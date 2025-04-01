@@ -1,9 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -229,7 +228,7 @@ interface EvaluationFormProps {
 
 const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("evaluation");
+  const [activeTab, setActiveTab] = useState("monthly");
   const [selectedMonth, setSelectedMonth] = useState("Jan");
   const [client, setClient] = useState("");
   const [location, setLocation] = useState("");
@@ -238,44 +237,87 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
     new Date().toISOString().split("T")[0]
   );
   const [completedBy, setCompletedBy] = useState("");
-  const [scores, setScores] = useState<Record<string, number[]>>({});
+  const [monthlyScores, setMonthlyScores] = useState<Record<string, Record<string, number[]>>>({});
   const [actionItems, setActionItems] = useState<ActionItemType[]>([]);
+
+  // Initialize scores for all months
+  useEffect(() => {
+    if (open) {
+      const initialMonthlyScores: Record<string, Record<string, number[]>> = {};
+      
+      months.forEach(month => {
+        initialMonthlyScores[month] = {};
+        evaluationSections.forEach(section => {
+          initialMonthlyScores[month][section.name] = new Array(section.items.length).fill(0);
+        });
+      });
+      
+      setMonthlyScores(initialMonthlyScores);
+      setClient("");
+      setLocation("");
+      setEvaluator("");
+      setCompletedBy("");
+      setEvaluationDate(new Date().toISOString().split("T")[0]);
+      setActionItems([]);
+      setActiveTab("monthly");
+    }
+  }, [open]);
 
   const handleScoreChange = (sectionName: string, itemIndex: number, value: string) => {
     const newValue = value === "" ? 0 : Math.min(1, Math.max(0, parseInt(value) || 0));
     
-    setScores((prevScores) => {
-      const sectionScores = [...(prevScores[sectionName] || [])];
+    setMonthlyScores(prevScores => {
+      const newScores = { ...prevScores };
+      if (!newScores[selectedMonth]) {
+        newScores[selectedMonth] = {};
+      }
+      if (!newScores[selectedMonth][sectionName]) {
+        newScores[selectedMonth][sectionName] = new Array(
+          evaluationSections.find(s => s.name === sectionName)?.items.length || 0
+        ).fill(0);
+      }
+      
+      const sectionScores = [...newScores[selectedMonth][sectionName]];
       sectionScores[itemIndex] = newValue;
-      return { ...prevScores, [sectionName]: sectionScores };
+      newScores[selectedMonth][sectionName] = sectionScores;
+      
+      return newScores;
     });
   };
 
-  const getTotalScore = (sectionName: string) => {
-    if (!scores[sectionName]) return 0;
-    return scores[sectionName].reduce((sum, score) => sum + score, 0);
+  const getTotalSectionScore = (sectionName: string, month: string) => {
+    if (!monthlyScores[month] || !monthlyScores[month][sectionName]) return 0;
+    return monthlyScores[month][sectionName].reduce((sum, score) => sum + score, 0);
   };
 
-  const getOverallScore = () => {
+  const getMonthlyScore = (month: string) => {
     let totalScore = 0;
     let maxPoints = 0;
     
     evaluationSections.forEach(section => {
-      totalScore += getTotalScore(section.name);
+      totalScore += getTotalSectionScore(section.name, month);
       maxPoints += section.maxPoints;
     });
     
-    return { totalScore, maxPoints, percentage: maxPoints > 0 ? (totalScore / maxPoints * 100).toFixed(0) : "0" };
+    return { 
+      totalScore, 
+      maxPoints, 
+      percentage: maxPoints > 0 ? (totalScore / maxPoints * 100).toFixed(0) : "0" 
+    };
   };
 
-  const initializeScores = () => {
-    const initialScores: Record<string, number[]> = {};
+  const getOverallScore = () => {
+    const totalScores = months.map(month => getMonthlyScore(month).totalScore);
+    const totalMaxPoints = months.map(() => evaluationSections.reduce((sum, section) => sum + section.maxPoints, 0));
     
-    evaluationSections.forEach(section => {
-      initialScores[section.name] = new Array(section.items.length).fill(0);
-    });
+    const totalScore = totalScores.reduce((sum, score) => sum + score, 0);
+    const maxPoints = totalMaxPoints.reduce((sum, points) => sum + points, 0);
     
-    setScores(initialScores);
+    return { 
+      totalScore, 
+      maxPoints, 
+      percentage: maxPoints > 0 ? (totalScore / maxPoints * 100).toFixed(0) : "0" 
+    };
   };
 
   const addActionItem = () => {
@@ -303,25 +345,10 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
     setActionItems(actionItems.filter(item => item.id !== id));
   };
 
-  React.useEffect(() => {
-    if (open) {
-      initializeScores();
-      setClient("");
-      setLocation("");
-      setEvaluator("");
-      setCompletedBy("");
-      setEvaluationDate(new Date().toISOString().split("T")[0]);
-      setActionItems([]);
-      setActiveTab("evaluation");
-    }
-  }, [open]);
-
   const handleSubmit = () => {
-    const { totalScore, maxPoints, percentage } = getOverallScore();
-    
     toast({
       title: "Evaluation Submitted",
-      description: `Client: ${client}, Location: ${location}, Score: ${percentage}%, Month: ${selectedMonth}`,
+      description: `Client: ${client}, Location: ${location}, Overall Score: ${getOverallScore().percentage}%`,
     });
     
     onClose();
@@ -329,21 +356,24 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-[90vw] max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Site Evaluation Sheet</DialogTitle>
-          <DialogDescription>
-            Complete the evaluation form for the selected client and location.
-          </DialogDescription>
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src="/lovable-uploads/b0665233-cf52-40c9-b047-4078abb97733.png" alt="Pulse Point CX" className="h-10" />
+              <span>Site Evaluation Sheet</span>
+            </div>
+          </DialogTitle>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="evaluation">Evaluation</TabsTrigger>
+          <TabsList className="grid grid-cols-3">
+            <TabsTrigger value="monthly">Monthly Overview</TabsTrigger>
+            <TabsTrigger value="details">Detailed Evaluation</TabsTrigger>
             <TabsTrigger value="action">Action Items</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="evaluation" className="flex-1 flex flex-col space-y-4 mt-4">
+          <TabsContent value="monthly" className="flex-1 flex flex-col space-y-4 mt-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="client">Client</Label>
@@ -395,8 +425,70 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
               </div>
             </div>
             
-            <div className="flex justify-between items-center py-2">
-              <div className="font-semibold">Evaluation Month: {selectedMonth}</div>
+            <ScrollArea className="flex-1 border rounded-md">
+              <div className="p-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[30%]">Scoring Area</TableHead>
+                      <TableHead className="text-center">Max. Points</TableHead>
+                      {months.map(month => (
+                        <TableHead key={month} className="text-center">{month}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {evaluationSections.map((section) => (
+                      <TableRow key={section.name}>
+                        <TableCell className="font-medium">{section.name}</TableCell>
+                        <TableCell className="text-center">{section.maxPoints}</TableCell>
+                        {months.map(month => (
+                          <TableCell key={`${section.name}-${month}`} className="text-center">
+                            {getTotalSectionScore(section.name, month) || "-"}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                    <TableRow className="bg-primary text-primary-foreground">
+                      <TableCell className="font-bold">TOTAL</TableCell>
+                      <TableCell className="text-center font-bold">
+                        {evaluationSections.reduce((sum, section) => sum + section.maxPoints, 0)}
+                      </TableCell>
+                      {months.map(month => (
+                        <TableCell key={`total-${month}`} className="text-center font-bold">
+                          {getMonthlyScore(month).totalScore || "-"}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-bold">MAXIMUM</TableCell>
+                      <TableCell className="text-center font-bold">
+                        {evaluationSections.reduce((sum, section) => sum + section.maxPoints, 0)}
+                      </TableCell>
+                      {months.map(month => (
+                        <TableCell key={`maximum-${month}`} className="text-center font-bold">
+                          {evaluationSections.reduce((sum, section) => sum + section.maxPoints, 0)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-bold">Percentage %</TableCell>
+                      <TableCell className="text-center"></TableCell>
+                      {months.map(month => (
+                        <TableCell key={`percentage-${month}`} className="text-center font-bold">
+                          {getMonthlyScore(month).percentage}%
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="details" className="flex-1 flex flex-col space-y-4 mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-semibold">Selected Month: {selectedMonth}</div>
               <div className="flex flex-wrap justify-end gap-1">
                 {months.map((month) => (
                   <Button 
@@ -413,27 +505,19 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
             
             <ScrollArea className="flex-1 border rounded-md">
               <div className="p-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[60%]">Scoring Areas</TableHead>
-                      <TableHead className="text-center">Max Points</TableHead>
-                      <TableHead className="text-center">Score</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {evaluationSections.map((section) => (
-                      <React.Fragment key={section.name}>
+                {evaluationSections.map((section) => (
+                  <div key={section.name} className="mb-8">
+                    <Table>
+                      <TableHeader>
                         <TableRow className="bg-muted">
-                          <TableCell className="font-medium">{section.name}</TableCell>
-                          <TableCell className="text-center">{section.maxPoints}</TableCell>
-                          <TableCell className="text-center font-bold">
-                            {getTotalScore(section.name)} / {section.maxPoints}
-                          </TableCell>
+                          <TableHead colSpan={2} className="font-bold text-lg">{section.name}</TableHead>
+                          <TableHead className="text-center">{selectedMonth}</TableHead>
                         </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {section.items.map((item, index) => (
                           <TableRow key={`${section.name}-${index}`}>
-                            <TableCell className="pl-8 text-sm">{item}</TableCell>
+                            <TableCell className="w-[80%]">{item}</TableCell>
                             <TableCell className="text-center">1</TableCell>
                             <TableCell className="text-center">
                               <Input
@@ -441,23 +525,26 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                                 min="0"
                                 max="1"
                                 className="h-8 w-20 mx-auto text-center"
-                                value={scores[section.name]?.[index] || 0}
+                                value={monthlyScores[selectedMonth]?.[section.name]?.[index] || 0}
                                 onChange={(e) => handleScoreChange(section.name, index, e.target.value)}
                               />
                             </TableCell>
                           </TableRow>
                         ))}
-                      </React.Fragment>
-                    ))}
-                    <TableRow className="bg-primary text-primary-foreground">
-                      <TableCell className="font-bold">TOTAL</TableCell>
-                      <TableCell className="text-center font-bold">{evaluationSections.reduce((sum, section) => sum + section.maxPoints, 0)}</TableCell>
-                      <TableCell className="text-center font-bold">
-                        {getOverallScore().totalScore} / {getOverallScore().maxPoints} ({getOverallScore().percentage}%)
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                        <TableRow className="bg-muted">
+                          <TableCell>SCORE</TableCell>
+                          <TableCell className="text-center">{getTotalSectionScore(section.name, selectedMonth)}</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                        <TableRow className="bg-muted">
+                          <TableCell>SCORABLE POINTS</TableCell>
+                          <TableCell className="text-center">{section.maxPoints}</TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                ))}
               </div>
             </ScrollArea>
           </TabsContent>
