@@ -57,7 +57,7 @@ const evaluationSections: EvaluationSection[] = [
       "Pay point - clean and tidy",
       "Emergency contact details displayed (Manager & Assistant Details)",
       "Water & electrical reading done daily - record available",
-      "CCTV camera - correctly installed/ no obtructive wires, working order"
+      "CCTV camera - correctly installed/ no obtrusive wires, working order"
     ]
   },
   {
@@ -80,7 +80,7 @@ const evaluationSections: EvaluationSection[] = [
       "Window Squeegees - available, not damaged and clean",
       "Clipboard available - clean and in use",
       "Air Points - working and rolled away neatly",
-      "Forcourt roles and microfibre cloths available",
+      "Forecourt roles and microfibre cloths available",
       "Fire Extinguishers - correctly placed, clean, serviced",
       "Manholes - covers in good order, clean & dry",
       "Filler & dip caps locked & identified. Seals in good condition",
@@ -124,7 +124,7 @@ const evaluationSections: EvaluationSection[] = [
     name: "Bakery, Food Preparation",
     maxPoints: 14,
     items: [
-      "Kitchen - neat tidy & clean.",
+      "Kitchen - neat tidy & clean",
       "Correct chemicals used to clean different parts of kitchen",
       "Cleaning materials/ equipment stored neatly",
       "Food packed in order of labelling/ pricing",
@@ -132,12 +132,12 @@ const evaluationSections: EvaluationSection[] = [
       "Food items efficiently stocked on shelves",
       "Food items fresh - priced and sell-by dates marked",
       "Washing hand procedure at the basin",
-      "Is there a bilnd filter to clean / Is the porta filter clean",
-      "Coffe cleaning checkist done",
+      "Is there a blind filter to clean / Is the porta filter clean",
+      "Coffee cleaning checklist done",
       "Steam wands are clean",
       "Grinder is clean",
       "Production plan on display, wastage recorded",
-      "Coffee stock-take done daily. Coffee fresh."
+      "Coffee stock-take done daily. Coffee fresh"
     ]
   },
   {
@@ -239,6 +239,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
   const [completedBy, setCompletedBy] = useState("");
   const [monthlyScores, setMonthlyScores] = useState<Record<string, Record<string, number[]>>>({});
   const [actionItems, setActionItems] = useState<ActionItemType[]>([]);
+  const [isEditable, setIsEditable] = useState(true);
 
   // Initialize scores for all months
   useEffect(() => {
@@ -260,10 +261,13 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
       setEvaluationDate(new Date().toISOString().split("T")[0]);
       setActionItems([]);
       setActiveTab("monthly");
+      setIsEditable(true);
     }
   }, [open]);
 
   const handleScoreChange = (sectionName: string, itemIndex: number, value: string) => {
+    if (!isEditable) return;
+    
     const newValue = value === "" ? 0 : Math.min(1, Math.max(0, parseInt(value) || 0));
     
     setMonthlyScores(prevScores => {
@@ -321,6 +325,8 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
   };
 
   const addActionItem = () => {
+    if (!isEditable) return;
+    
     const newItem: ActionItemType = {
       id: `action-${Date.now()}`,
       description: "",
@@ -334,6 +340,8 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
   };
 
   const updateActionItem = (id: string, field: keyof ActionItemType, value: string) => {
+    if (!isEditable) return;
+    
     setActionItems(
       actionItems.map(item => 
         item.id === id ? { ...item, [field]: value } : item
@@ -342,6 +350,8 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
   };
 
   const deleteActionItem = (id: string) => {
+    if (!isEditable) return;
+    
     setActionItems(actionItems.filter(item => item.id !== id));
   };
 
@@ -382,6 +392,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                   value={client}
                   onChange={(e) => setClient(e.target.value)}
                   placeholder="Enter client name"
+                  disabled={!isEditable}
                 />
               </div>
               <div className="space-y-2">
@@ -391,6 +402,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Enter location"
+                  disabled={!isEditable}
                 />
               </div>
               <div className="space-y-2">
@@ -400,6 +412,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                   value={evaluator}
                   onChange={(e) => setEvaluator(e.target.value)}
                   placeholder="Enter evaluator name"
+                  disabled={!isEditable}
                 />
               </div>
             </div>
@@ -412,6 +425,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                   value={completedBy}
                   onChange={(e) => setCompletedBy(e.target.value)}
                   placeholder="Enter name"
+                  disabled={!isEditable}
                 />
               </div>
               <div className="space-y-2">
@@ -421,6 +435,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                   type="date"
                   value={evaluationDate}
                   onChange={(e) => setEvaluationDate(e.target.value)}
+                  disabled={!isEditable}
                 />
               </div>
             </div>
@@ -527,6 +542,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                                 className="h-8 w-20 mx-auto text-center"
                                 value={monthlyScores[selectedMonth]?.[section.name]?.[index] || 0}
                                 onChange={(e) => handleScoreChange(section.name, index, e.target.value)}
+                                disabled={!isEditable}
                               />
                             </TableCell>
                           </TableRow>
@@ -552,7 +568,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
           <TabsContent value="action" className="flex-1 flex flex-col space-y-4 mt-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium">Action Items</h3>
-              <Button onClick={addActionItem} size="sm">
+              <Button onClick={addActionItem} size="sm" disabled={!isEditable}>
                 <Plus className="h-4 w-4 mr-2" /> Add Action Item
               </Button>
             </div>
@@ -573,6 +589,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
                     item={item}
                     onUpdate={updateActionItem}
                     onDelete={deleteActionItem}
+                    disabled={!isEditable}
                   />
                 ))}
               </div>
@@ -590,7 +607,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
           <Button variant="outline" onClick={onClose}>
             <X className="mr-2 h-4 w-4" /> Cancel
           </Button>
-          <Button onClick={handleSubmit}>
+          <Button onClick={handleSubmit} disabled={!isEditable}>
             <Save className="mr-2 h-4 w-4" /> Save Evaluation
           </Button>
         </div>
