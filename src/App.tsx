@@ -11,7 +11,11 @@ import Evaluations from "./pages/Evaluations";
 import Clients from "./pages/Clients";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import DashboardLayout from "./components/layout/DashboardLayout";
+import UserManagement from "./pages/UserManagement";
+import Reports from "./pages/Reports";
+import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -19,26 +23,54 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Login />} />
 
-            {/* Dashboard routes with layout */}
-            <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/evaluations" element={<Evaluations />} />
-              <Route path="/clients" element={<Clients />} />
-              <Route path="/settings" element={<Settings />} />
-            </Route>
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+              {/* Protected routes with auth layout */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<AuthenticatedLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  
+                  {/* Routes with specific permissions */}
+                  <Route 
+                    path="/evaluations" 
+                    element={<Evaluations />} 
+                  />
+                  
+                  <Route 
+                    path="/clients" 
+                    element={<Clients />} 
+                  />
+                  
+                  <Route 
+                    path="/reports" 
+                    element={<Reports />} 
+                  />
+                  
+                  <Route 
+                    path="/users" 
+                    element={<UserManagement />} 
+                  />
+                  
+                  <Route 
+                    path="/settings" 
+                    element={<Settings />} 
+                  />
+                </Route>
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

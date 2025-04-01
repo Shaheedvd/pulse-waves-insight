@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, Activity } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,18 +16,26 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, isAuthenticated } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  // If already logged in, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Demo authentication - in a real app this would connect to a backend service
-    setTimeout(() => {
-      // Demo credentials for testing
-      if (email === "admin@pulsepointcx.com" && password === "admin123") {
+    try {
+      const user = await login(email, password);
+      
+      if (user) {
         toast({
           title: "Login successful",
-          description: "Welcome to Pulse Point CX Dashboard",
+          description: `Welcome, ${user.name}`,
         });
         navigate("/dashboard");
       } else {
@@ -36,8 +45,15 @@ const Login = () => {
           variant: "destructive",
         });
       }
+    } catch (error) {
+      toast({
+        title: "Login error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -95,7 +111,10 @@ const Login = () => {
               </Button>
               <div className="text-sm text-center mt-2">
                 <p className="text-muted-foreground">
-                  Demo access: admin@pulsepointcx.com / admin123
+                  Superuser: shaheed@pulsepointcx.com / Shaheed1!
+                </p>
+                <p className="text-muted-foreground">
+                  Admin: admin@pulsepointcx.com / admin123
                 </p>
               </div>
             </CardFooter>
