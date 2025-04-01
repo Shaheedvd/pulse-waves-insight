@@ -33,6 +33,7 @@ import {
   Search,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import EvaluationForm from "@/components/evaluations/EvaluationForm";
 
 // Sample evaluation data
 const evaluationsData = [
@@ -132,6 +133,7 @@ const Evaluations = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const itemsPerPage = 8;
 
   // Filter evaluations based on search term and status
@@ -182,7 +184,7 @@ const Evaluations = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Evaluations</h1>
-        <Button>
+        <Button onClick={() => setIsFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> New Evaluation
         </Button>
       </div>
@@ -336,6 +338,12 @@ const Evaluations = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Evaluation Form Dialog */}
+      <EvaluationForm 
+        open={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+      />
     </div>
   );
 };
