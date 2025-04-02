@@ -6,6 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,9 +34,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlusCircle, FileText, Download, Trash2 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { 
+  ChevronRight, 
+  PlusCircle, 
+  FileText, 
+  Download, 
+  Trash2, 
+  Filter, 
+  BarChart3,
+  CalendarRange,
+  Users,
+  Search
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Example report types
 type ReportType = "monthly" | "quarterly" | "annual" | "performance" | "custom";
@@ -68,13 +87,24 @@ const Reports = () => {
     },
   ]);
   const [isCreateReportOpen, setIsCreateReportOpen] = useState(false);
+  const [isGenerateReportOpen, setIsGenerateReportOpen] = useState(false);
   const [newReport, setNewReport] = useState({
     name: "",
     type: "monthly" as ReportType,
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string | null>(null);
 
   const canCreateReports = hasPermission("canCreateReports");
   const canDeleteReports = hasPermission("canDeleteReports");
+  const isSuperuser = currentUser?.role === "superuser";
+
+  const filteredReports = reports.filter(report => {
+    const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          report.createdBy.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = !filterType || report.type === filterType;
+    return matchesSearch && matchesType;
+  });
 
   const handleCreateReport = () => {
     if (!newReport.name) {
@@ -119,6 +149,14 @@ const Reports = () => {
     });
   };
 
+  const handleGenerateReport = () => {
+    toast({
+      title: "Report Generated",
+      description: "Your custom report has been generated and is ready to download",
+    });
+    setIsGenerateReportOpen(false);
+  };
+
   const reportTypeLabels: Record<ReportType, string> = {
     monthly: "Monthly Report",
     quarterly: "Quarterly Report",
@@ -131,12 +169,20 @@ const Reports = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-        {canCreateReports && (
-          <Button onClick={() => setIsCreateReportOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Report
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {canCreateReports && (
+            <>
+              <Button variant="outline" onClick={() => setIsGenerateReportOpen(true)}>
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Generate Report
+              </Button>
+              <Button onClick={() => window.location.href = "/report-designer"}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Design Report
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -147,21 +193,55 @@ const Reports = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {reports.length === 0 ? (
+          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 md:space-x-4 mb-4">
+            <div className="flex flex-1 items-center space-x-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search reports..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select
+                value={filterType || ""}
+                onValueChange={(value) => setFilterType(value === "" ? null : value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <div className="flex items-center">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Filter by type" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
+                  <SelectItem value="performance">Performance</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {filteredReports.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <FileText className="h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-semibold">No Reports Yet</h3>
+              <h3 className="mt-4 text-lg font-semibold">No Reports Found</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {canCreateReports
-                  ? "Create your first report to get started"
-                  : "Reports created by administrators will appear here"}
+                  ? "Try adjusting your search or create a new report"
+                  : "No reports match your search criteria"}
               </p>
               {canCreateReports && (
                 <Button
                   className="mt-4"
-                  onClick={() => setIsCreateReportOpen(true)}
+                  onClick={() => window.location.href = "/report-designer"}
                 >
-                  Create Report
+                  Design New Report
                 </Button>
               )}
             </div>
@@ -177,7 +257,7 @@ const Reports = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reports.map((report) => (
+                {filteredReports.map((report) => (
                   <TableRow key={report.id}>
                     <TableCell className="font-medium">{report.name}</TableCell>
                     <TableCell>{reportTypeLabels[report.type]}</TableCell>
@@ -265,6 +345,164 @@ const Reports = () => {
               Cancel
             </Button>
             <Button onClick={handleCreateReport}>Create Report</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Report Dialog */}
+      <Dialog open={isGenerateReportOpen} onOpenChange={setIsGenerateReportOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Generate Custom Report</DialogTitle>
+            <DialogDescription>
+              Select criteria to generate a customized report
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="date-range">
+                <AccordionTrigger className="flex items-center">
+                  <CalendarRange className="h-4 w-4 mr-2" />
+                  Date Range
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="start-date">Start Date</Label>
+                      <Input id="start-date" type="date" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="end-date">End Date</Label>
+                      <Input id="end-date" type="date" />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="clients-locations">
+                <AccordionTrigger className="flex items-center">
+                  <Users className="h-4 w-4 mr-2" />
+                  Clients & Locations
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-2 gap-6 pt-2">
+                    <div>
+                      <Label className="mb-2 block">Clients</Label>
+                      <div className="border rounded-md p-3 h-40 overflow-auto space-y-2">
+                        {['Retail Corp SA', 'QuickMart', 'EcoFuel', 'LuxCafé', 'FreshGrocer', 'HealthPharm'].map(client => (
+                          <div key={client} className="flex items-center space-x-2">
+                            <Checkbox id={`client-${client}`} />
+                            <Label htmlFor={`client-${client}`} className="text-sm cursor-pointer">
+                              {client}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="mb-2 block">Locations</Label>
+                      <div className="border rounded-md p-3 h-40 overflow-auto space-y-2">
+                        {['Cape Town CBD', 'Johannesburg North', 'Durban Beachfront', 'Pretoria Central', 'Bloemfontein', 'Port Elizabeth', 'Sandton', 'Cape Town Waterfront'].map(location => (
+                          <div key={location} className="flex items-center space-x-2">
+                            <Checkbox id={`location-${location}`} />
+                            <Label htmlFor={`location-${location}`} className="text-sm cursor-pointer">
+                              {location}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="metrics">
+                <AccordionTrigger className="flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Metrics
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="pt-2 grid grid-cols-2 gap-3">
+                    {[
+                      'Overall Score',
+                      'Signage, Lighting & Accessibility',
+                      'Building Exterior',
+                      'Shop/Forecourt',
+                      'Yard Area',
+                      'Staff Facilities',
+                      'Bakery, Food Preparation',
+                      'Store, Fridges, Storage',
+                      'Staff',
+                      'HSSE General',
+                      'Administration & Business',
+                      'Action Items'
+                    ].map(metric => (
+                      <div key={metric} className="flex items-center space-x-2">
+                        <Checkbox id={`metric-${metric}`} />
+                        <Label htmlFor={`metric-${metric}`} className="text-sm cursor-pointer">
+                          {metric}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="format">
+                <AccordionTrigger className="flex items-center">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Format & Options
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="report-format">Report Format</Label>
+                        <Select defaultValue="combined">
+                          <SelectTrigger id="report-format">
+                            <SelectValue placeholder="Select format" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="table">Table Only</SelectItem>
+                            <SelectItem value="chart">Charts Only</SelectItem>
+                            <SelectItem value="combined">Tables & Charts</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="breakdown-by">Break Down By</Label>
+                        <Select defaultValue="none">
+                          <SelectTrigger id="breakdown-by">
+                            <SelectValue placeholder="Select breakdown" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No Breakdown</SelectItem>
+                            <SelectItem value="client">By Client</SelectItem>
+                            <SelectItem value="location">By Location</SelectItem>
+                            <SelectItem value="evaluator">By Evaluator</SelectItem>
+                            <SelectItem value="section">By Section</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="include-action-items" />
+                      <Label htmlFor="include-action-items" className="text-sm cursor-pointer">
+                        Include action items
+                      </Label>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsGenerateReportOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleGenerateReport}>Generate Report</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

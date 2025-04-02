@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
 import Reports from "./pages/Reports";
+import ReportDesigner from "./pages/ReportDesigner";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -51,6 +52,11 @@ const App = () => {
                   <Route 
                     path="/reports" 
                     element={<Reports />} 
+                  />
+                  
+                  <Route 
+                    path="/report-designer" 
+                    element={<ReportDesigner />} 
                   />
                   
                   <Route 

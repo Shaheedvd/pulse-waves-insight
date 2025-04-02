@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -241,7 +240,6 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
   const [actionItems, setActionItems] = useState<ActionItemType[]>([]);
   const [isEditable, setIsEditable] = useState(true);
 
-  // Initialize scores for all months
   useEffect(() => {
     if (open) {
       const initialMonthlyScores: Record<string, Record<string, number[]>> = {};
@@ -520,6 +518,33 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({ open, onClose }) => {
             
             <ScrollArea className="flex-1 border rounded-md">
               <div className="p-4">
+                <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="border rounded-md p-2">
+                    <img 
+                      src="/lovable-uploads/92dcc06b-dcdf-4517-9d42-0eb6a36b7ab2.png" 
+                      alt="Evaluation Reference 1" 
+                      className="w-full h-auto"
+                    />
+                    <p className="text-xs text-center mt-1">Forecourt and Yard Standards</p>
+                  </div>
+                  <div className="border rounded-md p-2">
+                    <img 
+                      src="/lovable-uploads/ab30c6f7-3343-4afa-8df7-c55f4f05d43e.png" 
+                      alt="Evaluation Reference 2" 
+                      className="w-full h-auto"
+                    />
+                    <p className="text-xs text-center mt-1">Building and Signage Standards</p>
+                  </div>
+                  <div className="border rounded-md p-2">
+                    <img 
+                      src="/lovable-uploads/f14b3b21-e38a-4f85-9ac1-a20cd8b65b6b.png" 
+                      alt="Evaluation Reference 3" 
+                      className="w-full h-auto"
+                    />
+                    <p className="text-xs text-center mt-1">Staff and Store Standards</p>
+                  </div>
+                </div>
+
                 {evaluationSections.map((section) => (
                   <div key={section.name} className="mb-8">
                     <Table>

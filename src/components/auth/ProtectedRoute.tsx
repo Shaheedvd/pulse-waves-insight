@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredPermission }) => {
-  const { isAuthenticated, hasPermission } = useAuth();
+  const { isAuthenticated, hasPermission, currentUser } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -16,7 +16,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredPermission }) =
 
   // If a specific permission is required, check it
   if (requiredPermission && !hasPermission(requiredPermission)) {
-    return <Navigate to="/dashboard" replace />;
+    // For superuser, always grant access regardless of specific permissions
+    if (currentUser?.role !== "superuser") {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <Outlet />;

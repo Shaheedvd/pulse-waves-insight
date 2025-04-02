@@ -10,6 +10,7 @@ import {
   User,
   ShieldCheck,
   FileText,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,6 +54,13 @@ const AuthenticatedLayout = () => {
       name: "Reports", 
       icon: <FileText className="h-5 w-5" />,
       permission: "canViewReports" as const
+    },
+    { 
+      path: "/report-designer", 
+      name: "Design Reports", 
+      icon: <FileDown className="h-5 w-5" />,
+      permission: "canCreateReports" as const,
+      superuserOnly: true
     },
     { 
       path: "/users", 
@@ -101,6 +109,11 @@ const AuthenticatedLayout = () => {
             {navItems.map((item) => {
               // Skip rendering items that require permissions the user doesn't have
               if (item.permission && !hasPermission(item.permission)) {
+                return null;
+              }
+              
+              // Skip rendering items marked as superuser only if user is not superuser
+              if (item.superuserOnly && currentUser?.role !== "superuser") {
                 return null;
               }
               
