@@ -14,7 +14,7 @@ import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
 import UserActivityReport from "./pages/UserActivityReport";
 import Reports from "./pages/Reports";
-import ReportDesigner from "./pages/ReportDesigner";
+import AuditSheetDesigner from "./pages/AuditSheetDesigner";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -56,8 +56,8 @@ const App = () => {
                   />
                   
                   <Route 
-                    path="/report-designer" 
-                    element={<ReportDesigner />} 
+                    path="/audit-sheet-designer" 
+                    element={<AuditSheetDesigner />} 
                   />
                   
                   <Route 

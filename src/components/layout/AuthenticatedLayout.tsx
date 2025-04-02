@@ -56,8 +56,8 @@ const AuthenticatedLayout = () => {
       permission: "canViewReports" as const
     },
     { 
-      path: "/report-designer", 
-      name: "Design Reports", 
+      path: "/audit-sheet-designer", 
+      name: "Design Audit Sheets", 
       icon: <FileDown className="h-5 w-5" />,
       permission: "canCreateReports" as const,
       superuserOnly: true

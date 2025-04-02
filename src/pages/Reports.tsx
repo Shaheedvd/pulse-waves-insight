@@ -57,7 +57,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Example report types
-type ReportType = "monthly" | "quarterly" | "annual" | "performance" | "custom";
+type ReportType = "monthly" | "quarterly" | "annual" | "performance" | "custom" | "audit";
 
 interface Report {
   id: string;
@@ -85,6 +85,13 @@ const Reports = () => {
       createdBy: "Admin User",
       dateCreated: "2023-12-30",
     },
+    {
+      id: "3",
+      name: "Store Audit Template",
+      type: "audit",
+      createdBy: "Admin User",
+      dateCreated: "2024-05-15",
+    }
   ]);
   const [isCreateReportOpen, setIsCreateReportOpen] = useState(false);
   const [isGenerateReportOpen, setIsGenerateReportOpen] = useState(false);
@@ -163,6 +170,7 @@ const Reports = () => {
     annual: "Annual Report",
     performance: "Performance Report",
     custom: "Custom Report",
+    audit: "Audit Sheet"
   };
 
   return (
@@ -176,9 +184,9 @@ const Reports = () => {
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Generate Report
               </Button>
-              <Button onClick={() => window.location.href = "/report-designer"}>
+              <Button onClick={() => window.location.href = "/audit-sheet-designer"}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Design Report
+                Design Audit Sheet
               </Button>
             </>
           )}
