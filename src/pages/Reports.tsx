@@ -214,8 +214,8 @@ const Reports = () => {
                 />
               </div>
               <Select
-                value={filterType || ""}
-                onValueChange={(value) => setFilterType(value === "" ? null : value)}
+                value={filterType || "all"}
+                onValueChange={(value) => setFilterType(value === "all" ? null : value)}
               >
                 <SelectTrigger className="w-[180px]">
                   <div className="flex items-center">
@@ -224,7 +224,7 @@ const Reports = () => {
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="quarterly">Quarterly</SelectItem>
                   <SelectItem value="annual">Annual</SelectItem>
