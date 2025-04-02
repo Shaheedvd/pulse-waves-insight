@@ -19,71 +19,73 @@ import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 
-// Create a new QueryClient instance
+// Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
 
-const App = () => {
+const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Login />} />
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Login />} />
 
-              {/* Protected routes with auth layout */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<AuthenticatedLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  
-                  {/* Routes with specific permissions */}
-                  <Route 
-                    path="/evaluations" 
-                    element={<Evaluations />} 
-                  />
-                  
-                  <Route 
-                    path="/clients" 
-                    element={<Clients />} 
-                  />
-                  
-                  <Route 
-                    path="/reports" 
-                    element={<Reports />} 
-                  />
-                  
-                  <Route 
-                    path="/audit-sheet-designer" 
-                    element={<AuditSheetDesigner />} 
-                  />
-                  
-                  <Route 
-                    path="/users" 
-                    element={<UserManagement />} 
-                  />
-                  
-                  <Route 
-                    path="/user-activity-report" 
-                    element={<UserActivityReport />} 
-                  />
-                  
-                  <Route 
-                    path="/settings" 
-                    element={<Settings />} 
-                  />
+                {/* Protected routes with auth layout */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AuthenticatedLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    
+                    {/* Routes with specific permissions */}
+                    <Route 
+                      path="/evaluations" 
+                      element={<Evaluations />} 
+                    />
+                    
+                    <Route 
+                      path="/clients" 
+                      element={<Clients />} 
+                    />
+                    
+                    <Route 
+                      path="/reports" 
+                      element={<Reports />} 
+                    />
+                    
+                    <Route 
+                      path="/audit-sheet-designer" 
+                      element={<AuditSheetDesigner />} 
+                    />
+                    
+                    <Route 
+                      path="/users" 
+                      element={<UserManagement />} 
+                    />
+                    
+                    <Route 
+                      path="/user-activity-report" 
+                      element={<UserActivityReport />} 
+                    />
+                    
+                    <Route 
+                      path="/settings" 
+                      element={<Settings />} 
+                    />
+                  </Route>
                 </Route>
-              </Route>
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 };
 
