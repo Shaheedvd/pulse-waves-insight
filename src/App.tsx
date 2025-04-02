@@ -12,6 +12,7 @@ import Clients from "./pages/Clients";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import UserManagement from "./pages/UserManagement";
+import UserActivityReport from "./pages/UserActivityReport";
 import Reports from "./pages/Reports";
 import ReportDesigner from "./pages/ReportDesigner";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
@@ -62,6 +63,11 @@ const App = () => {
                   <Route 
                     path="/users" 
                     element={<UserManagement />} 
+                  />
+                  
+                  <Route 
+                    path="/user-activity-report" 
+                    element={<UserActivityReport />} 
                   />
                   
                   <Route 
