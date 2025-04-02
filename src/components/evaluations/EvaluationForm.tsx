@@ -5,16 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
-import { CalendarRange, CheckSquare } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon, X, CameraIcon, ImageIcon, PlusCircle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import ActionItem from "./ActionItem";
-
-interface EvaluationFormProps {
-  open: boolean;
-  onClose: () => void;
-  evaluatorsList?: string[];
-}
 
 // Sample client data for the dropdown
 const clientsData = [
@@ -52,17 +49,22 @@ const locationsData: Record<string, { id: string; name: string }[]> = {
   ],
 };
 
-const EvaluationForm: React.FC<EvaluationFormProps> = ({ 
+const EvaluationForm = ({ 
   open, 
-  onClose,
+  onClose, 
   evaluatorsList = [] 
+}: { 
+  open: boolean; 
+  onClose: () => void; 
+  evaluatorsList?: string[];
 }) => {
   const [clientId, setClientId] = useState("");
   const [locationId, setLocationId] = useState("");
-  const [evaluationDate, setEvaluationDate] = useState<Date | undefined>(undefined);
+  const [evaluationDate, setEvaluationDate] = useState<Date>();
   const [evaluator, setEvaluator] = useState("");
   const [actionItems, setActionItems] = useState<string[]>([]);
   const [newActionItem, setNewActionItem] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const { toast } = useToast();
 
   const resetForm = () => {
@@ -72,6 +74,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
     setEvaluator("");
     setActionItems([]);
     setNewActionItem("");
+    setPhotos([]);
   };
 
   const handleClose = () => {
@@ -112,6 +115,38 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
     setActionItems(actionItems.filter((_, i) => i !== index));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    // Check if adding more photos would exceed the limit
+    if (photos.length + files.length > 5) {
+      toast({
+        title: "Too many photos",
+        description: "Maximum 5 photos are allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        if (event.target && typeof event.target.result === 'string') {
+          setPhotos(prev => [...prev, event.target.result as string]);
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos(photos.filter((_, i) => i !== index));
+  };
+
   const selectedClient = clientsData.find(client => client.id === clientId);
   const availableLocations = clientId ? locationsData[clientId] || [] : [];
 
@@ -124,14 +159,17 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
             Create a new site evaluation to assess customer experience.
           </DialogDescription>
         </DialogHeader>
-
+        
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="client">Client</Label>
-            <Select value={clientId} onValueChange={(value) => {
-              setClientId(value);
-              setLocationId("");
-            }}>
+            <Select
+              value={clientId}
+              onValueChange={(value) => {
+                setClientId(value);
+                setLocationId("");
+              }}
+            >
               <SelectTrigger id="client">
                 <SelectValue placeholder="Select a client" />
               </SelectTrigger>
@@ -147,8 +185,8 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
-            <Select 
-              value={locationId} 
+            <Select
+              value={locationId}
               onValueChange={setLocationId}
               disabled={!clientId}
             >
@@ -167,8 +205,8 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="evaluator">Assigned Evaluator</Label>
-            <Select 
-              value={evaluator} 
+            <Select
+              value={evaluator}
               onValueChange={setEvaluator}
             >
               <SelectTrigger id="evaluator">
@@ -186,13 +224,71 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="date">Evaluation Date</Label>
-            <div className="flex space-x-2">
-              <DatePicker
-                value={evaluationDate}
-                onChange={setEvaluationDate}
-                placeholder="Select date"
-              />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !evaluationDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {evaluationDate ? format(evaluationDate, "PPP") : <span>Select date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={evaluationDate}
+                  onSelect={setEvaluationDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Site Photos (Maximum 5)</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {photos.map((photo, index) => (
+                <div key={index} className="relative group">
+                  <img 
+                    src={photo} 
+                    alt={`Photo ${index + 1}`} 
+                    className="rounded-md h-20 w-full object-cover" 
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removePhoto(index)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+              
+              {photos.length < 5 && (
+                <div className="flex items-center justify-center border border-dashed rounded-md h-20">
+                  <Label htmlFor="photo-upload" className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                    <CameraIcon className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground mt-1">Add photo</span>
+                    <Input 
+                      id="photo-upload" 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleFileChange} 
+                      multiple
+                    />
+                  </Label>
+                </div>
+              )}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {photos.length}/5 photos added
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -203,7 +299,11 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
                 value={newActionItem}
                 onChange={(e) => setNewActionItem(e.target.value)}
               />
-              <Button type="button" onClick={handleAddActionItem} variant="outline">
+              <Button
+                type="button"
+                onClick={handleAddActionItem}
+                variant="outline"
+              >
                 Add
               </Button>
             </div>
@@ -214,10 +314,10 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
               <Label>Items to review:</Label>
               <div className="space-y-2">
                 {actionItems.map((item, index) => (
-                  <ActionItem 
-                    key={index} 
-                    text={item} 
-                    onRemove={() => handleRemoveActionItem(index)} 
+                  <ActionItem
+                    key={index}
+                    text={item}
+                    onRemove={() => handleRemoveActionItem(index)}
                   />
                 ))}
               </div>
@@ -225,7 +325,11 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+            >
               Cancel
             </Button>
             <Button type="submit">Schedule Evaluation</Button>

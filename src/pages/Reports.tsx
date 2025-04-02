@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -50,11 +51,14 @@ import {
   BarChart3,
   CalendarRange,
   Users,
-  Search
+  Search,
+  Mail,
+  Printer
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 // Example report types
 type ReportType = "monthly" | "quarterly" | "annual" | "performance" | "custom" | "audit";
@@ -65,9 +69,12 @@ interface Report {
   type: ReportType;
   createdBy: string;
   dateCreated: string;
+  status?: "completed" | "pending" | "scheduled";
+  assignedTo?: string;
 }
 
 const Reports = () => {
+  const navigate = useNavigate();
   const { currentUser, hasPermission } = useAuth();
   const { toast } = useToast();
   const [reports, setReports] = useState<Report[]>([
@@ -77,6 +84,8 @@ const Reports = () => {
       type: "quarterly",
       createdBy: "Shaheed Van Dawson",
       dateCreated: "2023-04-15",
+      status: "completed",
+      assignedTo: "Eric Evaluator"
     },
     {
       id: "2",
@@ -84,13 +93,26 @@ const Reports = () => {
       type: "annual",
       createdBy: "Admin User",
       dateCreated: "2023-12-30",
+      status: "completed",
+      assignedTo: "Sarah Manager"
     },
     {
       id: "3",
       name: "Store Audit Template",
       type: "audit",
       createdBy: "Admin User",
-      dateCreated: "2024-05-15",
+      dateCreated: "2024-05-15", 
+      status: "pending",
+      assignedTo: "Eric Evaluator"
+    },
+    {
+      id: "4",
+      name: "June Performance Review",
+      type: "performance",
+      createdBy: "Sarah Manager",
+      dateCreated: "2024-06-01",
+      status: "scheduled",
+      assignedTo: "Eric Evaluator"
     }
   ]);
   const [isCreateReportOpen, setIsCreateReportOpen] = useState(false);
@@ -101,6 +123,7 @@ const Reports = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
   const canCreateReports = hasPermission("canCreateReports");
   const canDeleteReports = hasPermission("canDeleteReports");
@@ -110,8 +133,14 @@ const Reports = () => {
     const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           report.createdBy.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = !filterType || report.type === filterType;
-    return matchesSearch && matchesType;
+    const matchesStatus = !filterStatus || report.status === filterStatus;
+    return matchesSearch && matchesType && matchesStatus;
   });
+
+  // Filtered reports based on current user's assignments
+  const userReports = filteredReports.filter(report => 
+    report.assignedTo === currentUser?.name || report.createdBy === currentUser?.name
+  );
 
   const handleCreateReport = () => {
     if (!newReport.name) {
@@ -129,6 +158,7 @@ const Reports = () => {
       type: newReport.type,
       createdBy: currentUser?.name || "Unknown User",
       dateCreated: new Date().toISOString().split("T")[0],
+      status: "scheduled"
     };
 
     setReports([...reports, report]);
@@ -148,12 +178,41 @@ const Reports = () => {
     });
   };
 
-  const handleDownloadReport = (id: string, name: string) => {
-    // In a real app, this would trigger an actual download
+  const handlePrintReport = (id: string, name: string) => {
+    // In a real app, this would generate a PDF and open the print dialog
     toast({
-      title: "Download Started",
-      description: `${name} is being downloaded`,
+      title: "Preparing Print",
+      description: `${name} is being prepared for printing`,
     });
+    
+    // Simulate print preparation
+    setTimeout(() => {
+      window.print();
+    }, 1000);
+  };
+
+  const handleEmailReport = (id: string, name: string) => {
+    // In a real app, this would send an email with the report
+    toast({
+      title: "Email Sent",
+      description: `${name} has been emailed to management`,
+    });
+  };
+
+  const handleDownloadReport = (id: string, name: string) => {
+    // In a real app, this would trigger an actual PDF download
+    toast({
+      title: "Generating PDF",
+      description: `${name} is being generated as a PDF`,
+    });
+    
+    // Simulate download delay
+    setTimeout(() => {
+      toast({
+        title: "Download Ready",
+        description: `${name} PDF is ready for download`,
+      });
+    }, 1500);
   };
 
   const handleGenerateReport = () => {
@@ -164,6 +223,10 @@ const Reports = () => {
     setIsGenerateReportOpen(false);
   };
 
+  const navigateToAuditSheetDesigner = () => {
+    navigate("/audit-sheet-designer");
+  };
+
   const reportTypeLabels: Record<ReportType, string> = {
     monthly: "Monthly Report",
     quarterly: "Quarterly Report",
@@ -171,6 +234,12 @@ const Reports = () => {
     performance: "Performance Report",
     custom: "Custom Report",
     audit: "Audit Sheet"
+  };
+
+  const statusColors = {
+    completed: "bg-green-100 text-green-800",
+    pending: "bg-yellow-100 text-yellow-800",
+    scheduled: "bg-blue-100 text-blue-800"
   };
 
   return (
@@ -184,13 +253,67 @@ const Reports = () => {
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Generate Report
               </Button>
-              <Button onClick={() => window.location.href = "/audit-sheet-designer"}>
+              <Button onClick={navigateToAuditSheetDesigner}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Design Audit Sheet
               </Button>
             </>
           )}
         </div>
+      </div>
+
+      {/* Current user report metrics */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Completed Audits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {reports.filter(r => r.status === "completed" && (r.assignedTo === currentUser?.name || r.createdBy === currentUser?.name)).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              +2 from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Pending Audits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {reports.filter(r => r.status === "pending" && (r.assignedTo === currentUser?.name || r.createdBy === currentUser?.name)).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Awaiting your review
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Scheduled Audits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {reports.filter(r => r.status === "scheduled" && (r.assignedTo === currentUser?.name || r.createdBy === currentUser?.name)).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Upcoming in next 30 days
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">84%</div>
+            <p className="text-xs text-muted-foreground">
+              +2% from previous period
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -230,6 +353,24 @@ const Reports = () => {
                   <SelectItem value="annual">Annual</SelectItem>
                   <SelectItem value="performance">Performance</SelectItem>
                   <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="audit">Audit</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={filterStatus || "all"}
+                onValueChange={(value) => setFilterStatus(value === "all" ? null : value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <div className="flex items-center">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Filter by status" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -247,7 +388,7 @@ const Reports = () => {
               {canCreateReports && (
                 <Button
                   className="mt-4"
-                  onClick={() => window.location.href = "/report-designer"}
+                  onClick={() => navigate("/audit-sheet-designer")}
                 >
                   Design New Report
                 </Button>
@@ -259,9 +400,10 @@ const Reports = () => {
                 <TableRow>
                   <TableHead>Report Name</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Created By</TableHead>
                   <TableHead>Date Created</TableHead>
-                  <TableHead className="w-[150px]">Actions</TableHead>
+                  <TableHead className="w-[180px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -269,19 +411,56 @@ const Reports = () => {
                   <TableRow key={report.id}>
                     <TableCell className="font-medium">{report.name}</TableCell>
                     <TableCell>{reportTypeLabels[report.type]}</TableCell>
+                    <TableCell>
+                      {report.status && (
+                        <span className={`inline-block rounded-full px-2 py-1 text-xs font-semibold ${statusColors[report.status]}`}>
+                          {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>{report.createdBy}</TableCell>
                     <TableCell>{report.dateCreated}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            handleDownloadReport(report.id, report.name)
-                          }
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="end">
+                            <div className="flex flex-col">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="justify-start rounded-none"
+                                onClick={() => handleDownloadReport(report.id, report.name)}
+                              >
+                                <Download className="h-4 w-4 mr-2" /> Download PDF
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="justify-start rounded-none"
+                                onClick={() => handlePrintReport(report.id, report.name)}
+                              >
+                                <Printer className="h-4 w-4 mr-2" /> Print
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="justify-start rounded-none"
+                                onClick={() => handleEmailReport(report.id, report.name)}
+                              >
+                                <Mail className="h-4 w-4 mr-2" /> Email
+                              </Button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        
                         {canDeleteReports && (
                           <Button
                             variant="outline"

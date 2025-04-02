@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -20,15 +20,66 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { currentUser, users, updateUser } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+
+  const isSuperuserOrManager = currentUser?.role === "superuser" || currentUser?.role === "manager";
 
   const handleSave = () => {
     toast({
       title: "Settings saved",
       description: "Your settings have been saved successfully",
     });
+  };
+
+  const handleChangePassword = () => {
+    if (!selectedUser || !newPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter a new password",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // In a real app, this would update the user's password in the database
+    toast({
+      title: "Password Updated",
+      description: "The user's password has been updated successfully",
+    });
+
+    setIsChangePasswordOpen(false);
+    setSelectedUser(null);
+    setNewPassword("");
+  };
+
+  const openChangePasswordDialog = (userId: string) => {
+    setSelectedUser(userId);
+    setIsChangePasswordOpen(true);
   };
 
   return (
@@ -38,10 +89,11 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="account">
-        <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+        <TabsList className="grid w-full grid-cols-4 md:w-[500px]">
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
+          {isSuperuserOrManager && <TabsTrigger value="userPasswords">User Passwords</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="account" className="space-y-4 mt-4">
@@ -85,7 +137,21 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" />
+                <div className="relative">
+                  <Input 
+                    id="currentPassword" 
+                    type={showPassword ? "text" : "password"} 
+                    defaultValue="admin123"
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-0 top-0 h-full"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
@@ -261,7 +327,98 @@ const Settings = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {isSuperuserOrManager && (
+          <TabsContent value="userPasswords" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Password Management</CardTitle>
+                <CardDescription>
+                  View and update user passwords
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Password</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <span className="capitalize">{user.role}</span>
+                        </TableCell>
+                        <TableCell>
+                          {user.email === "shaheed@pulsepointcx.com" && "Shaheed1!"}
+                          {user.email === "admin@pulsepointcx.com" && "admin123"}
+                          {user.email === "manager@pulsepointcx.com" && "manager123"}
+                          {user.email === "evaluator@pulsepointcx.com" && "evaluator123"}
+                          {user.email === "viewer@pulsepointcx.com" && "viewer123"}
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => openChangePasswordDialog(user.id)}
+                          >
+                            Change Password
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
+
+      <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Change User Password</DialogTitle>
+            <DialogDescription>
+              Update the password for the selected user.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <div className="flex items-center space-x-2 mt-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="h-8 px-2"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                  {showPassword ? "Hide" : "Show"} Password
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsChangePasswordOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleChangePassword}>Save Password</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
