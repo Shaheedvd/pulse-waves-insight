@@ -125,6 +125,27 @@ const initialUsers: User[] = [
     role: "admin",
     permissions: rolePermissions.admin,
   },
+  {
+    id: "3",
+    email: "manager@pulsepointcx.com",
+    name: "Sarah Manager",
+    role: "manager",
+    permissions: rolePermissions.manager,
+  },
+  {
+    id: "4",
+    email: "evaluator@pulsepointcx.com",
+    name: "Eric Evaluator",
+    role: "evaluator",
+    permissions: rolePermissions.evaluator,
+  },
+  {
+    id: "5",
+    email: "viewer@pulsepointcx.com",
+    name: "Victor Viewer",
+    role: "viewer",
+    permissions: rolePermissions.viewer,
+  },
 ];
 
 interface AuthContextType {
@@ -145,6 +166,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const passwordMap: Record<string, string> = {
   "shaheed@pulsepointcx.com": "Shaheed1!",
   "admin@pulsepointcx.com": "admin123",
+  "manager@pulsepointcx.com": "manager123",
+  "evaluator@pulsepointcx.com": "evaluator123",
+  "viewer@pulsepointcx.com": "viewer123",
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -104,12 +104,17 @@ const Login = () => {
                   </button>
                 </div>
               </div>
+              <div className="flex justify-end">
+                <Button variant="link" className="p-0 h-auto" type="button">
+                  Forgot password?
+                </Button>
+              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2">
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
-              <div className="text-sm text-center mt-2">
+              <div className="text-sm text-center mt-2 hidden">
                 <p className="text-muted-foreground">
                   Superuser: shaheed@pulsepointcx.com / Shaheed1!
                 </p>

@@ -8,16 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Activity,
-  ArrowDown,
-  ArrowUp,
-  Building,
-  ClipboardCheck,
-  MapPin,
-  Star,
-  Users,
-} from "lucide-react";
-import {
   BarChart,
   Bar,
   XAxis,
@@ -28,231 +18,226 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   Legend,
 } from "recharts";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowUpRight, Download } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 // Sample data for charts
-const evaluationData = [
-  { name: "Jan", score: 78 },
-  { name: "Feb", score: 82 },
-  { name: "Mar", score: 85 },
-  { name: "Apr", score: 80 },
-  { name: "May", score: 88 },
-  { name: "Jun", score: 92 },
+const monthlyScoreData = [
+  { month: "Jan", score: 87 },
+  { month: "Feb", score: 82 },
+  { month: "Mar", score: 85 },
+  { month: "Apr", score: 91 },
+  { month: "May", score: 88 },
+  { month: "Jun", score: 93 },
 ];
 
-const categoryData = [
-  { name: "Service", value: 85 },
-  { name: "Cleanliness", value: 92 },
-  { name: "Product Quality", value: 78 },
-  { name: "Speed", value: 88 },
+const quarterlyScoreData = [
+  { quarter: "Q1", score: 85 },
+  { quarter: "Q2", score: 89 },
+  { quarter: "Q3", score: 92 },
+  { quarter: "Q4", score: 88 },
 ];
 
-const locationPerformance = [
-  { name: "Cape Town", score: 92 },
-  { name: "Johannesburg", score: 85 },
-  { name: "Durban", score: 76 },
-  { name: "Pretoria", score: 88 },
-  { name: "Port Elizabeth", score: 82 },
+const categoryScoreData = [
+  { name: "Customer Service", value: 92 },
+  { name: "Staff Appearance", value: 88 },
+  { name: "Store Cleanliness", value: 95 },
+  { name: "Product Knowledge", value: 82 },
+  { name: "Brand Compliance", value: 90 },
 ];
 
-const COLORS = ["#1A5276", "#008080", "#2E86C1", "#148F77", "#117864"];
+const upcomingEvaluations = [
+  {
+    id: "EV-2023-1011",
+    client: "Retail Corp SA",
+    location: "Cape Town North",
+    date: "2023-07-15",
+  },
+  {
+    id: "EV-2023-1012",
+    client: "EcoFuel",
+    location: "Pretoria East",
+    date: "2023-07-18",
+  },
+  {
+    id: "EV-2023-1013",
+    client: "LuxCafé",
+    location: "Johannesburg Central",
+    date: "2023-07-22",
+  },
+];
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
+  const { currentUser } = useAuth();
+  const { toast } = useToast();
+
+  const handleDownload = () => {
+    toast({
+      title: "Report Downloaded",
+      description: "Dashboard report has been downloaded successfully",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-muted-foreground">Last updated: </span>
-          <span className="text-sm font-medium">Today, 10:30 AM</span>
-        </div>
+        <Button variant="outline" onClick={handleDownload}>
+          <Download className="mr-2 h-4 w-4" /> Download Report
+        </Button>
       </div>
 
-      {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Overall CX Score
-                </p>
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold">86%</p>
-                  <div className="flex items-center text-xs text-green-500">
-                    <ArrowUp size={12} />
-                    <span>4%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-full bg-primary/10 p-2">
-                <Star size={20} className="text-primary" />
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Overall CX Score
+            </CardTitle>
+            <div className="h-4 w-4 rounded-full bg-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">89%</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-500 flex items-center">
+                +2.5% <ArrowUpRight className="h-3 w-3" />
+              </span>{" "}
+              from last month
+            </p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Active Clients
-                </p>
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold">24</p>
-                  <div className="flex items-center text-xs text-green-500">
-                    <ArrowUp size={12} />
-                    <span>2</span>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-full bg-primary/10 p-2">
-                <Building size={20} className="text-primary" />
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Locations Evaluated
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">42/50</div>
+            <p className="text-xs text-muted-foreground">
+              84% coverage this quarter
+            </p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Recent Evaluations
-                </p>
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold">128</p>
-                  <div className="flex items-center text-xs text-green-500">
-                    <ArrowUp size={12} />
-                    <span>12%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-full bg-primary/10 p-2">
-                <ClipboardCheck size={20} className="text-primary" />
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Top Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Store Cleanliness</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-500">95%</span> average score
+            </p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Locations Covered
-                </p>
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold">82</p>
-                  <div className="flex items-center text-xs text-red-500">
-                    <ArrowDown size={12} />
-                    <span>3</span>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-full bg-primary/10 p-2">
-                <MapPin size={20} className="text-primary" />
-              </div>
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Improvement Area
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Product Knowledge</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-yellow-500">82%</span> average score
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>CX Score Trend</CardTitle>
-            <CardDescription>
-              Monthly customer experience scores
-            </CardDescription>
+            <CardTitle>Trend Analysis</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={evaluationData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="#1A5276"
-                    activeDot={{ r: 8 }}
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+          <CardContent className="pl-2">
+            <Tabs defaultValue="monthly">
+              <TabsList>
+                <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                <TabsTrigger value="quarterly">Quarterly</TabsTrigger>
+              </TabsList>
+              <TabsContent value="monthly" className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={monthlyScoreData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis domain={[50, 100]} />
+                    <Tooltip
+                      formatter={(value) => [`${value}%`, "Score"]}
+                      cursor={{ fillOpacity: 0.1 }}
+                    />
+                    <Bar
+                      dataKey="score"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </TabsContent>
+              <TabsContent value="quarterly" className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={quarterlyScoreData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="quarter" />
+                    <YAxis domain={[50, 100]} />
+                    <Tooltip
+                      formatter={(value) => [`${value}%`, "Score"]}
+                      cursor={{ fillOpacity: 0.1 }}
+                    />
+                    <Bar
+                      dataKey="score"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
-
-        <Card>
+        <Card className="col-span-3">
           <CardHeader>
             <CardTitle>CX Categories</CardTitle>
-            <CardDescription>
-              Performance across key categories
-            </CardDescription>
+            <CardDescription>Performance by category</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <div className="h-[300px] flex justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={categoryData}
+                    data={categoryScoreData}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
+                    innerRadius={60}
                     outerRadius={80}
-                    fill="#8884d8"
+                    paddingAngle={5}
                     dataKey="value"
-                    label={({
-                      cx,
-                      cy,
-                      midAngle,
-                      innerRadius,
-                      outerRadius,
-                      percent,
-                      index,
-                    }) => {
-                      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                      const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
-                      const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
-                      return (
-                        <text
-                          x={x}
-                          y={y}
-                          fill="white"
-                          textAnchor={x > cx ? "start" : "end"}
-                          dominantBaseline="central"
-                        >
-                          {`${categoryData[index].name} ${(percent * 100).toFixed(0)}%`}
-                        </text>
-                      );
-                    }}
+                    labelLine={false}
+                    label={({ name, percent }) =>
+                      `${name}: ${(percent * 100).toFixed(0)}%`
+                    }
                   >
-                    {categoryData.map((entry, index) => (
+                    {categoryScoreData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Legend />
+                  <Tooltip formatter={(value) => `${value}%`} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -260,101 +245,39 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Location Performance</CardTitle>
-            <CardDescription>
-              Customer experience scores by location
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={locationPerformance}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip />
-                  <Bar dataKey="score" fill="#008080" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Evaluations</CardTitle>
-            <CardDescription>Latest customer experience evaluations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  client: "Retail Corp SA",
-                  location: "Cape Town CBD",
-                  date: "Today, 09:15 AM",
-                  score: 92,
-                },
-                {
-                  client: "QuickMart",
-                  location: "Johannesburg North",
-                  date: "Yesterday, 02:30 PM",
-                  score: 78,
-                },
-                {
-                  client: "EcoFuel",
-                  location: "Durban Beachfront",
-                  date: "Yesterday, 10:45 AM",
-                  score: 85,
-                },
-                {
-                  client: "LuxCafé",
-                  location: "Pretoria Central",
-                  date: "22 Jun 2023, 11:20 AM",
-                  score: 89,
-                },
-              ].map((evaluation, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
-                >
-                  <div>
-                    <p className="font-medium">{evaluation.client}</p>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin size={12} className="mr-1" />
-                      {evaluation.location}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {evaluation.date}
-                    </div>
-                  </div>
-                  <div
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${
-                      evaluation.score >= 85
-                        ? "bg-green-100 text-green-800"
-                        : evaluation.score >= 70
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {evaluation.score}%
-                  </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Upcoming Evaluations</CardTitle>
+          <CardDescription>
+            Scheduled evaluations for the next 30 days
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            {upcomingEvaluations.map((evaluation) => (
+              <div
+                key={evaluation.id}
+                className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 last:border-0 last:pb-0"
+              >
+                <div className="space-y-1">
+                  <p className="font-medium">{evaluation.client}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {evaluation.location}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="mt-2 sm:mt-0 flex items-center space-x-2">
+                  <div className="text-sm text-muted-foreground">
+                    {evaluation.date}
+                  </div>
+                  <Button variant="outline" size="sm">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

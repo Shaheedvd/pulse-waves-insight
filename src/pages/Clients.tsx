@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,150 +18,211 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Building,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  MapPin,
-  Phone,
-  Plus,
-  Search,
-  User,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Search, Filter, Plus, Eye, Download } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Sample client data
-const clientsData = [
+const initialClientsData = [
   {
-    id: "CL-2023-001",
+    id: "1",
     name: "Retail Corp SA",
     industry: "Retail",
-    locations: 24,
-    contactPerson: "Jane Smith",
-    email: "jane.smith@retailcorp.co.za",
-    phone: "+27 21 555 1234",
-    status: "Active",
+    locations: 8,
+    recentScore: 92,
+    status: "active",
   },
   {
-    id: "CL-2023-002",
+    id: "2",
     name: "QuickMart",
     industry: "Grocery",
-    locations: 36,
-    contactPerson: "Michael Johnson",
-    email: "michael@quickmart.co.za",
-    phone: "+27 11 555 2345",
-    status: "Active",
+    locations: 12,
+    recentScore: 78,
+    status: "active",
   },
   {
-    id: "CL-2023-003",
+    id: "3",
     name: "EcoFuel",
-    industry: "Gas Station",
-    locations: 42,
-    contactPerson: "Sarah Williams",
-    email: "sarah@ecofuel.co.za",
-    phone: "+27 31 555 3456",
-    status: "Active",
+    industry: "Energy",
+    locations: 15,
+    recentScore: 85,
+    status: "active",
   },
   {
-    id: "CL-2023-004",
+    id: "4",
     name: "LuxCafé",
-    industry: "Restaurant",
-    locations: 8,
-    contactPerson: "David Brown",
-    email: "david@luxcafe.co.za",
-    phone: "+27 12 555 4567",
-    status: "Active",
+    industry: "Food & Beverage",
+    locations: 5,
+    recentScore: 89,
+    status: "active",
   },
   {
-    id: "CL-2023-005",
-    name: "HealthPharm",
-    industry: "Pharmacy",
-    locations: 18,
-    contactPerson: "Emily Davis",
-    email: "emily@healthpharm.co.za",
-    phone: "+27 41 555 5678",
-    status: "Active",
-  },
-  {
-    id: "CL-2023-006",
+    id: "5",
     name: "FreshGrocer",
     industry: "Grocery",
-    locations: 12,
-    contactPerson: "Robert Wilson",
-    email: "robert@freshgrocer.co.za",
-    phone: "+27 51 555 6789",
-    status: "Active",
+    locations: 7,
+    recentScore: 82,
+    status: "active",
   },
   {
-    id: "CL-2023-007",
-    name: "SwiftBank",
-    industry: "Banking",
-    locations: 28,
-    contactPerson: "Lisa Taylor",
-    email: "lisa@swiftbank.co.za",
-    phone: "+27 21 555 7890",
-    status: "Inactive",
-  },
-  {
-    id: "CL-2023-008",
-    name: "ComfortInn",
-    industry: "Hospitality",
-    locations: 6,
-    contactPerson: "John Anderson",
-    email: "john@comfortinn.co.za",
-    phone: "+27 11 555 8901",
-    status: "Active",
-  },
-  {
-    id: "CL-2023-009",
-    name: "TechRetail",
-    industry: "Electronics",
-    locations: 15,
-    contactPerson: "Nancy Miller",
-    email: "nancy@techretail.co.za",
-    phone: "+27 31 555 9012",
-    status: "Active",
-  },
-  {
-    id: "CL-2023-010",
-    name: "SportShop",
-    industry: "Retail",
+    id: "6",
+    name: "HealthPharm",
+    industry: "Healthcare",
     locations: 9,
-    contactPerson: "Kevin Thompson",
-    email: "kevin@sportshop.co.za",
-    phone: "+27 12 555 0123",
-    status: "Inactive",
+    recentScore: 88,
+    status: "active",
+  },
+  {
+    id: "7",
+    name: "TechZone",
+    industry: "Electronics",
+    locations: 4,
+    recentScore: 79,
+    status: "inactive",
+  },
+  {
+    id: "8",
+    name: "HomeStyle",
+    industry: "Home Improvement",
+    locations: 6,
+    recentScore: 81,
+    status: "active",
   },
 ];
 
 const Clients = () => {
+  const [clients, setClients] = useState(initialClientsData);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const [industryFilter, setIndustryFilter] = useState("all");
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [isViewClientOpen, setIsViewClientOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [newClient, setNewClient] = useState({
+    name: "",
+    industry: "",
+    contactName: "",
+    contactEmail: "",
+    contactPhone: "",
+    businessAddress: "",
+    numberOfLocations: "",
+  });
+  const { toast } = useToast();
+  const { hasPermission } = useAuth();
 
-  // Filter clients based on search term
-  const filteredClients = clientsData.filter((client) =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter clients based on search term and industry
+  const filteredClients = clients.filter((client) => {
+    const matchesSearch = client.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesIndustry =
+      industryFilter === "all" || client.industry === industryFilter;
+    return matchesSearch && matchesIndustry;
+  });
 
-  // Paginate clients
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentClients = filteredClients.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  // Get unique industries for the filter
+  const industries = [...new Set(clients.map((client) => client.industry))];
 
-  const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+  const handleAddClient = () => {
+    if (!newClient.name || !newClient.industry) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const id = (clients.length + 1).toString();
+    const newClientData = {
+      id,
+      name: newClient.name,
+      industry: newClient.industry,
+      locations: parseInt(newClient.numberOfLocations) || 1,
+      recentScore: 0,
+      status: "active",
+    };
+
+    setClients([...clients, newClientData]);
+    setIsAddClientOpen(false);
+    setNewClient({
+      name: "",
+      industry: "",
+      contactName: "",
+      contactEmail: "",
+      contactPhone: "",
+      businessAddress: "",
+      numberOfLocations: "",
+    });
+
+    toast({
+      title: "Client Added",
+      description: `${newClient.name} has been added to your clients`,
+    });
+  };
+
+  const handleViewClient = (client: any) => {
+    setSelectedClient(client);
+    setIsViewClientOpen(true);
+  };
+
+  const handleDownload = () => {
+    toast({
+      title: "Report Downloaded",
+      description: "Client data has been downloaded successfully",
+    });
+  };
+
+  const handleToggleClientStatus = () => {
+    if (!selectedClient) return;
+
+    const updatedClients = clients.map((client) => {
+      if (client.id === selectedClient.id) {
+        const newStatus = client.status === "active" ? "inactive" : "active";
+        const updatedClient = {
+          ...client,
+          status: newStatus,
+        };
+        setSelectedClient(updatedClient);
+        return updatedClient;
+      }
+      return client;
+    });
+
+    setClients(updatedClients);
+    toast({
+      title: "Status Updated",
+      description: `${selectedClient.name} is now ${selectedClient.status === "active" ? "inactive" : "active"}`,
+    });
+  };
+
+  const getScoreBadgeColor = (score: number) => {
+    if (score === 0) return "bg-gray-100 text-gray-800";
+    if (score >= 85) return "bg-green-100 text-green-800";
+    if (score >= 70) return "bg-yellow-100 text-yellow-800";
+    return "bg-red-100 text-red-800";
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
-        <Button>
+        <Button onClick={() => setIsAddClientOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Add Client
         </Button>
       </div>
@@ -168,6 +230,9 @@ const Clients = () => {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Client Management</CardTitle>
+          <CardDescription>
+            Manage and view client information and audit performance
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 md:space-x-4">
@@ -182,103 +247,284 @@ const Clients = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              <Select
+                value={industryFilter}
+                onValueChange={(value) => setIndustryFilter(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <div className="flex items-center">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Industry" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Industries</SelectItem>
+                  {industries.map((industry) => (
+                    <SelectItem key={industry} value={industry}>
+                      {industry}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleDownload}>
               <Download className="h-4 w-4" />
             </Button>
           </div>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {currentClients.length > 0 ? (
-              currentClients.map((client) => (
-                <Card key={client.id} className="overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{client.name}</CardTitle>
-                      <Badge
-                        variant={client.status === "Active" ? "default" : "secondary"}
-                      >
-                        {client.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-center text-muted-foreground">
-                        <Building className="mr-2 h-4 w-4" />
-                        {client.industry}
-                      </div>
-                      <div className="flex items-center text-muted-foreground">
-                        <MapPin className="mr-2 h-4 w-4" />
-                        {client.locations} locations
-                      </div>
-                      <div className="flex items-center text-muted-foreground">
-                        <User className="mr-2 h-4 w-4" />
-                        {client.contactPerson}
-                      </div>
-                      <div className="flex items-center text-muted-foreground">
-                        <Phone className="mr-2 h-4 w-4" />
-                        {client.phone}
-                      </div>
-                      
-                      <div className="flex justify-end pt-2">
-                        <Button variant="outline" size="sm">
-                          View Details
+          <div className="mt-4 rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client Name</TableHead>
+                  <TableHead>Industry</TableHead>
+                  <TableHead>Locations</TableHead>
+                  <TableHead>Recent Score</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredClients.length > 0 ? (
+                  filteredClients.map((client) => (
+                    <TableRow key={client.id}>
+                      <TableCell className="font-medium">
+                        {client.name}
+                      </TableCell>
+                      <TableCell>{client.industry}</TableCell>
+                      <TableCell>{client.locations}</TableCell>
+                      <TableCell>
+                        {client.recentScore > 0 ? (
+                          <Badge
+                            className={getScoreBadgeColor(client.recentScore)}
+                          >
+                            {client.recentScore}%
+                          </Badge>
+                        ) : (
+                          "No data"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            client.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }
+                        >
+                          {client.status === "active" ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewClient(client)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" /> View
                         </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-3 py-8 text-center text-muted-foreground">
-                No clients found matching your search.
-              </div>
-            )}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between space-x-2 py-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {indexOfFirstItem + 1}-
-                {Math.min(indexOfLastItem, filteredClients.length)} of{" "}
-                {filteredClients.length}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="icon"
-                      onClick={() => setCurrentPage(page)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="h-24 text-center text-muted-foreground"
                     >
-                      {page}
-                    </Button>
-                  )
+                      No clients found.
+                    </TableCell>
+                  </TableRow>
                 )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Add Client Dialog */}
+      <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+            <DialogDescription>
+              Enter the details of the new client to add them to your system.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="clientName">Client Name</Label>
+              <Input
+                id="clientName"
+                value={newClient.name}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, name: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="industry">Industry</Label>
+              <Input
+                id="industry"
+                value={newClient.industry}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, industry: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="contactName">Contact Person</Label>
+              <Input
+                id="contactName"
+                value={newClient.contactName}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, contactName: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="contactEmail">Contact Email</Label>
+              <Input
+                id="contactEmail"
+                type="email"
+                value={newClient.contactEmail}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, contactEmail: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="contactPhone">Contact Phone</Label>
+              <Input
+                id="contactPhone"
+                value={newClient.contactPhone}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, contactPhone: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="businessAddress">Business Address</Label>
+              <Input
+                id="businessAddress"
+                value={newClient.businessAddress}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, businessAddress: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="numberOfLocations">Number of Locations</Label>
+              <Input
+                id="numberOfLocations"
+                type="number"
+                min="1"
+                value={newClient.numberOfLocations}
+                onChange={(e) =>
+                  setNewClient({ ...newClient, numberOfLocations: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddClientOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddClient}>Add Client</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Client Dialog */}
+      <Dialog open={isViewClientOpen} onOpenChange={setIsViewClientOpen}>
+        {selectedClient && (
+          <DialogContent className="sm:max-w-[525px]">
+            <DialogHeader>
+              <DialogTitle>{selectedClient.name}</DialogTitle>
+              <DialogDescription>
+                Client information and performance data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Industry</Label>
+                  <p className="font-medium">{selectedClient.industry}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Status</Label>
+                  <p>
+                    <Badge
+                      className={
+                        selectedClient.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }
+                    >
+                      {selectedClient.status === "active" ? "Active" : "Inactive"}
+                    </Badge>
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Locations</Label>
+                  <p className="font-medium">{selectedClient.locations}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Recent Score</Label>
+                  <p>
+                    {selectedClient.recentScore > 0 ? (
+                      <Badge
+                        className={getScoreBadgeColor(selectedClient.recentScore)}
+                      >
+                        {selectedClient.recentScore}%
+                      </Badge>
+                    ) : (
+                      "No data"
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-2">Additional Information</h3>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <span className="text-muted-foreground">Contact Person:</span>{" "}
+                    John Smith
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Email:</span>{" "}
+                    john.smith@{selectedClient.name.toLowerCase().replace(/\s+/g, "")}.com
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Phone:</span> +27 21 555 1234
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">Address:</span> 123 Business Ave, Cape Town, South Africa
+                  </p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="flex justify-between">
+              <div>
+                {hasPermission("canManageUsers") && (
+                  <Button
+                    variant={selectedClient.status === "active" ? "destructive" : "default"}
+                    onClick={handleToggleClientStatus}
+                  >
+                    {selectedClient.status === "active" ? "Deactivate" : "Activate"} Client
+                  </Button>
+                )}
+              </div>
+              <Button variant="outline" onClick={() => setIsViewClientOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 };

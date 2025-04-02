@@ -31,9 +31,12 @@ import {
   Filter,
   Plus,
   Search,
+  FileText,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import EvaluationForm from "@/components/evaluations/EvaluationForm";
+import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
+import { useToast } from "@/components/ui/use-toast";
 
 // Sample evaluation data
 const evaluationsData = [
@@ -129,11 +132,28 @@ const evaluationsData = [
   },
 ];
 
+// List of available evaluators
+const evaluatorsList = [
+  "John Smith",
+  "Sarah Johnson",
+  "Michael Brown",
+  "Emily Davis",
+  "David Wilson",
+  "Lisa Taylor",
+  "James Anderson",
+  "Patricia Thomas",
+  "Robert Jackson",
+  "Jennifer White"
+];
+
 const Evaluations = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { toast } = useToast();
   const itemsPerPage = 8;
 
   // Filter evaluations based on search term and status
@@ -180,6 +200,18 @@ const Evaluations = () => {
     }
   };
 
+  const handleViewEvaluation = (evaluation: any) => {
+    setSelectedEvaluation(evaluation);
+    setIsSheetOpen(true);
+  };
+
+  const handleDownload = () => {
+    toast({
+      title: "Downloading evaluations",
+      description: "Your file has been downloaded successfully",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -224,7 +256,7 @@ const Evaluations = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleDownload}>
               <Download className="h-4 w-4" />
             </Button>
           </div>
@@ -276,8 +308,12 @@ const Evaluations = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <ClipboardCheck className="h-4 w-4 mr-1" /> View
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleViewEvaluation(evaluation)}
+                        >
+                          <FileText className="h-4 w-4 mr-1" /> View
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -343,6 +379,15 @@ const Evaluations = () => {
       <EvaluationForm 
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
+        evaluatorsList={evaluatorsList}
+      />
+
+      {/* Evaluation Sheet Dialog */}
+      <EvaluationSheet
+        open={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        evaluation={selectedEvaluation}
+        evaluatorsList={evaluatorsList}
       />
     </div>
   );
