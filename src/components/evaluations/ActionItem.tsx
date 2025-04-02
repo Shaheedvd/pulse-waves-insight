@@ -14,27 +14,54 @@ export interface ActionItemType {
 }
 
 interface ActionItemProps {
-  item: ActionItemType;
-  onUpdate: (id: string, field: keyof ActionItemType, value: string) => void;
-  onDelete: (id: string) => void;
+  text?: string; // For simple text items
+  item?: ActionItemType;
+  onUpdate?: (id: string, field: keyof ActionItemType, value: string) => void;
+  onDelete?: (id: string) => void;
+  onRemove?: () => void; // For simple text items
   disabled?: boolean;
 }
 
-const ActionItem: React.FC<ActionItemProps> = ({ item, onUpdate, onDelete, disabled = false }) => {
+const ActionItem: React.FC<ActionItemProps> = ({ 
+  text, 
+  item, 
+  onUpdate, 
+  onDelete, 
+  onRemove,
+  disabled = false 
+}) => {
+  if (text) {
+    // Simple text version
+    return (
+      <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+        <span>{text}</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="text-destructive hover:text-destructive h-8 w-8"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  // Full featured version
   return (
     <div className="grid grid-cols-12 gap-2 items-center mb-2">
       <div className="col-span-4">
         <Input
-          value={item.description}
-          onChange={(e) => onUpdate(item.id, "description", e.target.value)}
+          value={item?.description}
+          onChange={(e) => onUpdate && item && onUpdate(item.id, "description", e.target.value)}
           placeholder="Issue or action item"
           disabled={disabled}
         />
       </div>
       <div className="col-span-2">
         <Input
-          value={item.responsible}
-          onChange={(e) => onUpdate(item.id, "responsible", e.target.value)}
+          value={item?.responsible}
+          onChange={(e) => onUpdate && item && onUpdate(item.id, "responsible", e.target.value)}
           placeholder="Responsible person"
           disabled={disabled}
         />
@@ -42,23 +69,23 @@ const ActionItem: React.FC<ActionItemProps> = ({ item, onUpdate, onDelete, disab
       <div className="col-span-1">
         <Input
           type="date"
-          value={item.startDate}
-          onChange={(e) => onUpdate(item.id, "startDate", e.target.value)}
+          value={item?.startDate}
+          onChange={(e) => onUpdate && item && onUpdate(item.id, "startDate", e.target.value)}
           disabled={disabled}
         />
       </div>
       <div className="col-span-1">
         <Input
           type="date"
-          value={item.resolvedDate}
-          onChange={(e) => onUpdate(item.id, "resolvedDate", e.target.value)}
+          value={item?.resolvedDate}
+          onChange={(e) => onUpdate && item && onUpdate(item.id, "resolvedDate", e.target.value)}
           disabled={disabled}
         />
       </div>
       <div className="col-span-3">
         <Input
-          value={item.actionTaken}
-          onChange={(e) => onUpdate(item.id, "actionTaken", e.target.value)}
+          value={item?.actionTaken}
+          onChange={(e) => onUpdate && item && onUpdate(item.id, "actionTaken", e.target.value)}
           placeholder="Action taken"
           disabled={disabled}
         />
@@ -67,7 +94,7 @@ const ActionItem: React.FC<ActionItemProps> = ({ item, onUpdate, onDelete, disab
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onDelete(item.id)}
+          onClick={() => onDelete && item && onDelete(item.id)}
           className="text-destructive hover:text-destructive"
           disabled={disabled}
         >
