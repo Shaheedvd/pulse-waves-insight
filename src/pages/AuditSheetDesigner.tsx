@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -54,6 +53,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Define the allowed item types
+type ItemType = "yesno" | "scale" | "text";
+
 // Define form schema using zod
 const auditSheetFormSchema = z.object({
   name: z.string().min(3, { message: "Audit sheet name must be at least 3 characters" }),
@@ -84,8 +86,22 @@ const auditSheetFormSchema = z.object({
 
 type AuditSheetFormValues = z.infer<typeof auditSheetFormSchema>;
 
-// Predefined audit categories and sections based on the provided info
-const predefinedCategories = [
+// Predefined audit categories and sections with explicit type annotations
+const predefinedCategories: {
+  id: string;
+  name: string;
+  sections: {
+    id: string;
+    name: string;
+    items: {
+      id: string;
+      question: string;
+      type: ItemType;
+      required: boolean;
+      helpText?: string;
+    }[];
+  }[];
+}[] = [
   {
     id: "store_design",
     name: "Store/Physical Space Design",
@@ -236,7 +252,7 @@ const AuditSheetDesigner = () => {
           items: [{
             id: generateId(),
             question: "New Question",
-            type: "yesno",
+            type: "yesno" as const,
             required: true,
             helpText: "",
           }]
@@ -275,7 +291,7 @@ const AuditSheetDesigner = () => {
         items: [{
           id: generateId(),
           question: "New Question",
-          type: "yesno",
+          type: "yesno" as const,
           required: true,
           helpText: "",
         }]
@@ -293,7 +309,7 @@ const AuditSheetDesigner = () => {
       items: [{
         id: generateId(),
         question: "New Question",
-        type: "yesno",
+        type: "yesno" as const,
         required: true,
         helpText: "",
       }]
@@ -309,7 +325,7 @@ const AuditSheetDesigner = () => {
     const newItem = {
       id: generateId(),
       question: "New Question",
-      type: "yesno",
+      type: "yesno" as const,
       required: true,
       helpText: "",
     };
