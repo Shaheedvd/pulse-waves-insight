@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   FileText,
   FileDown,
+  Calculator,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,7 +60,7 @@ const AuthenticatedLayout = () => {
       path: "/audit-sheet-designer", 
       name: "Design Audit Sheets", 
       icon: <FileDown className="h-5 w-5" />,
-      permission: "canCreateReports" as const,
+      permission: "canCreateAuditSheets" as const,
       superuserOnly: true
     },
     { 
@@ -67,6 +68,12 @@ const AuthenticatedLayout = () => {
       name: "User Management", 
       icon: <ShieldCheck className="h-5 w-5" />,
       permission: "canManageUsers" as const
+    },
+    { 
+      path: "/financial", 
+      name: "Financial", 
+      icon: <Calculator className="h-5 w-5" />,
+      permission: "canManageFinancials" as const
     },
     { 
       path: "/settings", 
