@@ -17,7 +17,7 @@ const Financial = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   // Check if user has permission to access financial page
-  const canAccessFinancial = currentUser?.role === "superuser" || currentUser?.role === "manager";
+  const canAccessFinancial = hasPermission("canManageFinancials");
 
   if (!canAccessFinancial) {
     // Redirect unauthorized users
