@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Define user roles with their permission levels
@@ -19,6 +20,7 @@ export interface Permissions {
   canViewClients: boolean;
   canEditClients: boolean;
   canCreateAuditSheets: boolean;
+  canManageFinancials: boolean;
 }
 
 // Define user interface
@@ -47,6 +49,7 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canViewClients: true,
     canEditClients: true,
     canCreateAuditSheets: true,
+    canManageFinancials: true,
   },
   admin: {
     canViewReports: true,
@@ -63,6 +66,7 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canViewClients: true,
     canEditClients: true,
     canCreateAuditSheets: true,
+    canManageFinancials: false,
   },
   manager: {
     canViewReports: true,
@@ -79,6 +83,7 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canViewClients: true,
     canEditClients: false,
     canCreateAuditSheets: true,
+    canManageFinancials: true,
   },
   evaluator: {
     canViewReports: true,
@@ -95,6 +100,7 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canViewClients: true,
     canEditClients: false,
     canCreateAuditSheets: false,
+    canManageFinancials: false,
   },
   viewer: {
     canViewReports: true,
@@ -111,6 +117,7 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canViewClients: true,
     canEditClients: false,
     canCreateAuditSheets: false,
+    canManageFinancials: false,
   },
 };
 

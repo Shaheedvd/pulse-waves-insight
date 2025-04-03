@@ -12,10 +12,12 @@ import {
   User,
   Users,
   X,
+  Calculator,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -23,8 +25,10 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { currentUser, logout } = useAuth();
 
   const handleLogout = () => {
+    logout();
     toast({
       title: "Logged out",
       description: "You have been successfully logged out",
@@ -49,11 +53,27 @@ const DashboardLayout = () => {
       path: "/clients",
     },
     {
-      name: "Settings",
-      icon: <Settings size={20} />,
-      path: "/settings",
-    },
+      name: "Reports",
+      icon: <Activity size={20} />,
+      path: "/reports",
+    }
   ];
+
+  // Only show Financial tab to superusers and managers
+  if (currentUser?.role === "superuser" || currentUser?.role === "manager") {
+    navigationItems.push({
+      name: "Financial",
+      icon: <Calculator size={20} />,
+      path: "/financial",
+    });
+  }
+
+  // Add Settings as the last item
+  navigationItems.push({
+    name: "Settings",
+    icon: <Settings size={20} />,
+    path: "/settings",
+  });
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -130,14 +150,14 @@ const DashboardLayout = () => {
           <div className="flex items-center">
             <Avatar>
               <AvatarFallback className="bg-primary text-primary-foreground">
-                AD
+                {currentUser?.name.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             {(!isCollapsed || isMobile) && (
               <div className="ml-3">
-                <p className="text-sm font-medium">Admin User</p>
+                <p className="text-sm font-medium">{currentUser?.name || 'User'}</p>
                 <p className="text-xs text-muted-foreground">
-                  admin@pulsepointcx.com
+                  {currentUser?.email || 'user@example.com'}
                 </p>
               </div>
             )}

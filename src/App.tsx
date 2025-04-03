@@ -15,6 +15,7 @@ import UserManagement from "./pages/UserManagement";
 import UserActivityReport from "./pages/UserActivityReport";
 import Reports from "./pages/Reports";
 import AuditSheetDesigner from "./pages/AuditSheetDesigner";
+import Financial from "./pages/Financial";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -69,6 +70,11 @@ const App: React.FC = () => {
                     <Route 
                       path="/user-activity-report" 
                       element={<UserActivityReport />} 
+                    />
+                    
+                    <Route 
+                      path="/financial" 
+                      element={<Financial />} 
                     />
                     
                     <Route 
