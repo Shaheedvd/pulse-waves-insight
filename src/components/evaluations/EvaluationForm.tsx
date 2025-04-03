@@ -1,19 +1,37 @@
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { CalendarIcon, X, CameraIcon, ImageIcon, PlusCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarIcon, Image, X } from "lucide-react";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import ActionItem from "./ActionItem";
+import { useToast } from "@/components/ui/use-toast";
 
-// Sample client data for the dropdown
+interface EvaluationFormProps {
+  open: boolean;
+  onClose: () => void;
+  evaluatorsList: string[];
+}
+
+// Sample client and location data
 const clientsData = [
   { id: "1", name: "Retail Corp SA" },
   { id: "2", name: "QuickMart" },
@@ -23,160 +41,138 @@ const clientsData = [
   { id: "6", name: "HealthPharm" },
 ];
 
-// Sample locations data keyed by client ID
-const locationsData: Record<string, { id: string; name: string }[]> = {
-  "1": [
-    { id: "101", name: "Cape Town CBD" },
-    { id: "102", name: "Cape Town Waterfront" },
-  ],
-  "2": [
-    { id: "201", name: "Johannesburg North" },
-    { id: "202", name: "Sandton" },
-    { id: "203", name: "Cape Town South" },
-  ],
-  "3": [
-    { id: "301", name: "Durban Beachfront" },
-    { id: "302", name: "Johannesburg East" },
-  ],
-  "4": [
-    { id: "401", name: "Pretoria Central" },
-  ],
-  "5": [
-    { id: "501", name: "Bloemfontein" },
-  ],
-  "6": [
-    { id: "601", name: "Port Elizabeth" },
-  ],
-};
+const locationsData = [
+  { id: "1", name: "Cape Town CBD", clientId: "1" },
+  { id: "2", name: "Cape Town Waterfront", clientId: "1" },
+  { id: "3", name: "Johannesburg North", clientId: "2" },
+  { id: "4", name: "Sandton", clientId: "2" },
+  { id: "5", name: "Durban Beachfront", clientId: "3" },
+  { id: "6", name: "Johannesburg East", clientId: "3" },
+  { id: "7", name: "Pretoria Central", clientId: "4" },
+  { id: "8", name: "Bloemfontein", clientId: "5" },
+  { id: "9", name: "Port Elizabeth", clientId: "6" },
+  { id: "10", name: "Cape Town South", clientId: "2" },
+];
 
-const EvaluationForm = ({ 
-  open, 
-  onClose, 
-  evaluatorsList = [] 
-}: { 
-  open: boolean; 
-  onClose: () => void; 
-  evaluatorsList?: string[];
+const EvaluationForm: React.FC<EvaluationFormProps> = ({
+  open,
+  onClose,
+  evaluatorsList
 }) => {
-  const [clientId, setClientId] = useState("");
-  const [locationId, setLocationId] = useState("");
-  const [evaluationDate, setEvaluationDate] = useState<Date>();
-  const [evaluator, setEvaluator] = useState("");
-  const [actionItems, setActionItems] = useState<string[]>([]);
-  const [newActionItem, setNewActionItem] = useState("");
-  const [photos, setPhotos] = useState<string[]>([]);
   const { toast } = useToast();
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [client, setClient] = useState("");
+  const [location, setLocation] = useState("");
+  const [evaluator, setEvaluator] = useState("");
+  const [notes, setNotes] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
 
-  const resetForm = () => {
-    setClientId("");
-    setLocationId("");
-    setEvaluationDate(undefined);
-    setEvaluator("");
-    setActionItems([]);
-    setNewActionItem("");
-    setPhotos([]);
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
+  // Filter locations based on selected client
+  const filteredLocations = client
+    ? locationsData.filter(loc => loc.clientId === client)
+    : [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
-    if (!clientId || !locationId || !evaluationDate) {
+    if (!client || !location || !evaluator || !date) {
       toast({
-        title: "Missing information",
+        title: "Missing Information",
         description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
     }
 
-    // In a real app, this would submit to an API
-    toast({
-      title: "Evaluation scheduled",
-      description: `New evaluation has been scheduled for ${clientsData.find(c => c.id === clientId)?.name}`,
+    // In a real app, this would submit to a backend
+    console.log("Submitting evaluation:", {
+      client,
+      location,
+      evaluator,
+      date,
+      notes,
+      photos: photos.map(p => p.name) // Just log names in console
     });
-    
-    handleClose();
+
+    toast({
+      title: "Evaluation Scheduled",
+      description: "The evaluation has been scheduled successfully",
+    });
+
+    // Reset form
+    resetForm();
+    onClose();
   };
 
-  const handleAddActionItem = () => {
-    if (newActionItem.trim()) {
-      setActionItems([...actionItems, newActionItem.trim()]);
-      setNewActionItem("");
-    }
+  const resetForm = () => {
+    setClient("");
+    setLocation("");
+    setEvaluator("");
+    setDate(new Date());
+    setNotes("");
+    setPhotos([]);
+    setPhotoPreviewUrls([]);
   };
 
-  const handleRemoveActionItem = (index: number) => {
-    setActionItems(actionItems.filter((_, i) => i !== index));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    // Check if adding more photos would exceed the limit
-    if (photos.length + files.length > 5) {
-      toast({
-        title: "Too many photos",
-        description: "Maximum 5 photos are allowed",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
       
-      reader.onload = (event) => {
-        if (event.target && typeof event.target.result === 'string') {
-          setPhotos(prev => [...prev, event.target.result as string]);
-        }
-      };
+      // Limit to 5 photos maximum
+      const totalPhotos = [...photos, ...newFiles];
+      if (totalPhotos.length > 5) {
+        toast({
+          title: "Maximum Photos Reached",
+          description: "You can only upload a maximum of 5 photos",
+          variant: "destructive",
+        });
+        return;
+      }
       
-      reader.readAsDataURL(file);
+      // Create preview URLs for the images
+      const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
+      
+      setPhotos([...photos, ...newFiles]);
+      setPhotoPreviewUrls([...photoPreviewUrls, ...newPreviewUrls]);
     }
   };
 
   const removePhoto = (index: number) => {
-    setPhotos(photos.filter((_, i) => i !== index));
+    const newPhotos = [...photos];
+    const newPhotoPreviewUrls = [...photoPreviewUrls];
+    
+    // Revoke the object URL to avoid memory leaks
+    URL.revokeObjectURL(newPhotoPreviewUrls[index]);
+    
+    newPhotos.splice(index, 1);
+    newPhotoPreviewUrls.splice(index, 1);
+    
+    setPhotos(newPhotos);
+    setPhotoPreviewUrls(newPhotoPreviewUrls);
   };
 
-  const selectedClient = clientsData.find(client => client.id === clientId);
-  const availableLocations = clientId ? locationsData[clientId] || [] : [];
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Schedule New Evaluation</DialogTitle>
           <DialogDescription>
-            Create a new site evaluation to assess customer experience.
+            Create a new evaluation for a client location
           </DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="client">Client</Label>
-            <Select
-              value={clientId}
-              onValueChange={(value) => {
-                setClientId(value);
-                setLocationId("");
-              }}
-            >
+            <Select value={client} onValueChange={setClient}>
               <SelectTrigger id="client">
-                <SelectValue placeholder="Select a client" />
+                <SelectValue placeholder="Select client" />
               </SelectTrigger>
               <SelectContent>
-                {clientsData.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
+                {clientsData.map((clientItem) => (
+                  <SelectItem key={clientItem.id} value={clientItem.id}>
+                    {clientItem.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -185,18 +181,18 @@ const EvaluationForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
-            <Select
-              value={locationId}
-              onValueChange={setLocationId}
-              disabled={!clientId}
+            <Select 
+              value={location} 
+              onValueChange={setLocation}
+              disabled={!client}
             >
               <SelectTrigger id="location">
-                <SelectValue placeholder={clientId ? "Select a location" : "Select a client first"} />
+                <SelectValue placeholder={client ? "Select location" : "Select a client first"} />
               </SelectTrigger>
               <SelectContent>
-                {availableLocations.map((location) => (
-                  <SelectItem key={location.id} value={location.id}>
-                    {location.name}
+                {filteredLocations.map((locationItem) => (
+                  <SelectItem key={locationItem.id} value={locationItem.id}>
+                    {locationItem.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -204,18 +200,15 @@ const EvaluationForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="evaluator">Assigned Evaluator</Label>
-            <Select
-              value={evaluator}
-              onValueChange={setEvaluator}
-            >
+            <Label htmlFor="evaluator">Evaluator</Label>
+            <Select value={evaluator} onValueChange={setEvaluator}>
               <SelectTrigger id="evaluator">
-                <SelectValue placeholder="Select an evaluator" />
+                <SelectValue placeholder="Select evaluator" />
               </SelectTrigger>
               <SelectContent>
-                {evaluatorsList.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
+                {evaluatorsList.map((evaluatorName) => (
+                  <SelectItem key={evaluatorName} value={evaluatorName}>
+                    {evaluatorName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -223,25 +216,26 @@ const EvaluationForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Evaluation Date</Label>
+            <Label htmlFor="date">Date</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  id="date"
                   variant={"outline"}
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !evaluationDate && "text-muted-foreground"
+                    !date && "text-muted-foreground"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {evaluationDate ? format(evaluationDate, "PPP") : <span>Select date</span>}
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={evaluationDate}
-                  onSelect={setEvaluationDate}
+                  selected={date}
+                  onSelect={setDate}
                   initialFocus
                 />
               </PopoverContent>
@@ -249,19 +243,30 @@ const EvaluationForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label>Site Photos (Maximum 5)</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {photos.map((photo, index) => (
-                <div key={index} className="relative group">
-                  <img 
-                    src={photo} 
-                    alt={`Photo ${index + 1}`} 
-                    className="rounded-md h-20 w-full object-cover" 
+            <Label htmlFor="notes">Notes (Optional)</Label>
+            <Input
+              id="notes"
+              placeholder="Add additional information"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Photos (Maximum 5)</Label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {photoPreviewUrls.map((url, index) => (
+                <div key={index} className="relative w-20 h-20">
+                  <img
+                    src={url}
+                    alt={`Uploaded ${index + 1}`}
+                    className="w-full h-full object-cover rounded-md"
                   />
                   <Button
+                    type="button"
                     variant="destructive"
                     size="icon"
-                    className="absolute top-1 right-1 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
                     onClick={() => removePhoto(index)}
                   >
                     <X className="h-3 w-3" />
@@ -270,66 +275,25 @@ const EvaluationForm = ({
               ))}
               
               {photos.length < 5 && (
-                <div className="flex items-center justify-center border border-dashed rounded-md h-20">
-                  <Label htmlFor="photo-upload" className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
-                    <CameraIcon className="h-6 w-6 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground mt-1">Add photo</span>
-                    <Input 
-                      id="photo-upload" 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={handleFileChange} 
-                      multiple
-                    />
-                  </Label>
-                </div>
+                <label className="w-20 h-20 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer hover:bg-muted">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                    multiple={5 - photos.length > 1}
+                  />
+                  <Image className="h-6 w-6 text-muted-foreground" />
+                </label>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {photos.length}/5 photos added
+            <p className="text-xs text-muted-foreground">
+              {photos.length}/5 photos uploaded
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label>Action Items (Optional)</Label>
-            <div className="flex space-x-2">
-              <Input
-                placeholder="Add an action item"
-                value={newActionItem}
-                onChange={(e) => setNewActionItem(e.target.value)}
-              />
-              <Button
-                type="button"
-                onClick={handleAddActionItem}
-                variant="outline"
-              >
-                Add
-              </Button>
-            </div>
-          </div>
-
-          {actionItems.length > 0 && (
-            <div className="border rounded-md p-3 space-y-2">
-              <Label>Items to review:</Label>
-              <div className="space-y-2">
-                {actionItems.map((item, index) => (
-                  <ActionItem
-                    key={index}
-                    text={item}
-                    onRemove={() => handleRemoveActionItem(index)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit">Schedule Evaluation</Button>
