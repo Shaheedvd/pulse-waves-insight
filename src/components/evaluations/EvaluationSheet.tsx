@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, FileText, Save } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EvaluationSheetProps {
   open: boolean;
@@ -82,6 +83,7 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
   evaluatorsList
 }) => {
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [editedEvaluation, setEditedEvaluation] = useState<any>(null);
@@ -164,6 +166,8 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
     if (percentage >= 70) return "bg-yellow-100 text-yellow-800";
     return "bg-red-100 text-red-800";
   };
+
+  const canEdit = hasPermission("canEditEvaluations");
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -298,19 +302,21 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
 
         <DialogFooter className="flex justify-between items-center">
           <div>
-            {editMode ? (
-              <>
-                <Button onClick={handleSave} className="mr-2">
-                  <Save className="h-4 w-4 mr-2" /> Save Changes
+            {canEdit && (
+              editMode ? (
+                <>
+                  <Button onClick={handleSave} className="mr-2">
+                    <Save className="h-4 w-4 mr-2" /> Save Changes
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditMode(false)}>
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" onClick={() => setEditMode(true)}>
+                  Edit Evaluation
                 </Button>
-                <Button variant="outline" onClick={() => setEditMode(false)}>
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={() => setEditMode(true)}>
-                Edit Evaluation
-              </Button>
+              )
             )}
           </div>
           <div>

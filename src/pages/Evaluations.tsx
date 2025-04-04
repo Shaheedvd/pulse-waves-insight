@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import EvaluationForm from "@/components/evaluations/EvaluationForm";
 import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const evaluationsData = [
   {
@@ -153,6 +154,7 @@ const Evaluations = () => {
   const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
+  const { hasPermission } = useAuth();
   const itemsPerPage = 8;
 
   const filteredEvaluations = evaluationsData.filter((evaluation) => {
@@ -202,9 +204,10 @@ const Evaluations = () => {
     setIsSheetOpen(true);
   };
 
-  const handleDownload = () => {
-    const content = `
+  const generateEvaluationReportContent = () => {
+    return `
       <h1>Evaluations Report</h1>
+      <p>Generated on: ${new Date().toLocaleDateString()}</p>
       <table>
         <thead>
           <tr>
@@ -232,11 +235,6 @@ const Evaluations = () => {
         </tbody>
       </table>
     `;
-
-    toast({
-      title: "Downloading evaluations",
-      description: "Your file has been downloaded successfully",
-    });
   };
 
   return (
@@ -244,12 +242,16 @@ const Evaluations = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Evaluations</h1>
         <div className="flex space-x-2">
-          <Button onClick={() => setIsAuditFormOpen(true)}>
-            <FileCheck className="mr-2 h-4 w-4" /> New Audit
-          </Button>
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New Evaluation
-          </Button>
+          {(hasPermission("canCreateAuditSheets") || hasPermission("canCreateEvaluations")) && (
+            <Button onClick={() => setIsAuditFormOpen(true)}>
+              <FileCheck className="mr-2 h-4 w-4" /> New Audit
+            </Button>
+          )}
+          {hasPermission("canCreateEvaluations") && (
+            <Button onClick={() => setIsFormOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New Evaluation
+            </Button>
+          )}
         </div>
       </div>
 
@@ -291,39 +293,9 @@ const Evaluations = () => {
             <Button 
               variant="outline" 
               size="icon" 
-              onClick={handleDownload}
               downloadPdf={true}
               documentTitle="Evaluations Report"
-              documentContent={() => `
-                <h1>Evaluations Report</h1>
-                <p>Generated on: ${new Date().toLocaleDateString()}</p>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Client</th>
-                      <th>Location</th>
-                      <th>Date</th>
-                      <th>Evaluator</th>
-                      <th>Score</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${filteredEvaluations.map(item => `
-                      <tr>
-                        <td>${item.id}</td>
-                        <td>${item.client}</td>
-                        <td>${item.location}</td>
-                        <td>${item.date}</td>
-                        <td>${item.evaluator}</td>
-                        <td>${item.status === "Completed" ? item.score + "%" : "-"}</td>
-                        <td>${item.status}</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              `}
+              documentContent={generateEvaluationReportContent}
             >
               <Download className="h-4 w-4" />
             </Button>
