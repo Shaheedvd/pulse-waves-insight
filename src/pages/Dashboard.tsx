@@ -27,6 +27,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
+// Define the COLORS constant for the pie chart
+const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#D6BCFA', '#8E9196'];
+
 // Sample data for charts
 const monthlyScoreData = [
   { month: "Jan", score: 87 },
@@ -125,12 +128,12 @@ const Dashboard = () => {
                 <th>Location</th>
                 <th>Date</th>
               </tr>
-              ${upcomingEvaluations.map(eval => `
+              ${upcomingEvaluations.map(evaluation => `
                 <tr>
-                  <td>${eval.id}</td>
-                  <td>${eval.client}</td>
-                  <td>${eval.location}</td>
-                  <td>${eval.date}</td>
+                  <td>${evaluation.id}</td>
+                  <td>${evaluation.client}</td>
+                  <td>${evaluation.location}</td>
+                  <td>${evaluation.date}</td>
                 </tr>
               `).join('')}
             </table>
