@@ -32,6 +32,7 @@ import {
   Plus,
   Search,
   FileText,
+  FileCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import EvaluationForm from "@/components/evaluations/EvaluationForm";
@@ -151,6 +152,7 @@ const Evaluations = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAuditFormOpen, setIsAuditFormOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
@@ -206,6 +208,37 @@ const Evaluations = () => {
   };
 
   const handleDownload = () => {
+    // Generate PDF content
+    const content = `
+      <h1>Evaluations Report</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Evaluator</th>
+            <th>Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredEvaluations.map(eval => `
+            <tr>
+              <td>${eval.id}</td>
+              <td>${eval.client}</td>
+              <td>${eval.location}</td>
+              <td>${eval.date}</td>
+              <td>${eval.evaluator}</td>
+              <td>${eval.status === "Completed" ? eval.score + "%" : "-"}</td>
+              <td>${eval.status}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
     toast({
       title: "Downloading evaluations",
       description: "Your file has been downloaded successfully",
@@ -216,9 +249,14 @@ const Evaluations = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Evaluations</h1>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> New Evaluation
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={() => setIsAuditFormOpen(true)}>
+            <FileCheck className="mr-2 h-4 w-4" /> New Audit
+          </Button>
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> New Evaluation
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -256,7 +294,43 @@ const Evaluations = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" size="icon" onClick={handleDownload}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleDownload}
+              downloadPdf={true}
+              documentTitle="Evaluations Report"
+              documentContent={() => `
+                <h1>Evaluations Report</h1>
+                <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Client</th>
+                      <th>Location</th>
+                      <th>Date</th>
+                      <th>Evaluator</th>
+                      <th>Score</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${filteredEvaluations.map(eval => `
+                      <tr>
+                        <td>${eval.id}</td>
+                        <td>${eval.client}</td>
+                        <td>${eval.location}</td>
+                        <td>${eval.date}</td>
+                        <td>${eval.evaluator}</td>
+                        <td>${eval.status === "Completed" ? eval.score + "%" : "-"}</td>
+                        <td>${eval.status}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              `}
+            >
               <Download className="h-4 w-4" />
             </Button>
           </div>
@@ -380,6 +454,15 @@ const Evaluations = () => {
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         evaluatorsList={evaluatorsList}
+        isAudit={false}
+      />
+
+      {/* Audit Form Dialog */}
+      <EvaluationForm 
+        open={isAuditFormOpen}
+        onClose={() => setIsAuditFormOpen(false)}
+        evaluatorsList={evaluatorsList}
+        isAudit={true}
       />
 
       {/* Evaluation Sheet Dialog */}

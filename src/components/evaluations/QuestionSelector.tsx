@@ -79,7 +79,7 @@ const QuestionSelector: React.FC<QuestionSelectorProps> = ({
       
       // Load questions for the selected category
       const categoryQuestions = getQuestionsByCategory(selectedCategory)
-        .filter(q => q.type === evaluationType || evaluationType === 'both');
+        .filter(q => q.type === evaluationType || q.type === 'both');
       setQuestions(categoryQuestions);
     }
   }, [selectedCategory, evaluationType]);
@@ -96,7 +96,7 @@ const QuestionSelector: React.FC<QuestionSelectorProps> = ({
       // If search is cleared, show questions for current category
       if (selectedCategory) {
         const categoryQuestions = getQuestionsByCategory(selectedCategory)
-          .filter(q => q.type === evaluationType || evaluationType === 'both');
+          .filter(q => q.type === evaluationType || q.type === 'both');
         setQuestions(categoryQuestions);
       }
       return;
@@ -106,7 +106,7 @@ const QuestionSelector: React.FC<QuestionSelectorProps> = ({
     const lowerTerm = term.toLowerCase();
     const filteredQuestions = getQuestionsByCategory(selectedCategory)
       .filter(q => 
-        (q.type === evaluationType || evaluationType === 'both') && 
+        (q.type === evaluationType || q.type === 'both') && 
         (q.text.toLowerCase().includes(lowerTerm) || 
          q.subcategory.toLowerCase().includes(lowerTerm))
       );
