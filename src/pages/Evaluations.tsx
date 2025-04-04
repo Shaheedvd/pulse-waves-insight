@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -39,7 +38,6 @@ import EvaluationForm from "@/components/evaluations/EvaluationForm";
 import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
 import { useToast } from "@/components/ui/use-toast";
 
-// Sample evaluation data
 const evaluationsData = [
   {
     id: "EV-2023-1001",
@@ -133,7 +131,6 @@ const evaluationsData = [
   },
 ];
 
-// List of available evaluators
 const evaluatorsList = [
   "John Smith",
   "Sarah Johnson",
@@ -158,7 +155,6 @@ const Evaluations = () => {
   const { toast } = useToast();
   const itemsPerPage = 8;
 
-  // Filter evaluations based on search term and status
   const filteredEvaluations = evaluationsData.filter((evaluation) => {
     const matchesSearch =
       evaluation.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -172,7 +168,6 @@ const Evaluations = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Paginate evaluations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEvaluations = filteredEvaluations.slice(
@@ -208,7 +203,6 @@ const Evaluations = () => {
   };
 
   const handleDownload = () => {
-    // Generate PDF content
     const content = `
       <h1>Evaluations Report</h1>
       <table>
@@ -224,15 +218,15 @@ const Evaluations = () => {
           </tr>
         </thead>
         <tbody>
-          ${filteredEvaluations.map(eval => `
+          ${filteredEvaluations.map(item => `
             <tr>
-              <td>${eval.id}</td>
-              <td>${eval.client}</td>
-              <td>${eval.location}</td>
-              <td>${eval.date}</td>
-              <td>${eval.evaluator}</td>
-              <td>${eval.status === "Completed" ? eval.score + "%" : "-"}</td>
-              <td>${eval.status}</td>
+              <td>${item.id}</td>
+              <td>${item.client}</td>
+              <td>${item.location}</td>
+              <td>${item.date}</td>
+              <td>${item.evaluator}</td>
+              <td>${item.status === "Completed" ? item.score + "%" : "-"}</td>
+              <td>${item.status}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -316,15 +310,15 @@ const Evaluations = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    ${filteredEvaluations.map(eval => `
+                    ${filteredEvaluations.map(item => `
                       <tr>
-                        <td>${eval.id}</td>
-                        <td>${eval.client}</td>
-                        <td>${eval.location}</td>
-                        <td>${eval.date}</td>
-                        <td>${eval.evaluator}</td>
-                        <td>${eval.status === "Completed" ? eval.score + "%" : "-"}</td>
-                        <td>${eval.status}</td>
+                        <td>${item.id}</td>
+                        <td>${item.client}</td>
+                        <td>${item.location}</td>
+                        <td>${item.date}</td>
+                        <td>${item.evaluator}</td>
+                        <td>${item.status === "Completed" ? item.score + "%" : "-"}</td>
+                        <td>${item.status}</td>
                       </tr>
                     `).join('')}
                   </tbody>
@@ -406,7 +400,6 @@ const Evaluations = () => {
             </Table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between space-x-2 py-4">
               <div className="text-sm text-muted-foreground">
@@ -449,7 +442,6 @@ const Evaluations = () => {
         </CardContent>
       </Card>
 
-      {/* Evaluation Form Dialog */}
       <EvaluationForm 
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
@@ -457,7 +449,6 @@ const Evaluations = () => {
         isAudit={false}
       />
 
-      {/* Audit Form Dialog */}
       <EvaluationForm 
         open={isAuditFormOpen}
         onClose={() => setIsAuditFormOpen(false)}
@@ -465,7 +456,6 @@ const Evaluations = () => {
         isAudit={true}
       />
 
-      {/* Evaluation Sheet Dialog */}
       <EvaluationSheet
         open={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
