@@ -88,13 +88,13 @@ const AuthenticatedLayout = () => {
       {/* Top Navigation */}
       <header className="sticky top-0 z-10 border-b bg-background">
         <div className="flex h-16 items-center px-4 md:px-6">
-          <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
+          <Link to="/dashboard" className="flex items-center gap-2 font-semibold text-foreground">
             <span className="text-primary text-xl">Pulse Point CX</span>
           </Link>
           <div className="ml-auto flex items-center gap-2">
             <div className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              <span className="text-sm font-medium">{currentUser?.name}</span>
+              <span className="text-sm font-medium text-foreground">{currentUser?.name}</span>
               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                 {currentUser?.role === "superuser" 
                   ? "Superuser" 
@@ -133,7 +133,7 @@ const AuthenticatedLayout = () => {
                     className="w-full justify-start"
                   >
                     {item.icon}
-                    <span className="ml-2">{item.name}</span>
+                    <span className="ml-2 text-foreground">{item.name}</span>
                   </Button>
                 </Link>
               );

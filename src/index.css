@@ -101,6 +101,18 @@
   button, a {
     @apply text-current;
   }
+  
+  /* Fix font visibility in navigation */
+  nav a, nav button, .sidebar-nav-item {
+    @apply text-foreground font-medium;
+  }
+  
+  /* Ensure font visibility in sidebar groups */
+  [data-sidebar="group-label"], 
+  [data-sidebar="menu-button"],
+  [data-sidebar="menu-sub-button"] {
+    @apply text-foreground;
+  }
 }
 
 /* Custom scrollbar for Windows feel */

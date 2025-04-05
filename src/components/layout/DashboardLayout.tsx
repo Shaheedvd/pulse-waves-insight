@@ -111,7 +111,7 @@ const DashboardLayout = () => {
         <div className="flex items-center h-16 px-4 border-b">
           <Activity className="h-6 w-6 text-primary mr-2" />
           {!isCollapsed && (
-            <span className="text-lg font-semibold">Pulse Point CX</span>
+            <span className="text-lg font-semibold text-foreground">Pulse Point CX</span>
           )}
           {!isMobile && (
             <Button
@@ -133,12 +133,12 @@ const DashboardLayout = () => {
                   variant="ghost"
                   className={`w-full justify-${
                     isCollapsed && !isMobile ? "center" : "start"
-                  } py-2`}
+                  } py-2 sidebar-nav-item`}
                   onClick={() => handleNavigation(item.path)}
                 >
                   {item.icon}
                   {(!isCollapsed || isMobile) && (
-                    <span className="ml-3">{item.name}</span>
+                    <span className="ml-3 text-foreground">{item.name}</span>
                   )}
                 </Button>
               </li>
@@ -155,7 +155,7 @@ const DashboardLayout = () => {
             </Avatar>
             {(!isCollapsed || isMobile) && (
               <div className="ml-3">
-                <p className="text-sm font-medium">{currentUser?.name || 'User'}</p>
+                <p className="text-sm font-medium text-foreground">{currentUser?.name || 'User'}</p>
                 <p className="text-xs text-muted-foreground">
                   {currentUser?.email || 'user@example.com'}
                 </p>
@@ -170,7 +170,7 @@ const DashboardLayout = () => {
             onClick={handleLogout}
           >
             <LogOut size={20} />
-            {(!isCollapsed || isMobile) && <span className="ml-3">Logout</span>}
+            {(!isCollapsed || isMobile) && <span className="ml-3 text-foreground">Logout</span>}
           </Button>
         </div>
       </aside>
