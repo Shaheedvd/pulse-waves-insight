@@ -34,11 +34,11 @@ export function DatePicker({
             !value && "text-muted-foreground"
           )}
           disabled={disabled}
-          style={{ color: 'inherit !important' }}
+          style={{ color: 'inherit' }}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          <span className="font-medium" style={{visibility: 'visible !important', display: 'inline !important'}}>
-            {value ? format(value, "PPP") : <span className="text-muted-foreground" style={{visibility: 'visible !important', display: 'inline !important'}}>{placeholder}</span>}
+          <span className="font-medium visible">
+            {value ? format(value, "PPP") : <span className="text-muted-foreground visible">{placeholder}</span>}
           </span>
         </Button>
       </PopoverTrigger>

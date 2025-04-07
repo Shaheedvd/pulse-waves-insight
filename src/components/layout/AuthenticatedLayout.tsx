@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -114,12 +113,10 @@ const AuthenticatedLayout = () => {
         <aside className="hidden border-r bg-muted/40 md:block">
           <nav className="grid gap-2 p-4">
             {navItems.map((item) => {
-              // Skip rendering items that require permissions the user doesn't have
               if (item.permission && !hasPermission(item.permission)) {
                 return null;
               }
               
-              // Skip rendering items marked as superuser only if user is not superuser
               if (item.superuserOnly && currentUser?.role !== "superuser") {
                 return null;
               }
@@ -133,7 +130,7 @@ const AuthenticatedLayout = () => {
                     className="w-full justify-start font-bold sidebar-nav-item"
                   >
                     {item.icon}
-                    <span className="ml-2 sidebar-text font-bold" style={{display: 'inline !important', visibility: 'visible !important'}}>{item.name}</span>
+                    <span className="ml-2 sidebar-text font-bold visible">{item.name}</span>
                   </Button>
                 </Link>
               );
