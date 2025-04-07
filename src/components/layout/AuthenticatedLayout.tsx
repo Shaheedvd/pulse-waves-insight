@@ -88,14 +88,14 @@ const AuthenticatedLayout = () => {
       {/* Top Navigation */}
       <header className="sticky top-0 z-10 border-b bg-background">
         <div className="flex h-16 items-center px-4 md:px-6">
-          <Link to="/dashboard" className="flex items-center gap-2 font-semibold text-foreground">
-            <span className="text-primary text-xl sidebar-text">Pulse Point CX</span>
+          <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
+            <span className="text-primary text-xl font-bold sidebar-text">Pulse Point CX</span>
           </Link>
           <div className="ml-auto flex items-center gap-2">
             <div className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              <span className="text-sm font-medium text-foreground sidebar-text">{currentUser?.name}</span>
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+              <span className="text-sm font-bold sidebar-text">{currentUser?.name}</span>
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full sidebar-text">
                 {currentUser?.role === "superuser" 
                   ? "Superuser" 
                   : currentUser?.role.charAt(0).toUpperCase() + currentUser?.role.slice(1)}
@@ -103,7 +103,7 @@ const AuthenticatedLayout = () => {
             </div>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
-              <span className="sr-only">Logout</span>
+              <span className="sr-only sidebar-text">Logout</span>
             </Button>
           </div>
         </div>
@@ -130,10 +130,10 @@ const AuthenticatedLayout = () => {
                 <Link key={item.path} to={item.path}>
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start font-medium"
+                    className="w-full justify-start font-bold sidebar-nav-item"
                   >
                     {item.icon}
-                    <span className="ml-2 text-foreground sidebar-text">{item.name}</span>
+                    <span className="ml-2 sidebar-text font-bold">{item.name}</span>
                   </Button>
                 </Link>
               );
