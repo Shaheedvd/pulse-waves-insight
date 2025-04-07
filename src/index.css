@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -91,57 +90,64 @@
     color: hsl(var(--foreground)) !important;
   }
   
-  /* Global text visibility fixes - very aggressive */
-  span, p, h1, h2, h3, h4, h5, h6, a, button, label, div {
+  /* Global text and icon visibility fixes */
+  button, a, span, p, h1, h2, h3, h4, h5, h6, label, div {
     color: hsl(var(--foreground)) !important;
     opacity: 1 !important;
+    visibility: visible !important;
   }
   
-  /* Force SVG icons to be visible */
+  /* Ensure all SVG icons are visible */
   svg {
     color: currentColor !important;
     fill: currentColor !important;
-  }
-  
-  /* Force menu text visibility */
-  nav a *, nav button *, aside a *, aside button * {
-    color: hsl(var(--foreground)) !important;
+    visibility: visible !important;
+    display: inline-block !important;
     opacity: 1 !important;
   }
   
-  /* Button and link text visibility */
-  button span, button div, a span, a div {
+  /* Force text inside buttons and links to be visible */
+  button *, a * {
     color: currentColor !important;
-    opacity: 1 !important;
-  }
-  
-  /* Force sidebar text */
-  .sidebar-text {
-    color: hsl(var(--foreground)) !important;
-    opacity: 1 !important;
+    visibility: visible !important;
     display: inline !important;
+    opacity: 1 !important;
   }
   
+  /* Force sidebar text and items to be visible */
+  aside *, nav * {
+    color: hsl(var(--foreground)) !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    opacity: 1 !important;
+  }
+  
+  /* Force specific visibility classes */
   .visible {
     visibility: visible !important;
+    opacity: 1 !important;
+    display: inline-block !important;
   }
   
   .block {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .sidebar-text {
+    color: hsl(var(--foreground)) !important;
+    visibility: visible !important;
+    display: inline !important;
+    opacity: 1 !important;
   }
   
   .sidebar-nav-item {
     color: hsl(var(--foreground)) !important;
-    font-weight: bold !important;
-  }
-  
-  /* Force specific sidebar items to display */
-  [data-sidebar] *, 
-  [data-sidebar="menu-button"] *, 
-  [data-sidebar="group-label"] *,
-  [data-sidebar="menu-sub-button"] * {
-    color: hsl(var(--foreground)) !important;
+    visibility: visible !important;
+    display: flex !important;
     opacity: 1 !important;
+    font-weight: bold !important;
   }
 }
 
@@ -185,7 +191,7 @@
   @apply text-sm text-muted-foreground;
 }
 
-/* Global text visibility fixes for UI */
+/* Additional text visibility fixes for UI */
 .sidebar-text,
 aside span,
 nav span,
@@ -196,6 +202,8 @@ nav button {
   @apply text-foreground font-bold !important;
   color: hsl(var(--foreground)) !important;
   opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
 }
 
 /* All buttons should show text with guaranteed visibility */
@@ -204,6 +212,8 @@ a span {
   @apply text-current font-bold !important;
   color: currentColor !important;
   opacity: 1 !important;
+  visibility: visible !important;
+  display: inline !important;
 }
 
 /* Ensure font consistency across the application */
@@ -227,19 +237,13 @@ aside a *,
 aside button * {
   color: hsl(var(--foreground)) !important;
   opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
 }
 
 /* Special fix for Shadcn UI components text visibility */
 [class*="text-"] {
   color: currentColor !important;
-}
-
-/* Text contrast enhancer for light backgrounds */
-[data-theme="light"] [data-sidebar],
-[data-theme="light"] .sidebar-text,
-[data-theme="light"] nav a,
-[data-theme="light"] nav button {
-  text-shadow: 0 0 1px rgba(0,0,0,0.1);
 }
 
 /* Force display of all text elements in sidebars */
@@ -249,5 +253,30 @@ nav button span,
 nav a span {
   display: inline !important;
   opacity: 1 !important;
+  visibility: visible !important;
   color: hsl(var(--foreground)) !important;
+}
+
+/* Fix for date picker popup and dropdown menus */
+.PopoverContent,
+[role="dialog"],
+[role="menu"],
+[role="listbox"] {
+  z-index: 50 !important;
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure calendar is interactive */
+.rdp, 
+.rdp-months,
+.rdp-month,
+.rdp-table,
+.rdp-cell,
+.rdp-button {
+  pointer-events: auto !important;
 }

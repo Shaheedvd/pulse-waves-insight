@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -34,7 +33,6 @@ interface EvaluationSheetProps {
   evaluatorsList: string[];
 }
 
-// Sample evaluation details
 const evaluationSections = [
   {
     name: "External Appearance & Branding",
@@ -88,7 +86,6 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [editedEvaluation, setEditedEvaluation] = useState<any>(null);
 
-  // Set the edited evaluation when the evaluation prop changes
   React.useEffect(() => {
     if (evaluation) {
       setEditedEvaluation({
@@ -157,6 +154,25 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
     setEditedEvaluation({
       ...editedEvaluation,
       evaluator: value
+    });
+  };
+
+  const handleDownloadReport = () => {
+    const blob = new Blob([generateReportContent()], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${evaluation.client}-${evaluation.location}-Evaluation-Report.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Report Downloaded",
+      description: "Evaluation report has been downloaded successfully.",
     });
   };
 
@@ -322,10 +338,8 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
           <div>
             <Button 
               variant="outline" 
-              className="mr-2" 
-              downloadPdf={true}
-              documentTitle={`${evaluation.client} - ${evaluation.location} Evaluation Report`}
-              documentContent={generateReportContent}
+              className="mr-2"
+              onClick={handleDownloadReport}
             >
               <Download className="h-4 w-4 mr-2" /> Download Report
             </Button>
