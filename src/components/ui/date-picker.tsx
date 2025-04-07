@@ -30,7 +30,7 @@ export function DatePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "w-full justify-start text-left font-medium",
             !value && "text-muted-foreground"
           )}
           disabled={disabled}
@@ -47,7 +47,7 @@ export function DatePicker({
           selected={value}
           onSelect={onChange}
           initialFocus
-          className="p-3 pointer-events-auto text-foreground"
+          className="p-3 pointer-events-auto text-foreground font-medium"
         />
       </PopoverContent>
     </Popover>

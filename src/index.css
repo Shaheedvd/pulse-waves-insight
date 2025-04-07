@@ -154,3 +154,33 @@
 .stat-label {
   @apply text-sm text-muted-foreground;
 }
+
+/* Global sidebar and navigation text fixes */
+.sidebar-text,
+aside span,
+nav span,
+aside a, 
+nav a,
+aside button,
+nav button {
+  @apply text-foreground !important;
+}
+
+/* All buttons should show text */
+button span,
+a span {
+  @apply text-current !important;
+}
+
+/* Ensure font consistency across the application */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select {
+  @apply font-sans;
+}
+
+/* Additional text visibility fixes */
+.popover-content,
+.dropdown-content,
+.menu-content {
+  @apply text-foreground bg-popover;
+}
+
