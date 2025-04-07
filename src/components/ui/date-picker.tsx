@@ -30,14 +30,15 @@ export function DatePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-medium sidebar-text",
+            "w-full justify-start text-left font-medium",
             !value && "text-muted-foreground"
           )}
           disabled={disabled}
+          style={{ color: 'inherit !important' }}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          <span className="sidebar-text font-medium">
-            {value ? format(value, "PPP") : <span className="text-muted-foreground sidebar-text">{placeholder}</span>}
+          <span className="font-medium" style={{visibility: 'visible !important', display: 'inline !important'}}>
+            {value ? format(value, "PPP") : <span className="text-muted-foreground" style={{visibility: 'visible !important', display: 'inline !important'}}>{placeholder}</span>}
           </span>
         </Button>
       </PopoverTrigger>

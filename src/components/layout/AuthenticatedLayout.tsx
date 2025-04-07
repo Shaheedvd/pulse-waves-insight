@@ -133,7 +133,7 @@ const AuthenticatedLayout = () => {
                     className="w-full justify-start font-bold sidebar-nav-item"
                   >
                     {item.icon}
-                    <span className="ml-2 sidebar-text font-bold">{item.name}</span>
+                    <span className="ml-2 sidebar-text font-bold" style={{display: 'inline !important', visibility: 'visible !important'}}>{item.name}</span>
                   </Button>
                 </Link>
               );

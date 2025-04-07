@@ -35,7 +35,6 @@
 
     --radius: 0.5rem;
     
-    /* Adding explicit sidebar variables with stronger color definitions */
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 222.2 84% 4.9%;
     --sidebar-border: 214.3 31.8% 91.4%;
@@ -73,7 +72,6 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     
-    /* Adding explicit dark sidebar variables with stronger color definitions */
     --sidebar: 222.2 84% 4.9%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
@@ -90,37 +88,56 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-  }
-  
-  /* Force text visibility in sidebar components with !important */
-  [data-sidebar] {
-    @apply text-foreground !important;
     color: hsl(var(--foreground)) !important;
   }
   
-  /* Force text visibility in buttons and links */
-  button, a {
-    @apply text-current !important;
+  /* Global text visibility fixes - very aggressive */
+  span, p, h1, h2, h3, h4, h5, h6, a, button, label, div {
+    color: hsl(var(--foreground)) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Force SVG icons to be visible */
+  svg {
     color: currentColor !important;
+    fill: currentColor !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
-  /* Force text visibility in navigation */
-  nav a, nav button, .sidebar-nav-item {
-    @apply text-foreground font-bold !important;
+  /* Force menu text visibility */
+  nav a *, nav button *, aside a *, aside button * {
     color: hsl(var(--foreground)) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
-  /* Force text visibility in sidebar groups */
-  [data-sidebar="group-label"], 
-  [data-sidebar="menu-button"],
-  [data-sidebar="menu-sub-button"] {
-    @apply text-foreground !important;
-    color: hsl(var(--foreground)) !important;
+  /* Button and link text visibility */
+  button span, button div, a span, a div {
+    color: currentColor !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
-  /* Text visibility fix for all elements with sidebar-text class */
+  /* Force sidebar text */
   .sidebar-text {
-    @apply text-foreground font-medium !important;
+    color: hsl(var(--foreground)) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline !important;
+  }
+  
+  .sidebar-nav-item {
+    color: hsl(var(--foreground)) !important;
+    font-weight: bold !important;
+  }
+  
+  /* Force specific sidebar items to display */
+  [data-sidebar] *, 
+  [data-sidebar="menu-button"] *, 
+  [data-sidebar="group-label"] *,
+  [data-sidebar="menu-sub-button"] * {
     color: hsl(var(--foreground)) !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -175,19 +192,21 @@ aside a,
 nav a,
 aside button,
 nav button {
-  @apply text-foreground font-medium !important;
+  @apply text-foreground font-bold !important;
   color: hsl(var(--foreground)) !important;
   opacity: 1 !important;
   visibility: visible !important;
+  display: inline !important;
 }
 
 /* All buttons should show text with guaranteed visibility */
 button span,
 a span {
-  @apply text-current font-medium !important;
+  @apply text-current font-bold !important;
   color: currentColor !important;
   opacity: 1 !important;
   visibility: visible !important;
+  display: inline !important;
 }
 
 /* Ensure font consistency across the application */
@@ -212,6 +231,7 @@ aside button * {
   color: hsl(var(--foreground)) !important;
   opacity: 1 !important;
   visibility: visible !important;
+  display: inline-block !important;
 }
 
 /* Special fix for Shadcn UI components text visibility */
@@ -225,4 +245,15 @@ aside button * {
 [data-theme="light"] nav a,
 [data-theme="light"] nav button {
   text-shadow: 0 0 1px rgba(0,0,0,0.1);
+}
+
+/* Force display of all text elements in sidebars */
+aside button span, 
+aside a span, 
+nav button span, 
+nav a span {
+  display: inline !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: hsl(var(--foreground)) !important;
 }
