@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,65 +90,76 @@
     @apply bg-background text-foreground font-sans;
     color: hsl(var(--foreground)) !important;
   }
-  
-  /* Global text and icon visibility fixes */
-  button, a, span, p, h1, h2, h3, h4, h5, h6, label, div {
-    color: hsl(var(--foreground)) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+}
+
+/* UI Element Visibility - Core Rules */
+@layer components {
+  /* Base element visibility */
+  .element-visible {
+    @apply visible opacity-100 !important;
   }
   
-  /* Ensure all SVG icons are visible */
-  svg {
+  /* Text elements */
+  button, a, span, p, h1, h2, h3, h4, h5, h6, label, div {
+    @apply element-visible text-foreground;
+  }
+  
+  /* Icons */
+  svg, .icon {
+    @apply element-visible inline-block;
     color: currentColor !important;
     fill: currentColor !important;
-    visibility: visible !important;
-    display: inline-block !important;
-    opacity: 1 !important;
   }
   
-  /* Force text inside buttons and links to be visible */
+  /* Buttons and interactive elements */
+  button, a, .interactive-element {
+    @apply element-visible inline-flex items-center gap-2 cursor-pointer;
+  }
+  
+  /* Content inside buttons */
   button *, a * {
+    @apply element-visible inline;
     color: currentColor !important;
-    visibility: visible !important;
-    display: inline !important;
-    opacity: 1 !important;
   }
   
-  /* Force sidebar text and items to be visible */
-  aside *, nav * {
+  /* Navigation and sidebar elements */
+  nav *, aside *, .sidebar-nav-item {
+    @apply element-visible;
     color: hsl(var(--foreground)) !important;
-    visibility: visible !important;
-    display: inline-block !important;
-    opacity: 1 !important;
   }
   
-  /* Force specific visibility classes */
+  /* Dropdown and popover components */
+  .PopoverContent,
+  [role="dialog"],
+  [role="menu"],
+  [role="listbox"],
+  .dropdown-content {
+    @apply element-visible bg-popover shadow-md rounded-md z-50;
+    pointer-events: auto !important;
+    border: 1px solid hsl(var(--border)) !important;
+  }
+  
+  /* Calendar and date pickers */
+  .rdp, .rdp-button, .rdp-day, .rdp-month {
+    @apply element-visible pointer-events-auto;
+  }
+}
+
+/* Display utilities */
+@layer utilities {
   .visible {
-    visibility: visible !important;
-    opacity: 1 !important;
+    @apply visible opacity-100 !important;
     display: inline-block !important;
   }
   
   .block {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    @apply visible block w-full !important;
   }
   
   .sidebar-text {
+    @apply visible font-bold !important;
     color: hsl(var(--foreground)) !important;
-    visibility: visible !important;
     display: inline !important;
-    opacity: 1 !important;
-  }
-  
-  .sidebar-nav-item {
-    color: hsl(var(--foreground)) !important;
-    visibility: visible !important;
-    display: flex !important;
-    opacity: 1 !important;
-    font-weight: bold !important;
   }
 }
 
@@ -189,94 +201,4 @@
 
 .stat-label {
   @apply text-sm text-muted-foreground;
-}
-
-/* Additional text visibility fixes for UI */
-.sidebar-text,
-aside span,
-nav span,
-aside a, 
-nav a,
-aside button,
-nav button {
-  @apply text-foreground font-bold !important;
-  color: hsl(var(--foreground)) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: inline-block !important;
-}
-
-/* All buttons should show text with guaranteed visibility */
-button span,
-a span {
-  @apply text-current font-bold !important;
-  color: currentColor !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: inline !important;
-}
-
-/* Ensure font consistency across the application */
-h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select {
-  @apply font-sans;
-}
-
-/* Additional text visibility fixes */
-.popover-content,
-.dropdown-content,
-.menu-content {
-  @apply text-foreground bg-popover;
-}
-
-/* Force menu items to be visible */
-.sidebar-nav-item *,
-[data-sidebar="menu-button"] *,
-nav a *,
-nav button *,
-aside a *,
-aside button * {
-  color: hsl(var(--foreground)) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: inline-block !important;
-}
-
-/* Special fix for Shadcn UI components text visibility */
-[class*="text-"] {
-  color: currentColor !important;
-}
-
-/* Force display of all text elements in sidebars */
-aside button span, 
-aside a span, 
-nav button span, 
-nav a span {
-  display: inline !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  color: hsl(var(--foreground)) !important;
-}
-
-/* Fix for date picker popup and dropdown menus */
-.PopoverContent,
-[role="dialog"],
-[role="menu"],
-[role="listbox"] {
-  z-index: 50 !important;
-  background-color: hsl(var(--popover)) !important;
-  color: hsl(var(--popover-foreground)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  border-radius: 0.5rem !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-  pointer-events: auto !important;
-}
-
-/* Ensure calendar is interactive */
-.rdp, 
-.rdp-months,
-.rdp-month,
-.rdp-table,
-.rdp-cell,
-.rdp-button {
-  pointer-events: auto !important;
 }
