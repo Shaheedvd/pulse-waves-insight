@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Card,
@@ -293,9 +294,27 @@ const Evaluations = () => {
             <Button 
               variant="outline" 
               size="icon" 
-              downloadPdf={true}
-              documentTitle="Evaluations Report"
-              documentContent={generateEvaluationReportContent}
+              onClick={() => {
+                // Create a Blob with the HTML content
+                const blob = new Blob([generateEvaluationReportContent()], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                // Create a download link and trigger the download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Evaluations-Report.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // Clean up by revoking the object URL
+                URL.revokeObjectURL(url);
+                
+                toast({
+                  title: "Report Downloaded",
+                  description: "Evaluations report has been downloaded successfully.",
+                });
+              }}
             >
               <Download className="h-4 w-4" />
             </Button>
