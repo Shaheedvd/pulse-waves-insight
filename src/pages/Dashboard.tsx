@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Card,
@@ -25,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowUpRight, Download, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { downloadAsPdf } from "@/lib/pdf-utils";
+import { generateDashboardPdf } from "@/lib/pdf-utils";
 
 const monthlyScoreData = [
   { month: "Jan", score: 87 },
@@ -79,11 +78,18 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   const handleDownload = () => {
-    downloadAsPdf('Dashboard_Report.pdf', {
+    const dashboardData = {
       date: new Date().toISOString(),
       overallScore: '89%',
-      topCategory: 'Store Cleanliness'
-    });
+      topCategory: 'Store Cleanliness',
+      locationsCovered: '42/50',
+      improvementArea: 'Product Knowledge',
+      monthlyScoreData,
+      categoryScoreData,
+      upcomingEvaluations
+    };
+    
+    generateDashboardPdf(dashboardData);
     
     toast({
       title: "Report Downloaded",
