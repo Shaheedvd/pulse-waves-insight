@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -53,14 +52,15 @@ import {
   Users,
   Search,
   Mail,
-  Printer
+  Printer,
+  FilePdf
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { downloadAsPdf } from "@/lib/pdf-utils";
 
-// Example report types
 type ReportType = "monthly" | "quarterly" | "annual" | "performance" | "custom" | "audit";
 
 interface Report {
@@ -137,7 +137,6 @@ const Reports = () => {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  // Filtered reports based on current user's assignments
   const userReports = filteredReports.filter(report => 
     report.assignedTo === currentUser?.name || report.createdBy === currentUser?.name
   );
@@ -179,20 +178,17 @@ const Reports = () => {
   };
 
   const handlePrintReport = (id: string, name: string) => {
-    // In a real app, this would generate a PDF and open the print dialog
     toast({
       title: "Preparing Print",
       description: `${name} is being prepared for printing`,
     });
     
-    // Simulate print preparation
     setTimeout(() => {
       window.print();
     }, 1000);
   };
 
   const handleEmailReport = (id: string, name: string) => {
-    // In a real app, this would send an email with the report
     toast({
       title: "Email Sent",
       description: `${name} has been emailed to management`,
@@ -200,13 +196,14 @@ const Reports = () => {
   };
 
   const handleDownloadReport = (id: string, name: string) => {
-    // In a real app, this would trigger an actual PDF download
+    const fileName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+    downloadAsPdf(fileName, { id, name });
+    
     toast({
       title: "Generating PDF",
       description: `${name} is being generated as a PDF`,
     });
     
-    // Simulate download delay
     setTimeout(() => {
       toast({
         title: "Download Ready",
@@ -262,7 +259,6 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* Current user report metrics */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -482,7 +478,6 @@ const Reports = () => {
         </CardContent>
       </Card>
 
-      {/* Create Report Dialog */}
       <Dialog open={isCreateReportOpen} onOpenChange={setIsCreateReportOpen}>
         <DialogContent>
           <DialogHeader>
@@ -536,7 +531,6 @@ const Reports = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Generate Report Dialog */}
       <Dialog open={isGenerateReportOpen} onOpenChange={setIsGenerateReportOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>

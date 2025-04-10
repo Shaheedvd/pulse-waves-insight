@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { FilePlus, Search, FileText, Printer, Download, Mail, Filter, Plus, FileCheck, ClockIcon } from "lucide-react";
+import { FilePlus, Search, FileText, Printer, Download, Mail, Filter, Plus, FileCheck, ClockIcon, FilePdf } from "lucide-react";
+import { downloadAsPdf } from "@/lib/pdf-utils";
 
 // Sample invoice data
 const invoices = [
@@ -131,6 +131,8 @@ const InvoiceManagement = () => {
   };
 
   const handleDownloadInvoice = (id) => {
+    const invoiceFileName = `Invoice-${id}.pdf`;
+    downloadAsPdf(invoiceFileName, { id });
     toast({
       title: "Invoice Downloaded",
       description: `Invoice #${id} has been downloaded as PDF`,
