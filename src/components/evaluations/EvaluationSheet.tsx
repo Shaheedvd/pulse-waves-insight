@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -24,7 +25,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, FileText, Save } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface EvaluationSheetProps {
   open: boolean;
@@ -33,6 +33,7 @@ interface EvaluationSheetProps {
   evaluatorsList: string[];
 }
 
+// Sample evaluation details
 const evaluationSections = [
   {
     name: "External Appearance & Branding",
@@ -81,11 +82,11 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
   evaluatorsList
 }) => {
   const { toast } = useToast();
-  const { hasPermission } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [editedEvaluation, setEditedEvaluation] = useState<any>(null);
 
+  // Set the edited evaluation when the evaluation prop changes
   React.useEffect(() => {
     if (evaluation) {
       setEditedEvaluation({
@@ -103,43 +104,11 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
     return acc + (sectionScore / sectionMaxScore) * 100;
   }, 0) / evaluationSections.length;
 
-  const generateReportContent = () => {
-    return `
-      <h1>${evaluation.client} Evaluation Report</h1>
-      <h2>${evaluation.location}</h2>
-      <p><strong>Date:</strong> ${evaluation.date}</p>
-      <p><strong>Evaluator:</strong> ${evaluation.evaluator}</p>
-      <p><strong>Status:</strong> ${evaluation.status}</p>
-      <p><strong>Overall Score:</strong> ${evaluation.score}%</p>
-
-      <h3>Summary</h3>
-      <p>Overall excellent experience with a few minor areas for improvement. The store has good brand alignment and customer flow.</p>
-
-      <h3>Details</h3>
-      ${evaluationSections.map(section => `
-        <div style="margin-top: 20px;">
-          <h4>${section.name}</h4>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Question</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Score</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${section.items.map(item => `
-                <tr>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${item.question}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${item.score}/${item.maxScore}</td>
-                  <td style="border: 1px solid #ddd; padding: 8px;">${item.notes}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `).join('')}
-    `;
+  const handleDownload = () => {
+    toast({
+      title: "Report Downloaded",
+      description: `Evaluation report for ${evaluation.client} has been downloaded.`,
+    });
   };
 
   const handleSave = () => {
@@ -157,33 +126,12 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
     });
   };
 
-  const handleDownloadReport = () => {
-    const blob = new Blob([generateReportContent()], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${evaluation.client}-${evaluation.location}-Evaluation-Report.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Report Downloaded",
-      description: "Evaluation report has been downloaded successfully.",
-    });
-  };
-
   const getScoreBadgeColor = (score: number, maxScore: number) => {
     const percentage = (score / maxScore) * 100;
     if (percentage >= 85) return "bg-green-100 text-green-800";
     if (percentage >= 70) return "bg-yellow-100 text-yellow-800";
     return "bg-red-100 text-red-800";
   };
-
-  const canEdit = hasPermission("canEditEvaluations");
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -318,29 +266,23 @@ const EvaluationSheet: React.FC<EvaluationSheetProps> = ({
 
         <DialogFooter className="flex justify-between items-center">
           <div>
-            {canEdit && (
-              editMode ? (
-                <>
-                  <Button onClick={handleSave} className="mr-2">
-                    <Save className="h-4 w-4 mr-2" /> Save Changes
-                  </Button>
-                  <Button variant="outline" onClick={() => setEditMode(false)}>
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <Button variant="outline" onClick={() => setEditMode(true)}>
-                  Edit Evaluation
+            {editMode ? (
+              <>
+                <Button onClick={handleSave} className="mr-2">
+                  <Save className="h-4 w-4 mr-2" /> Save Changes
                 </Button>
-              )
+                <Button variant="outline" onClick={() => setEditMode(false)}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" onClick={() => setEditMode(true)}>
+                Edit Evaluation
+              </Button>
             )}
           </div>
           <div>
-            <Button 
-              variant="outline" 
-              className="mr-2"
-              onClick={handleDownloadReport}
-            >
+            <Button variant="outline" className="mr-2" onClick={handleDownload}>
               <Download className="h-4 w-4 mr-2" /> Download Report
             </Button>
             <Button variant="outline" onClick={onClose}>

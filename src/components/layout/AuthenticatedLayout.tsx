@@ -89,13 +89,13 @@ const AuthenticatedLayout = () => {
       <header className="sticky top-0 z-10 border-b bg-background">
         <div className="flex h-16 items-center px-4 md:px-6">
           <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-            <span className="text-primary text-xl font-bold sidebar-text">Pulse Point CX</span>
+            <span className="text-primary text-xl">Pulse Point CX</span>
           </Link>
           <div className="ml-auto flex items-center gap-2">
             <div className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              <span className="text-sm font-bold sidebar-text">{currentUser?.name}</span>
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full sidebar-text">
+              <span className="text-sm font-medium">{currentUser?.name}</span>
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                 {currentUser?.role === "superuser" 
                   ? "Superuser" 
                   : currentUser?.role.charAt(0).toUpperCase() + currentUser?.role.slice(1)}
@@ -103,7 +103,7 @@ const AuthenticatedLayout = () => {
             </div>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
-              <span className="sr-only sidebar-text">Logout</span>
+              <span className="sr-only">Logout</span>
             </Button>
           </div>
         </div>
@@ -114,10 +114,12 @@ const AuthenticatedLayout = () => {
         <aside className="hidden border-r bg-muted/40 md:block">
           <nav className="grid gap-2 p-4">
             {navItems.map((item) => {
+              // Skip rendering items that require permissions the user doesn't have
               if (item.permission && !hasPermission(item.permission)) {
                 return null;
               }
               
+              // Skip rendering items marked as superuser only if user is not superuser
               if (item.superuserOnly && currentUser?.role !== "superuser") {
                 return null;
               }
@@ -128,10 +130,10 @@ const AuthenticatedLayout = () => {
                 <Link key={item.path} to={item.path}>
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start font-bold sidebar-nav-item"
+                    className="w-full justify-start"
                   >
                     {item.icon}
-                    <span className="ml-2 sidebar-text font-bold visible">{item.name}</span>
+                    <span className="ml-2">{item.name}</span>
                   </Button>
                 </Link>
               );

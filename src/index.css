@@ -34,13 +34,6 @@
     --ring: 201 60% 27%;
 
     --radius: 0.5rem;
-    
-    --sidebar: 0 0% 100%;
-    --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-accent: 180 100% 25%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-ring: 201 60% 27%;
   }
 
   .dark {
@@ -71,13 +64,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    
-    --sidebar: 222.2 84% 4.9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-accent: 180 100% 25%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-ring: 212.7 26.8% 83.9%;
   }
 }
 
@@ -87,86 +73,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    color: hsl(var(--foreground)) !important;
-  }
-}
-
-/* UI Element Visibility - Core Rules */
-@layer components {
-  /* Base element visibility */
-  .element-visible {
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  /* Text elements */
-  button, a, span, p, h1, h2, h3, h4, h5, h6, label, div {
-    @apply element-visible text-foreground;
-  }
-  
-  /* Icons */
-  svg, .icon {
-    @apply element-visible inline-block;
-    color: currentColor !important;
-    fill: currentColor !important;
-  }
-  
-  /* Buttons and interactive elements */
-  button, a, .interactive-element {
-    @apply element-visible inline-flex items-center gap-2 cursor-pointer;
-  }
-  
-  /* Content inside buttons */
-  button *, a * {
-    @apply element-visible inline;
-    color: currentColor !important;
-  }
-  
-  /* Navigation and sidebar elements */
-  nav *, aside *, .sidebar-nav-item {
-    @apply element-visible;
-    color: hsl(var(--foreground)) !important;
-  }
-  
-  /* Dropdown and popover components */
-  .PopoverContent,
-  [role="dialog"],
-  [role="menu"],
-  [role="listbox"],
-  .dropdown-content {
-    @apply element-visible bg-popover shadow-md rounded-md z-50;
-    pointer-events: auto !important;
-    border: 1px solid hsl(var(--border)) !important;
-  }
-  
-  /* Calendar and date pickers */
-  .rdp, .rdp-button, .rdp-day, .rdp-month {
-    @apply element-visible pointer-events-auto;
-  }
-}
-
-/* Display utilities */
-@layer utilities {
-  .visible {
-    visibility: visible !important;
-    opacity: 1 !important;
-    display: inline-block !important;
-  }
-  
-  .block {
-    visibility: visible !important;
-    opacity: 1 !important;
-    display: block !important;
-    width: 100% !important;
-  }
-  
-  .sidebar-text {
-    visibility: visible !important;
-    opacity: 1 !important;
-    font-weight: bold !important;
-    color: hsl(var(--foreground)) !important;
-    display: inline !important;
+    @apply bg-background text-foreground;
   }
 }
 

@@ -19,7 +19,6 @@ import Financial from "./pages/Financial";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
-import GlobalStyles from "./components/GlobalStyles";
 
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
@@ -30,7 +29,6 @@ const App: React.FC = () => {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
-            <GlobalStyles />
             <Toaster />
             <Sonner />
             <BrowserRouter>

@@ -32,14 +32,13 @@ import {
   Plus,
   Search,
   FileText,
-  FileCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import EvaluationForm from "@/components/evaluations/EvaluationForm";
 import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 
+// Sample evaluation data
 const evaluationsData = [
   {
     id: "EV-2023-1001",
@@ -133,6 +132,7 @@ const evaluationsData = [
   },
 ];
 
+// List of available evaluators
 const evaluatorsList = [
   "John Smith",
   "Sarah Johnson",
@@ -151,13 +151,12 @@ const Evaluations = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isAuditFormOpen, setIsAuditFormOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
-  const { hasPermission } = useAuth();
   const itemsPerPage = 8;
 
+  // Filter evaluations based on search term and status
   const filteredEvaluations = evaluationsData.filter((evaluation) => {
     const matchesSearch =
       evaluation.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -171,6 +170,7 @@ const Evaluations = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Paginate evaluations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEvaluations = filteredEvaluations.slice(
@@ -205,55 +205,20 @@ const Evaluations = () => {
     setIsSheetOpen(true);
   };
 
-  const generateEvaluationReportContent = () => {
-    return `
-      <h1>Evaluations Report</h1>
-      <p>Generated on: ${new Date().toLocaleDateString()}</p>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Client</th>
-            <th>Location</th>
-            <th>Date</th>
-            <th>Evaluator</th>
-            <th>Score</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filteredEvaluations.map(item => `
-            <tr>
-              <td>${item.id}</td>
-              <td>${item.client}</td>
-              <td>${item.location}</td>
-              <td>${item.date}</td>
-              <td>${item.evaluator}</td>
-              <td>${item.status === "Completed" ? item.score + "%" : "-"}</td>
-              <td>${item.status}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
+  const handleDownload = () => {
+    toast({
+      title: "Downloading evaluations",
+      description: "Your file has been downloaded successfully",
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Evaluations</h1>
-        <div className="flex space-x-2">
-          {(hasPermission("canCreateAuditSheets") || hasPermission("canCreateEvaluations")) && (
-            <Button onClick={() => setIsAuditFormOpen(true)}>
-              <FileCheck className="mr-2 h-4 w-4" /> New Audit
-            </Button>
-          )}
-          {hasPermission("canCreateEvaluations") && (
-            <Button onClick={() => setIsFormOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> New Evaluation
-            </Button>
-          )}
-        </div>
+        <Button onClick={() => setIsFormOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> New Evaluation
+        </Button>
       </div>
 
       <Card>
@@ -291,31 +256,7 @@ const Evaluations = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => {
-                // Create a Blob with the HTML content
-                const blob = new Blob([generateEvaluationReportContent()], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                
-                // Create a download link and trigger the download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Evaluations-Report.html';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                // Clean up by revoking the object URL
-                URL.revokeObjectURL(url);
-                
-                toast({
-                  title: "Report Downloaded",
-                  description: "Evaluations report has been downloaded successfully.",
-                });
-              }}
-            >
+            <Button variant="outline" size="icon" onClick={handleDownload}>
               <Download className="h-4 w-4" />
             </Button>
           </div>
@@ -391,6 +332,7 @@ const Evaluations = () => {
             </Table>
           </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between space-x-2 py-4">
               <div className="text-sm text-muted-foreground">
@@ -433,20 +375,14 @@ const Evaluations = () => {
         </CardContent>
       </Card>
 
+      {/* Evaluation Form Dialog */}
       <EvaluationForm 
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         evaluatorsList={evaluatorsList}
-        isAudit={false}
       />
 
-      <EvaluationForm 
-        open={isAuditFormOpen}
-        onClose={() => setIsAuditFormOpen(false)}
-        evaluatorsList={evaluatorsList}
-        isAudit={true}
-      />
-
+      {/* Evaluation Sheet Dialog */}
       <EvaluationSheet
         open={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}

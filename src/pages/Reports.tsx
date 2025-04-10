@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -59,6 +60,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
+// Example report types
 type ReportType = "monthly" | "quarterly" | "annual" | "performance" | "custom" | "audit";
 
 interface Report {
@@ -135,6 +137,7 @@ const Reports = () => {
     return matchesSearch && matchesType && matchesStatus;
   });
 
+  // Filtered reports based on current user's assignments
   const userReports = filteredReports.filter(report => 
     report.assignedTo === currentUser?.name || report.createdBy === currentUser?.name
   );
@@ -176,17 +179,20 @@ const Reports = () => {
   };
 
   const handlePrintReport = (id: string, name: string) => {
+    // In a real app, this would generate a PDF and open the print dialog
     toast({
       title: "Preparing Print",
       description: `${name} is being prepared for printing`,
     });
     
+    // Simulate print preparation
     setTimeout(() => {
       window.print();
     }, 1000);
   };
 
   const handleEmailReport = (id: string, name: string) => {
+    // In a real app, this would send an email with the report
     toast({
       title: "Email Sent",
       description: `${name} has been emailed to management`,
@@ -194,11 +200,13 @@ const Reports = () => {
   };
 
   const handleDownloadReport = (id: string, name: string) => {
+    // In a real app, this would trigger an actual PDF download
     toast({
       title: "Generating PDF",
       description: `${name} is being generated as a PDF`,
     });
     
+    // Simulate download delay
     setTimeout(() => {
       toast({
         title: "Download Ready",
@@ -234,37 +242,6 @@ const Reports = () => {
     scheduled: "bg-blue-100 text-blue-800"
   };
 
-  const generateReportPdfContent = (report) => {
-    return `
-      <h1>${report.name}</h1>
-      <div style="margin-bottom: 20px;">
-        <p><strong>Report ID:</strong> ${report.id}</p>
-        <p><strong>Type:</strong> ${reportTypeLabels[report.type]}</p>
-        <p><strong>Created By:</strong> ${report.createdBy}</p>
-        <p><strong>Date Created:</strong> ${report.dateCreated}</p>
-        ${report.status ? `<p><strong>Status:</strong> ${report.status}</p>` : ''}
-        ${report.assignedTo ? `<p><strong>Assigned To:</strong> ${report.assignedTo}</p>` : ''}
-      </div>
-      
-      <h2>Report Summary</h2>
-      <p>This is a ${reportTypeLabels[report.type]} created by ${report.createdBy} on ${report.dateCreated}.</p>
-      
-      <h2>Key Findings</h2>
-      <ul>
-        <li>Overall score: 85%</li>
-        <li>Areas of excellence: Customer Service, Store Cleanliness</li>
-        <li>Areas for improvement: Product Knowledge, Staff Training</li>
-      </ul>
-      
-      <h2>Recommendations</h2>
-      <ol>
-        <li>Implement regular staff training sessions focusing on product knowledge</li>
-        <li>Review and update store layout to improve customer flow</li>
-        <li>Enhance visual merchandising standards across all locations</li>
-      </ol>
-    `;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -285,6 +262,7 @@ const Reports = () => {
         </div>
       </div>
 
+      {/* Current user report metrics */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -459,9 +437,7 @@ const Reports = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 className="justify-start rounded-none"
-                                downloadPdf={true}
-                                documentTitle={report.name}
-                                documentContent={() => generateReportPdfContent(report)}
+                                onClick={() => handleDownloadReport(report.id, report.name)}
                               >
                                 <Download className="h-4 w-4 mr-2" /> Download PDF
                               </Button>
@@ -469,9 +445,7 @@ const Reports = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 className="justify-start rounded-none"
-                                printable={true}
-                                documentTitle={report.name}
-                                documentContent={() => generateReportPdfContent(report)}
+                                onClick={() => handlePrintReport(report.id, report.name)}
                               >
                                 <Printer className="h-4 w-4 mr-2" /> Print
                               </Button>
@@ -508,6 +482,7 @@ const Reports = () => {
         </CardContent>
       </Card>
 
+      {/* Create Report Dialog */}
       <Dialog open={isCreateReportOpen} onOpenChange={setIsCreateReportOpen}>
         <DialogContent>
           <DialogHeader>
@@ -561,6 +536,7 @@ const Reports = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Generate Report Dialog */}
       <Dialog open={isGenerateReportOpen} onOpenChange={setIsGenerateReportOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>

@@ -1,10 +1,11 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
-import { CalendarRange, Calculator, FileText, ListChecks, CreditCard, ArrowUpDown, Download, Printer } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CalendarRange, Calculator, FileText, ListChecks, CreditCard, ArrowUpDown } from "lucide-react";
 
+// Sample data for the charts
 const revenueData = [
   { month: 'Jan', income: 15500, expenses: 12000 },
   { month: 'Feb', income: 18200, expenses: 13400 },
@@ -29,138 +30,8 @@ const expenseData = [
 ];
 
 const FinancialDashboard = () => {
-  const generateDashboardReport = () => {
-    return `
-      <h1>Financial Dashboard Report</h1>
-      <h2>Pulse Point CX - ${new Date().toLocaleDateString()}</h2>
-      <hr />
-      
-      <h3>Financial Summary</h3>
-      <table>
-        <tr>
-          <th>Metric</th>
-          <th>Value</th>
-          <th>Change</th>
-        </tr>
-        <tr>
-          <td>Total Revenue</td>
-          <td>R 147,000</td>
-          <td>+20.1% from last month</td>
-        </tr>
-        <tr>
-          <td>Total Expenses</td>
-          <td>R 100,000</td>
-          <td>+12.5% from last month</td>
-        </tr>
-        <tr>
-          <td>Pending Invoices</td>
-          <td>12 (R 66,000)</td>
-          <td>-3 from last month</td>
-        </tr>
-        <tr>
-          <td>Profit Margin</td>
-          <td>32%</td>
-          <td>+2.5% from last month</td>
-        </tr>
-      </table>
-      
-      <h3>Revenue Breakdown</h3>
-      <table>
-        <tr>
-          <th>Revenue Source</th>
-          <th>Amount</th>
-          <th>Percentage</th>
-        </tr>
-        <tr>
-          <td>Restaurant Audits</td>
-          <td>R 55,000</td>
-          <td>37.4%</td>
-        </tr>
-        <tr>
-          <td>Forecourt & Shop Audits</td>
-          <td>R 45,000</td>
-          <td>30.6%</td>
-        </tr>
-        <tr>
-          <td>School Audits</td>
-          <td>R 25,000</td>
-          <td>17.0%</td>
-        </tr>
-        <tr>
-          <td>Hotel Audits</td>
-          <td>R 22,000</td>
-          <td>15.0%</td>
-        </tr>
-      </table>
-      
-      <h3>Recent Transactions</h3>
-      <table>
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Type</th>
-        </tr>
-        <tr>
-          <td>2023-06-15</td>
-          <td>Invoice #5591 - QuickMart Audit</td>
-          <td>R 5,500</td>
-          <td>Income</td>
-        </tr>
-        <tr>
-          <td>2023-06-12</td>
-          <td>Evaluator Payment - E. Walker</td>
-          <td>R 2,500</td>
-          <td>Expense</td>
-        </tr>
-        <tr>
-          <td>2023-06-10</td>
-          <td>Invoice #5590 - EcoFuel Forecourt</td>
-          <td>R 5,500</td>
-          <td>Income</td>
-        </tr>
-        <tr>
-          <td>2023-06-05</td>
-          <td>Evaluator Payment - S. Johnson</td>
-          <td>R 2,000</td>
-          <td>Expense</td>
-        </tr>
-        <tr>
-          <td>2023-06-01</td>
-          <td>Invoice #5589 - Central High School</td>
-          <td>R 2,500</td>
-          <td>Income</td>
-        </tr>
-      </table>
-    `;
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Financial Dashboard</h2>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            downloadPdf={true}
-            documentTitle="Financial Dashboard"
-            documentContent={generateDashboardReport}
-          >
-            <Download className="mr-2 h-4 w-4" /> Download Report
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            printable={true}
-            documentTitle="Financial Dashboard"
-            documentContent={generateDashboardReport}
-          >
-            <Printer className="mr-2 h-4 w-4" /> Print Report
-          </Button>
-        </div>
-      </div>
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

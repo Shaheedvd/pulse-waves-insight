@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -110,7 +111,7 @@ const DashboardLayout = () => {
         <div className="flex items-center h-16 px-4 border-b">
           <Activity className="h-6 w-6 text-primary mr-2" />
           {!isCollapsed && (
-            <span className="text-lg font-bold text-foreground sidebar-text visible">Pulse Point CX</span>
+            <span className="text-lg font-semibold">Pulse Point CX</span>
           )}
           {!isMobile && (
             <Button
@@ -132,12 +133,12 @@ const DashboardLayout = () => {
                   variant="ghost"
                   className={`w-full justify-${
                     isCollapsed && !isMobile ? "center" : "start"
-                  } py-2 sidebar-nav-item font-bold`}
+                  } py-2`}
                   onClick={() => handleNavigation(item.path)}
                 >
                   {item.icon}
                   {(!isCollapsed || isMobile) && (
-                    <span className="ml-3 font-bold sidebar-text visible">{item.name}</span>
+                    <span className="ml-3">{item.name}</span>
                   )}
                 </Button>
               </li>
@@ -154,8 +155,8 @@ const DashboardLayout = () => {
             </Avatar>
             {(!isCollapsed || isMobile) && (
               <div className="ml-3">
-                <p className="text-sm font-bold sidebar-text visible block">{currentUser?.name || 'User'}</p>
-                <p className="text-xs text-muted-foreground sidebar-text visible block">
+                <p className="text-sm font-medium">{currentUser?.name || 'User'}</p>
+                <p className="text-xs text-muted-foreground">
                   {currentUser?.email || 'user@example.com'}
                 </p>
               </div>
@@ -169,7 +170,7 @@ const DashboardLayout = () => {
             onClick={handleLogout}
           >
             <LogOut size={20} />
-            {(!isCollapsed || isMobile) && <span className="ml-3 font-bold sidebar-text visible">{currentUser?.name}</span>}
+            {(!isCollapsed || isMobile) && <span className="ml-3">Logout</span>}
           </Button>
         </div>
       </aside>

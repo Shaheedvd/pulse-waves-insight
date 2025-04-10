@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,269 +25,22 @@ const FinancialReports = () => {
     setIsGenerateReportOpen(false);
   };
 
-  const generateIncomeStatementContent = () => {
-    return `
-      <h1>Income Statement</h1>
-      <h2>May 2023 | Generated on June 1, 2023</h2>
-      <hr />
-      
-      <h3>Revenue</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td style="padding-left: 20px;">Restaurant Audits</td>
-            <td style="text-align: right;">R 66,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Forecourt & Shop Audits</td>
-            <td style="text-align: right;">R 55,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">School Audits</td>
-            <td style="text-align: right;">R 20,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Hotel Audits</td>
-            <td style="text-align: right;">R 16,500</td>
-          </tr>
-          <tr style="font-weight: bold;">
-            <td>Total Revenue</td>
-            <td style="text-align: right;">R 157,500</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <h3>Expenses</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td style="padding-left: 20px;">Evaluator Payments</td>
-            <td style="text-align: right;">R 45,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Staff Salaries</td>
-            <td style="text-align: right;">R 65,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Office Rent</td>
-            <td style="text-align: right;">R 12,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Utilities</td>
-            <td style="text-align: right;">R 3,500</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Marketing</td>
-            <td style="text-align: right;">R 5,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Other Expenses</td>
-            <td style="text-align: right;">R 4,500</td>
-          </tr>
-          <tr style="font-weight: bold;">
-            <td>Total Expenses</td>
-            <td style="text-align: right;">R 135,000</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <table>
-        <tbody>
-          <tr style="font-weight: bold; font-size: 18px;">
-            <td>Net Income</td>
-            <td style="text-align: right;">R 22,500</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin-top: 20px;">
-        <h4 style="margin-top: 0;">Notes:</h4>
-        <ul>
-          <li>All figures are before tax calculations</li>
-          <li>Month-over-month revenue increased by 12%</li>
-          <li>Profit margin is currently at 14.3%</li>
-        </ul>
-      </div>
-    `;
+  const handleDownloadReport = (reportName) => {
+    toast({
+      title: "Report Downloaded",
+      description: `${reportName} has been downloaded as PDF`,
+    });
   };
 
-  const generateBalanceSheetContent = () => {
-    return `
-      <h1>Balance Sheet</h1>
-      <h2>As of May 31, 2023 | Generated on June 1, 2023</h2>
-      <hr />
-      
-      <h3>Assets</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td colspan="2" style="font-weight: medium;">Current Assets</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Cash and Cash Equivalents</td>
-            <td style="text-align: right;">R 185,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Accounts Receivable</td>
-            <td style="text-align: right;">R 55,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Prepaid Expenses</td>
-            <td style="text-align: right;">R 12,000</td>
-          </tr>
-          <tr>
-            <td colspan="2" style="font-weight: medium;">Fixed Assets</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Equipment</td>
-            <td style="text-align: right;">R 48,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Furniture and Fixtures</td>
-            <td style="text-align: right;">R 35,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Accumulated Depreciation</td>
-            <td style="text-align: right;">(R 18,000)</td>
-          </tr>
-          <tr style="font-weight: bold;">
-            <td>Total Assets</td>
-            <td style="text-align: right;">R 317,000</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <h3>Liabilities & Equity</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td colspan="2" style="font-weight: medium;">Current Liabilities</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Accounts Payable</td>
-            <td style="text-align: right;">R 28,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Accrued Expenses</td>
-            <td style="text-align: right;">R 15,000</td>
-          </tr>
-          <tr>
-            <td colspan="2" style="font-weight: medium;">Long-term Liabilities</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Business Loan</td>
-            <td style="text-align: right;">R 75,000</td>
-          </tr>
-          <tr>
-            <td colspan="2" style="font-weight: medium;">Equity</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Owner's Capital</td>
-            <td style="text-align: right;">R 150,000</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Retained Earnings</td>
-            <td style="text-align: right;">R 49,000</td>
-          </tr>
-          <tr style="font-weight: bold;">
-            <td>Total Liabilities & Equity</td>
-            <td style="text-align: right;">R 317,000</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  };
-
-  const generateCashFlowContent = () => {
-    return `
-      <h1>Cash Flow Statement</h1>
-      <h2>May 2023 | Generated on June 1, 2023</h2>
-      <hr />
-      
-      <h3>Operating Activities</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td style="padding-left: 20px;">Net Income</td>
-            <td style="text-align: right;">R 22,500</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Depreciation</td>
-            <td style="text-align: right;">R 1,500</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Increase in Accounts Receivable</td>
-            <td style="text-align: right;">(R 8,000)</td>
-          </tr>
-          <tr>
-            <td style="padding-left: 20px;">Increase in Accounts Payable</td>
-            <td style="text-align: right;">R 5,000</td>
-          </tr>
-          <tr style="font-weight: medium;">
-            <td>Net Cash from Operating Activities</td>
-            <td style="text-align: right;">R 21,000</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <h3>Investing Activities</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td style="padding-left: 20px;">Purchase of Equipment</td>
-            <td style="text-align: right;">(R 5,000)</td>
-          </tr>
-          <tr style="font-weight: medium;">
-            <td>Net Cash from Investing Activities</td>
-            <td style="text-align: right;">(R 5,000)</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <h3>Financing Activities</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td style="padding-left: 20px;">Loan Repayment</td>
-            <td style="text-align: right;">(R 3,000)</td>
-          </tr>
-          <tr style="font-weight: medium;">
-            <td>Net Cash from Financing Activities</td>
-            <td style="text-align: right;">(R 3,000)</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <table>
-        <tbody>
-          <tr style="font-weight: medium;">
-            <td>Net Increase in Cash</td>
-            <td style="text-align: right;">R 13,000</td>
-          </tr>
-          <tr>
-            <td>Cash at Beginning of Period</td>
-            <td style="text-align: right;">R 172,000</td>
-          </tr>
-          <tr style="font-weight: bold; font-size: 18px;">
-            <td>Cash at End of Period</td>
-            <td style="text-align: right;">R 185,000</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  };
-
-  const generateReportContent = (reportName) => {
-    switch(reportName) {
-      case "Income Statement":
-        return generateIncomeStatementContent();
-      case "Balance Sheet":
-        return generateBalanceSheetContent();
-      case "Cash Flow Statement":
-        return generateCashFlowContent();
-      default:
-        return `<h1>${reportName}</h1><p>Content for ${reportName}</p>`;
-    }
+  const handlePrintReport = (reportName) => {
+    toast({
+      title: "Printing Report",
+      description: `Preparing ${reportName} for printing`,
+    });
+    // In a real app, this would trigger print functionality
+    setTimeout(() => {
+      window.print();
+    }, 500);
   };
 
   return (
@@ -398,9 +152,7 @@ const FinancialReports = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              printable={true}
-                              documentTitle={report.name}
-                              documentContent={() => generateReportContent(report.type)}
+                              onClick={() => handlePrintReport(report.name)}
                             >
                               <Printer className="h-4 w-4" />
                               <span className="sr-only">Print</span>
@@ -408,9 +160,7 @@ const FinancialReports = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              downloadPdf={true}
-                              documentTitle={report.name}
-                              documentContent={() => generateReportContent(report.type)}
+                              onClick={() => handleDownloadReport(report.name)}
                             >
                               <Download className="h-4 w-4" />
                               <span className="sr-only">Download</span>
@@ -436,23 +186,11 @@ const FinancialReports = () => {
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  printable={true}
-                  documentTitle="Income Statement"
-                  documentContent={generateIncomeStatementContent}
-                >
+                <Button variant="outline" size="sm" onClick={() => handlePrintReport("Income Statement")}>
                   <Printer className="mr-2 h-4 w-4" />
                   Print
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  downloadPdf={true}
-                  documentTitle="Income Statement"
-                  documentContent={generateIncomeStatementContent}
-                >
+                <Button variant="outline" size="sm" onClick={() => handleDownloadReport("Income Statement")}>
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
                 </Button>
@@ -556,23 +294,11 @@ const FinancialReports = () => {
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  printable={true}
-                  documentTitle="Balance Sheet"
-                  documentContent={generateBalanceSheetContent}
-                >
+                <Button variant="outline" size="sm" onClick={() => handlePrintReport("Balance Sheet")}>
                   <Printer className="mr-2 h-4 w-4" />
                   Print
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  downloadPdf={true}
-                  documentTitle="Balance Sheet"
-                  documentContent={generateBalanceSheetContent}
-                >
+                <Button variant="outline" size="sm" onClick={() => handleDownloadReport("Balance Sheet")}>
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
                 </Button>
@@ -677,23 +403,11 @@ const FinancialReports = () => {
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  printable={true}
-                  documentTitle="Cash Flow Statement"
-                  documentContent={generateCashFlowContent}
-                >
+                <Button variant="outline" size="sm" onClick={() => handlePrintReport("Cash Flow Statement")}>
                   <Printer className="mr-2 h-4 w-4" />
                   Print
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  downloadPdf={true}
-                  documentTitle="Cash Flow Statement"
-                  documentContent={generateCashFlowContent}
-                >
+                <Button variant="outline" size="sm" onClick={() => handleDownloadReport("Cash Flow Statement")}>
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
                 </Button>
@@ -783,6 +497,7 @@ const FinancialReports = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Generate Report Dialog */}
       <Dialog open={isGenerateReportOpen} onOpenChange={setIsGenerateReportOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

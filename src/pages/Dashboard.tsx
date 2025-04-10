@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Card,
@@ -21,13 +22,9 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowUpRight, Download, FileText } from "lucide-react";
+import { ArrowUpRight, Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-
-// Define the COLORS constant for the pie chart
-const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#D6BCFA', '#8E9196'];
+import { useToast } from "@/components/ui/use-toast";
 
 // Sample data for charts
 const monthlyScoreData = [
@@ -60,119 +57,41 @@ const upcomingEvaluations = [
     client: "Retail Corp SA",
     location: "Cape Town North",
     date: "2023-07-15",
-    description: "Quarterly store audit for compliance with brand standards and customer service quality assessment.",
-    contact: "John Mabena",
-    contactEmail: "j.mabena@retailcorpsa.co.za",
-    contactPhone: "+27 82 555 1234"
   },
   {
     id: "EV-2023-1012",
     client: "EcoFuel",
     location: "Pretoria East",
     date: "2023-07-18",
-    description: "Monthly forecourt and convenience store audit, focusing on service quality and regulatory compliance.",
-    contact: "Sarah Johnson",
-    contactEmail: "s.johnson@ecofuel.co.za",
-    contactPhone: "+27 83 444 5678"
   },
   {
     id: "EV-2023-1013",
     client: "LuxCafé",
     location: "Johannesburg Central",
     date: "2023-07-22",
-    description: "Food safety and customer experience audit for premium coffee shop chain.",
-    contact: "Michael Ndlovu",
-    contactEmail: "m.ndlovu@luxcafe.co.za",
-    contactPhone: "+27 84 333 9876"
   },
 ];
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const [selectedEvaluation, setSelectedEvaluation] = React.useState<typeof upcomingEvaluations[0] | null>(null);
-  const [detailsDialogOpen, setDetailsDialogOpen] = React.useState(false);
 
-  const generateDashboardReport = () => {
-    return `
-      <h1>Dashboard Report</h1>
-      <h2>Pulse Point CX - ${new Date().toLocaleDateString()}</h2>
-      <hr />
-      <h3>Performance Metrics</h3>
-      <p>Overall CX Score: 89%</p>
-      <p>Locations Evaluated: 42/50 (84% coverage)</p>
-      <p>Top Category: Store Cleanliness (95%)</p>
-      <p>Improvement Area: Product Knowledge (82%)</p>
-      
-      <h3>Upcoming Evaluations</h3>
-      <table>
-        <tr>
-          <th>ID</th>
-          <th>Client</th>
-          <th>Location</th>
-          <th>Date</th>
-        </tr>
-        ${upcomingEvaluations.map(evaluation => `
-          <tr>
-            <td>${evaluation.id}</td>
-            <td>${evaluation.client}</td>
-            <td>${evaluation.location}</td>
-            <td>${evaluation.date}</td>
-          </tr>
-        `).join('')}
-      </table>
-    `;
-  };
-
-  const generateEvaluationDetails = () => {
-    if (!selectedEvaluation) return '';
-    
-    return `
-      <h1>Evaluation Details</h1>
-      <div style="margin-bottom: 20px;">
-        <div><strong>ID:</strong> ${selectedEvaluation.id}</div>
-        <div><strong>Client:</strong> ${selectedEvaluation.client}</div>
-        <div><strong>Location:</strong> ${selectedEvaluation.location}</div>
-        <div><strong>Date:</strong> ${selectedEvaluation.date}</div>
-        <div><strong>Contact Person:</strong> ${selectedEvaluation.contact}</div>
-        <div><strong>Email:</strong> ${selectedEvaluation.contactEmail}</div>
-        <div><strong>Phone:</strong> ${selectedEvaluation.contactPhone}</div>
-      </div>
-      
-      <div>
-        <div><strong>Description:</strong></div>
-        <p>${selectedEvaluation.description}</p>
-      </div>
-    `;
-  };
-
-  const handleViewDetails = (evaluation: typeof upcomingEvaluations[0]) => {
-    setSelectedEvaluation(evaluation);
-    setDetailsDialogOpen(true);
+  const handleDownload = () => {
+    toast({
+      title: "Report Downloaded",
+      description: "Dashboard report has been downloaded successfully",
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            downloadPdf={true}
-            documentTitle="Dashboard Report"
-            documentContent={generateDashboardReport}
-          >
-            <Download className="mr-2 h-4 w-4" /> Download Report
-          </Button>
-          <Button 
-            variant="outline" 
-            printable={true}
-            documentTitle="Dashboard Report"
-            documentContent={generateDashboardReport}
-          >
-            <FileText className="mr-2 h-4 w-4" /> Print Report
-          </Button>
-        </div>
+        <Button variant="outline" onClick={handleDownload}>
+          <Download className="mr-2 h-4 w-4" /> Download Report
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -350,12 +269,8 @@ const Dashboard = () => {
                   <div className="text-sm text-muted-foreground">
                     {evaluation.date}
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleViewDetails(evaluation)}
-                  >
-                    <FileText className="h-4 w-4 mr-1" /> View Details
+                  <Button variant="outline" size="sm">
+                    View Details
                   </Button>
                 </div>
               </div>
@@ -363,71 +278,6 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Evaluation Details</DialogTitle>
-            <DialogDescription>
-              Information about the upcoming evaluation
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedEvaluation && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="font-semibold">ID:</div>
-                <div>{selectedEvaluation.id}</div>
-                
-                <div className="font-semibold">Client:</div>
-                <div>{selectedEvaluation.client}</div>
-                
-                <div className="font-semibold">Location:</div>
-                <div>{selectedEvaluation.location}</div>
-                
-                <div className="font-semibold">Date:</div>
-                <div>{selectedEvaluation.date}</div>
-                
-                <div className="font-semibold">Contact Person:</div>
-                <div>{selectedEvaluation.contact}</div>
-                
-                <div className="font-semibold">Email:</div>
-                <div>{selectedEvaluation.contactEmail}</div>
-                
-                <div className="font-semibold">Phone:</div>
-                <div>{selectedEvaluation.contactPhone}</div>
-              </div>
-              
-              <div>
-                <div className="font-semibold mb-1">Description:</div>
-                <p className="text-sm text-muted-foreground">
-                  {selectedEvaluation.description}
-                </p>
-              </div>
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
-                  Close
-                </Button>
-                <Button
-                  downloadPdf={true}
-                  documentTitle={`Evaluation Details - ${selectedEvaluation.id}`}
-                  documentContent={generateEvaluationDetails}
-                >
-                  <Download className="mr-2 h-4 w-4" /> Download
-                </Button>
-                <Button
-                  printable={true}
-                  documentTitle={`Evaluation Details - ${selectedEvaluation.id}`}
-                  documentContent={generateEvaluationDetails}
-                >
-                  <FileText className="mr-2 h-4 w-4" /> Print
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
