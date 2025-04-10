@@ -96,7 +96,8 @@
 @layer components {
   /* Base element visibility */
   .element-visible {
-    @apply visible opacity-100 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Text elements */
@@ -148,16 +149,22 @@
 /* Display utilities */
 @layer utilities {
   .visible {
-    @apply visible opacity-100 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     display: inline-block !important;
   }
   
   .block {
-    @apply visible block w-full !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    width: 100% !important;
   }
   
   .sidebar-text {
-    @apply visible font-bold !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-weight: bold !important;
     color: hsl(var(--foreground)) !important;
     display: inline !important;
   }
