@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Card,
@@ -21,7 +22,7 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowUpRight, Download, FilePdf } from "lucide-react";
+import { ArrowUpRight, Download, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { downloadAsPdf } from "@/lib/pdf-utils";

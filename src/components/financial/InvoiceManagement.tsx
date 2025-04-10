@@ -1,173 +1,156 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { FilePlus, Search, FileText, Printer, Download, Mail, Filter, Plus, FileCheck, ClockIcon, FilePdf } from "lucide-react";
+import { Download, FileText, Filter, Plus, Printer, Search, Trash } from "lucide-react";
 import { downloadAsPdf } from "@/lib/pdf-utils";
-
-// Sample invoice data
-const invoices = [
-  { 
-    id: "5590", 
-    client: "QuickMart Cape Town", 
-    date: "2023-06-15", 
-    amount: "R 5,500", 
-    status: "paid", 
-    type: "Restaurant Audit",
-    contactPerson: "John Smith",
-    paymentDetails: {
-      method: "EFT",
-      reference: "QM15062023",
-      datePaid: "2023-06-20"
-    }
-  },
-  { 
-    id: "5589", 
-    client: "EcoFuel Johannesburg", 
-    date: "2023-06-12", 
-    amount: "R 5,500", 
-    status: "pending", 
-    type: "Forecourt & Shop Audit",
-    contactPerson: "Sarah Johnson",
-    paymentDetails: null
-  },
-  { 
-    id: "5588", 
-    client: "Central High School", 
-    date: "2023-06-10", 
-    amount: "R 2,500", 
-    status: "overdue", 
-    type: "School Audit",
-    contactPerson: "Michael Brown",
-    paymentDetails: null
-  },
-  { 
-    id: "5587", 
-    client: "LuxCafé Sandton", 
-    date: "2023-06-05", 
-    amount: "R 5,500", 
-    status: "paid", 
-    type: "Restaurant Audit",
-    contactPerson: "David Miller",
-    paymentDetails: {
-      method: "EFT",
-      reference: "LC05062023",
-      datePaid: "2023-06-08"
-    }
-  },
-  { 
-    id: "5586", 
-    client: "HealthPharm Durban", 
-    date: "2023-06-01", 
-    amount: "R 5,500", 
-    status: "paid", 
-    type: "Retail Audit",
-    contactPerson: "Emily Wilson",
-    paymentDetails: {
-      method: "EFT",
-      reference: "HP03062023",
-      datePaid: "2023-06-04"
-    }
-  },
-];
 
 const InvoiceManagement = () => {
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [isViewInvoiceOpen, setIsViewInvoiceOpen] = useState(false);
-  const [isMarkAsPaidOpen, setIsMarkAsPaidOpen] = useState(false);
-  const [paymentReference, setPaymentReference] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([]);
+  
+  const invoices = [
+    {
+      id: "INV-2023-001",
+      client: "Retail Corp SA",
+      amount: "R 12,500.00",
+      date: "2023-05-15",
+      dueDate: "2023-06-15",
+      status: "paid"
+    },
+    {
+      id: "INV-2023-002",
+      client: "EcoFuel",
+      amount: "R 8,750.00",
+      date: "2023-05-20",
+      dueDate: "2023-06-20",
+      status: "pending"
+    },
+    {
+      id: "INV-2023-003",
+      client: "LuxCafé",
+      amount: "R 5,200.00",
+      date: "2023-05-25",
+      dueDate: "2023-06-25",
+      status: "overdue"
+    },
+    {
+      id: "INV-2023-004",
+      client: "QuickMart",
+      amount: "R 9,800.00",
+      date: "2023-06-01",
+      dueDate: "2023-07-01",
+      status: "pending"
+    },
+    {
+      id: "INV-2023-005",
+      client: "HealthPharm",
+      amount: "R 6,300.00",
+      date: "2023-06-05",
+      dueDate: "2023-07-05",
+      status: "paid"
+    }
+  ];
 
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          invoice.id.includes(searchTerm);
-    const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
+    const matchesSearch = invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          invoice.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "all" || invoice.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
   const handleCreateInvoice = () => {
     toast({
       title: "Invoice Created",
-      description: "Invoice #5591 has been created successfully",
+      description: "New invoice has been created successfully",
     });
     setIsCreateInvoiceOpen(false);
   };
 
-  const handleMarkAsPaid = () => {
-    if (!paymentReference) {
+  const handleDownloadInvoice = (id: string) => {
+    const invoice = invoices.find(inv => inv.id === id);
+    if (invoice) {
+      downloadAsPdf(`${invoice.id}_${invoice.client.replace(/\s+/g, '_')}.pdf`);
       toast({
-        title: "Payment Reference Required",
-        description: "Please enter the EFT payment reference number",
-        variant: "destructive",
+        title: "Invoice Downloaded",
+        description: `Invoice ${id} has been downloaded as PDF`,
       });
-      return;
     }
-    
-    toast({
-      title: "Invoice Marked as Paid",
-      description: `Invoice #${selectedInvoice?.id} has been marked as paid and archived`,
-    });
-    setIsMarkAsPaidOpen(false);
-    setPaymentReference("");
   };
 
-  const viewInvoice = (invoice) => {
-    setSelectedInvoice(invoice);
-    setIsViewInvoiceOpen(true);
-  };
-
-  const openMarkAsPaid = (invoice) => {
-    setSelectedInvoice(invoice);
-    setIsMarkAsPaidOpen(true);
-  };
-
-  const handleDownloadInvoice = (id) => {
-    const invoiceFileName = `Invoice-${id}.pdf`;
-    downloadAsPdf(invoiceFileName, { id });
-    toast({
-      title: "Invoice Downloaded",
-      description: `Invoice #${id} has been downloaded as PDF`,
-    });
-  };
-
-  const handlePrintInvoice = (id) => {
+  const handlePrintInvoice = (id: string) => {
     toast({
       title: "Printing Invoice",
-      description: `Preparing Invoice #${id} for printing`,
+      description: `Preparing invoice ${id} for printing`,
     });
-    // In a real app, this would trigger print functionality
     setTimeout(() => {
       window.print();
     }, 500);
   };
 
-  const handleEmailInvoice = (id) => {
+  const handleDeleteInvoice = (id: string) => {
     toast({
-      title: "Invoice Emailed",
-      description: `Invoice #${id} has been emailed to the client`,
+      title: "Invoice Deleted",
+      description: `Invoice ${id} has been deleted`,
     });
+    // In a real app, you would remove the invoice from the state/database
   };
 
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case "paid":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "overdue":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const handleBulkAction = (action: string) => {
+    if (selectedInvoices.length === 0) {
+      toast({
+        title: "No Invoices Selected",
+        description: "Please select at least one invoice",
+        variant: "destructive",
+      });
+      return;
     }
+
+    if (action === "download") {
+      toast({
+        title: "Bulk Download",
+        description: `${selectedInvoices.length} invoices are being prepared for download`,
+      });
+      // In a real app, you would trigger downloads for all selected invoices
+    } else if (action === "delete") {
+      toast({
+        title: "Bulk Delete",
+        description: `${selectedInvoices.length} invoices have been deleted`,
+      });
+      setSelectedInvoices([]);
+      // In a real app, you would remove the invoices from the state/database
+    }
+  };
+
+  const toggleInvoiceSelection = (id: string) => {
+    setSelectedInvoices(prev => 
+      prev.includes(id) 
+        ? prev.filter(invId => invId !== id)
+        : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedInvoices.length === filteredInvoices.length) {
+      setSelectedInvoices([]);
+    } else {
+      setSelectedInvoices(filteredInvoices.map(inv => inv.id));
+    }
+  };
+
+  const statusColors = {
+    paid: "bg-green-100 text-green-800",
+    pending: "bg-yellow-100 text-yellow-800",
+    overdue: "bg-red-100 text-red-800"
   };
 
   return (
@@ -175,7 +158,7 @@ const InvoiceManagement = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Invoice Management</h2>
         <Button onClick={() => setIsCreateInvoiceOpen(true)}>
-          <FilePlus className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 h-4 w-4" />
           Create Invoice
         </Button>
       </div>
@@ -194,15 +177,15 @@ const InvoiceManagement = () => {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search by client or invoice #..."
+                  placeholder="Search invoices..."
                   className="pl-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
+                value={filterStatus}
+                onValueChange={setFilterStatus}
               >
                 <SelectTrigger className="w-[180px]">
                   <div className="flex items-center">
@@ -218,16 +201,47 @@ const InvoiceManagement = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleBulkAction("download")}
+                disabled={selectedInvoices.length === 0}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download Selected
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleBulkAction("delete")}
+                disabled={selectedInvoices.length === 0}
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                Delete Selected
+              </Button>
+            </div>
           </div>
 
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300"
+                        checked={selectedInvoices.length === filteredInvoices.length && filteredInvoices.length > 0}
+                        onChange={toggleSelectAll}
+                      />
+                    </div>
+                  </TableHead>
                   <TableHead>Invoice #</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Date</TableHead>
                   <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Due Date</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -235,32 +249,33 @@ const InvoiceManagement = () => {
               <TableBody>
                 {filteredInvoices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      No invoices found matching your search criteria
+                    <TableCell colSpan={8} className="h-24 text-center">
+                      No invoices found.
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
-                      <TableCell className="font-medium">#{invoice.id}</TableCell>
-                      <TableCell>{invoice.client}</TableCell>
-                      <TableCell>{invoice.date}</TableCell>
-                      <TableCell>{invoice.amount}</TableCell>
                       <TableCell>
-                        <span className={`inline-block rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeClass(invoice.status)}`}>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300"
+                          checked={selectedInvoices.includes(invoice.id)}
+                          onChange={() => toggleInvoiceSelection(invoice.id)}
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{invoice.id}</TableCell>
+                      <TableCell>{invoice.client}</TableCell>
+                      <TableCell>{invoice.amount}</TableCell>
+                      <TableCell>{invoice.date}</TableCell>
+                      <TableCell>{invoice.dueDate}</TableCell>
+                      <TableCell>
+                        <span className={`inline-block rounded-full px-2 py-1 text-xs font-semibold ${statusColors[invoice.status as keyof typeof statusColors]}`}>
                           {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => viewInvoice(invoice)}
-                          >
-                            <FileText className="h-4 w-4" />
-                            <span className="sr-only">View</span>
-                          </Button>
+                        <div className="flex justify-end space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
@@ -269,16 +284,22 @@ const InvoiceManagement = () => {
                             <Download className="h-4 w-4" />
                             <span className="sr-only">Download</span>
                           </Button>
-                          {invoice.status !== "paid" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openMarkAsPaid(invoice)}
-                            >
-                              <FileCheck className="h-4 w-4" />
-                              <span className="sr-only">Mark as Paid</span>
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePrintInvoice(invoice.id)}
+                          >
+                            <Printer className="h-4 w-4" />
+                            <span className="sr-only">Print</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteInvoice(invoice.id)}
+                          >
+                            <Trash className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -290,85 +311,51 @@ const InvoiceManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Create Invoice Dialog */}
       <Dialog open={isCreateInvoiceOpen} onOpenChange={setIsCreateInvoiceOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Create New Invoice</DialogTitle>
             <DialogDescription>
-              Generate a new invoice for a client
+              Create a new invoice for a client
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-6 py-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="invoice-number">Invoice Number</Label>
-                <Input id="invoice-number" defaultValue="5591" readOnly className="bg-muted" />
-              </div>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="client">Client</Label>
+              <Select>
+                <SelectTrigger id="client">
+                  <SelectValue placeholder="Select client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="retail-corp">Retail Corp SA</SelectItem>
+                  <SelectItem value="ecofuel">EcoFuel</SelectItem>
+                  <SelectItem value="luxcafe">LuxCafé</SelectItem>
+                  <SelectItem value="quickmart">QuickMart</SelectItem>
+                  <SelectItem value="healthpharm">HealthPharm</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="invoice-date">Invoice Date</Label>
-                <Input id="invoice-date" type="date" defaultValue={new Date().toISOString().split('T')[0]} />
-              </div>
-            </div>
-            
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="client">Client</Label>
-                <Select defaultValue="">
-                  <SelectTrigger id="client">
-                    <SelectValue placeholder="Select client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="QuickMart">QuickMart Cape Town</SelectItem>
-                    <SelectItem value="EcoFuel">EcoFuel Johannesburg</SelectItem>
-                    <SelectItem value="LuxCafe">LuxCafé Sandton</SelectItem>
-                    <SelectItem value="FreshGrocer">FreshGrocer Pretoria</SelectItem>
-                    <SelectItem value="HealthPharm">HealthPharm Durban</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input id="invoice-date" type="date" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contact-person">Contact Person</Label>
-                <Input id="contact-person" placeholder="Contact person name" />
-              </div>
-            </div>
-            
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="service-type">Service Type</Label>
-                <Select defaultValue="">
-                  <SelectTrigger id="service-type">
-                    <SelectValue placeholder="Select service type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="restaurant">Restaurant Audit (R5,500)</SelectItem>
-                    <SelectItem value="forecourt">Forecourt & Shop Audit (R5,500)</SelectItem>
-                    <SelectItem value="hotel">Hotel Audit (R5,500)</SelectItem>
-                    <SelectItem value="school">School Audit (R2,500)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount (excl. VAT)</Label>
-                <Input id="amount" defaultValue="R 5,500" readOnly className="bg-muted" />
-              </div>
-            </div>
-            
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="vat-rate">VAT Rate</Label>
-                <Input id="vat-rate" defaultValue="15.5%" readOnly className="bg-muted" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="total-amount">Total Amount (incl. VAT)</Label>
-                <Input id="total-amount" defaultValue="R 6,352.50" readOnly className="bg-muted" />
+                <Label htmlFor="due-date">Due Date</Label>
+                <Input id="due-date" type="date" />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="notes">Additional Notes</Label>
-              <Input id="notes" placeholder="Any additional information" />
+              <Label htmlFor="amount">Amount (ZAR)</Label>
+              <Input id="amount" type="number" placeholder="0.00" />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" placeholder="Invoice description" />
             </div>
           </div>
           
@@ -378,171 +365,6 @@ const InvoiceManagement = () => {
             </Button>
             <Button onClick={handleCreateInvoice}>
               Create Invoice
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* View Invoice Dialog */}
-      <Dialog open={isViewInvoiceOpen} onOpenChange={setIsViewInvoiceOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Invoice #{selectedInvoice?.id}</DialogTitle>
-            <DialogDescription>
-              {selectedInvoice?.client} - {selectedInvoice?.date}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-6">
-            <div className="bg-muted p-6 rounded-md space-y-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-bold">Pulse Point CX</h3>
-                  <p className="text-sm text-muted-foreground">123 Main Street</p>
-                  <p className="text-sm text-muted-foreground">Cape Town, 8001</p>
-                  <p className="text-sm text-muted-foreground">South Africa</p>
-                  <p className="text-sm text-muted-foreground">info@pulsepointcx.com</p>
-                </div>
-                <div className="text-right">
-                  <h3 className="text-lg font-bold">INVOICE</h3>
-                  <p className="text-sm text-muted-foreground">Invoice #: {selectedInvoice?.id}</p>
-                  <p className="text-sm text-muted-foreground">Date: {selectedInvoice?.date}</p>
-                  <p className={`text-sm font-medium mt-2 rounded-full px-2 py-1 inline-block ${getStatusBadgeClass(selectedInvoice?.status)}`}>
-                    {selectedInvoice?.status?.charAt(0).toUpperCase() + selectedInvoice?.status?.slice(1)}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="border-t border-b py-4">
-                <h4 className="font-medium mb-2">Bill To:</h4>
-                <p className="text-sm">{selectedInvoice?.client}</p>
-                <p className="text-sm">Attn: {selectedInvoice?.contactPerson}</p>
-              </div>
-              
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>{selectedInvoice?.type}</TableCell>
-                    <TableCell className="text-right">{selectedInvoice?.amount}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>VAT (15.5%)</TableCell>
-                    <TableCell className="text-right">R 852.50</TableCell>
-                  </TableRow>
-                </TableBody>
-                <TableBody className="border-t">
-                  <TableRow>
-                    <TableCell className="font-bold">Total</TableCell>
-                    <TableCell className="text-right font-bold">R 6,352.50</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium">Payment Information:</h4>
-                <p className="text-sm">Bank: South African Bank</p>
-                <p className="text-sm">Account Name: Pulse Point CX</p>
-                <p className="text-sm">Account Number: 123456789</p>
-                <p className="text-sm">Reference: Invoice #{selectedInvoice?.id}</p>
-              </div>
-              
-              {selectedInvoice?.paymentDetails && (
-                <div className="bg-green-50 p-4 rounded-md border border-green-200">
-                  <h4 className="font-medium text-green-800">Payment Received</h4>
-                  <p className="text-sm text-green-700">Method: {selectedInvoice.paymentDetails.method}</p>
-                  <p className="text-sm text-green-700">Reference: {selectedInvoice.paymentDetails.reference}</p>
-                  <p className="text-sm text-green-700">Date: {selectedInvoice.paymentDetails.datePaid}</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setIsViewInvoiceOpen(false)}>
-                Close
-              </Button>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleEmailInvoice(selectedInvoice?.id)}
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  Email
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handlePrintInvoice(selectedInvoice?.id)}
-                >
-                  <Printer className="mr-2 h-4 w-4" />
-                  Print
-                </Button>
-                <Button 
-                  onClick={() => handleDownloadInvoice(selectedInvoice?.id)}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Mark as Paid Dialog */}
-      <Dialog open={isMarkAsPaidOpen} onOpenChange={setIsMarkAsPaidOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mark Invoice as Paid</DialogTitle>
-            <DialogDescription>
-              Record payment for Invoice #{selectedInvoice?.id} - {selectedInvoice?.client}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="payment-amount">Payment Amount</Label>
-              <Input id="payment-amount" defaultValue="R 6,352.50" readOnly className="bg-muted" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="payment-method">Payment Method</Label>
-              <Select defaultValue="EFT">
-                <SelectTrigger id="payment-method">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EFT">EFT (Electronic Funds Transfer)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="payment-reference">Payment Reference</Label>
-              <Input 
-                id="payment-reference" 
-                placeholder="Enter EFT reference number" 
-                value={paymentReference}
-                onChange={(e) => setPaymentReference(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="payment-date">Payment Date</Label>
-              <Input id="payment-date" type="date" defaultValue={new Date().toISOString().split('T')[0]} />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMarkAsPaidOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleMarkAsPaid}>
-              Confirm Payment
             </Button>
           </DialogFooter>
         </DialogContent>
