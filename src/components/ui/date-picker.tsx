@@ -36,7 +36,7 @@ export function DatePicker({
           disabled={disabled}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          <span className="font-medium visible">
+          <span className="font-medium" style={{ visibility: 'visible', opacity: 1 }}>
             {value ? format(value, "PPP") : <span className="text-muted-foreground">{placeholder}</span>}
           </span>
         </Button>
