@@ -195,6 +195,38 @@ const Reports = () => {
   };
 
   const handleDownloadReport = (id: string, name: string) => {
+    const report = reports.find(r => r.id === id);
+    
+    if (!report) {
+      toast({
+        title: "Error",
+        description: "Report not found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const reportData = {
+      id: report.id,
+      name: report.name,
+      type: report.type,
+      createdBy: report.createdBy,
+      dateCreated: report.dateCreated,
+      status: report.status || "N/A",
+      assignedTo: report.assignedTo || "Unassigned",
+      details: {
+        type: reportTypeLabels[report.type as ReportType],
+        createdDate: report.dateCreated,
+        lastModified: new Date().toLocaleDateString(),
+      },
+      statistics: {
+        completedAudits: reports.filter(r => r.status === "completed").length,
+        pendingAudits: reports.filter(r => r.status === "pending").length,
+        scheduledAudits: reports.filter(r => r.status === "scheduled").length,
+        averageScore: "84%",
+      }
+    };
+    
     const fileName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
     downloadAsPdf(fileName, { id, name });
     

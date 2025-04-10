@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -54,15 +53,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         child.type === Download
       ));
 
-    // Replace Download icon with FileText if it's a download button
-    const modifiedChildren = isDownloadButton 
-      ? React.Children.map(children, child => {
-          if (typeof child === 'object' && child && 'type' in child && child.type === Download) {
-            return <FileText className={child.props.className || ''} />;
-          }
-          return child;
-        })
-      : children;
+    // Keep Download icon as is - don't replace with FileText
+    const modifiedChildren = children;
 
     return (
       <Comp

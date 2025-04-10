@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Card,
@@ -78,6 +79,7 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   const handleDownload = () => {
+    // Create a comprehensive data object with all dashboard information
     const dashboardData = {
       date: new Date().toISOString(),
       overallScore: '89%',
@@ -85,8 +87,28 @@ const Dashboard = () => {
       locationsCovered: '42/50',
       improvementArea: 'Product Knowledge',
       monthlyScoreData,
+      quarterlyScoreData,
       categoryScoreData,
-      upcomingEvaluations
+      upcomingEvaluations,
+      metrics: {
+        overallScore: {
+          value: '89%',
+          change: '+2.5%',
+          trend: 'up'
+        },
+        locationsEvaluated: {
+          value: '42/50',
+          coverage: '84%'
+        },
+        topCategory: {
+          name: 'Store Cleanliness',
+          score: '95%'
+        },
+        improvementArea: {
+          name: 'Product Knowledge',
+          score: '82%'
+        }
+      }
     };
     
     generateDashboardPdf(dashboardData);
