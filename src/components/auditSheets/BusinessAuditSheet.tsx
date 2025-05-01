@@ -28,7 +28,7 @@ const BusinessAuditSheet: React.FC<BusinessAuditSheetProps> = ({ data }) => {
   const { toast } = useToast();
 
   const handleDownloadAudit = () => {
-    // Create a comprehensive audit data object
+    // Create a comprehensive audit data object with all visible data
     const auditData = {
       name: data.name || "Business Audit",
       description: data.description || "",
