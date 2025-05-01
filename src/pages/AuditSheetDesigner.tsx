@@ -740,14 +740,14 @@ const AuditSheetDesigner = () => {
                                 />
                               </div>
                               <Select
-                                value={selectedCategory || ""}
-                                onValueChange={(value) => setSelectedCategory(value || null)}
+                                value={selectedCategory || "all"}
+                                onValueChange={(value) => setSelectedCategory(value === "all" ? null : value)}
                               >
                                 <SelectTrigger className="w-[180px]">
                                   <SelectValue placeholder="Category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="">All Categories</SelectItem>
+                                  <SelectItem value="all">All Categories</SelectItem>
                                   {Object.keys(predefinedQuestions).map((category) => (
                                     <SelectItem key={category} value={category}>
                                       {category}
@@ -993,8 +993,8 @@ const AuditSheetDesigner = () => {
                                   
                                   <div className="mt-4 space-y-4">
                                     <Select
-                                      value={selectedCategory || ""}
-                                      onValueChange={(value) => setSelectedCategory(value || null)}
+                                      value={selectedCategory || "none"}
+                                      onValueChange={(value) => setSelectedCategory(value === "none" ? null : value)}
                                     >
                                       <SelectTrigger>
                                         <SelectValue placeholder="Select a category" />
