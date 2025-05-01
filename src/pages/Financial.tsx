@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import FinancialDashboard from "@/components/financial/FinancialDashboard";
 import InvoiceManagement from "@/components/financial/InvoiceManagement";
 import FinancialReports from "@/components/financial/FinancialReports";
+import ExpenseManagement from "@/components/financial/ExpenseManagement";
 
 const Financial = () => {
   const { currentUser, hasPermission } = useAuth();
@@ -42,9 +43,10 @@ const Financial = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
+          <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
@@ -54,6 +56,10 @@ const Financial = () => {
 
         <TabsContent value="invoices" className="space-y-4">
           <InvoiceManagement />
+        </TabsContent>
+        
+        <TabsContent value="expenses" className="space-y-4">
+          <ExpenseManagement />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">

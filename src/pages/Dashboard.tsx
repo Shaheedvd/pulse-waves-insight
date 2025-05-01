@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { generateDashboardPdf } from "@/lib/pdf-utils";
 
+// Updated data for Pulse Point CX
 const monthlyScoreData = [
   { month: "Jan", score: 87 },
   { month: "Feb", score: 82 },
@@ -43,6 +44,7 @@ const quarterlyScoreData = [
   { quarter: "Q4", score: 88 },
 ];
 
+// Updated category score data with CX focused categories
 const categoryScoreData = [
   { name: "Customer Service", value: 92 },
   { name: "Staff Appearance", value: 88 },
@@ -72,11 +74,21 @@ const upcomingEvaluations = [
   },
 ];
 
+// Pulse Point CX metrics
+const pulsePointCXData = {
+  clientsScored: 18,
+  locationsEvaluated: 42,
+  auditsFilled: 156,
+  evaluationsCompleted: 132,
+  averageScore: 89
+};
+
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
+  const [timeFrame, setTimeFrame] = useState("month");
 
   const handleDownload = () => {
     // Create a comprehensive data object with all dashboard information
@@ -108,7 +120,8 @@ const Dashboard = () => {
           name: 'Product Knowledge',
           score: '82%'
         }
-      }
+      },
+      pulsePointCX: pulsePointCXData
     };
     
     generateDashboardPdf(dashboardData);
@@ -122,13 +135,13 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Pulse Point CX Dashboard</h1>
         <Button variant="outline" onClick={handleDownload}>
           <Download className="mr-2 h-4 w-4" /> Download Report
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -149,37 +162,52 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Locations Evaluated
+              Clients Scored
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42/50</div>
+            <div className="text-2xl font-bold">{pulsePointCXData.clientsScored}</div>
             <p className="text-xs text-muted-foreground">
-              84% coverage this quarter
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Top Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Store Cleanliness</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-500">95%</span> average score
+              Active client evaluations
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Improvement Area
+              Locations Evaluated
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Product Knowledge</div>
+            <div className="text-2xl font-bold">42/50</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-yellow-500">82%</span> average score
+              84% coverage this period
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Audits Filled
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pulsePointCXData.auditsFilled}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-500">+12%</span> from last {timeFrame}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Evaluations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pulsePointCXData.evaluationsCompleted}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-500">+8%</span> from last {timeFrame}
             </p>
           </CardContent>
         </Card>
@@ -187,58 +215,50 @@ const Dashboard = () => {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Trend Analysis</CardTitle>
+          <CardHeader className="flex justify-between">
+            <div>
+              <CardTitle>CX Score Trend Analysis</CardTitle>
+              <CardDescription>Performance over time</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant={timeFrame === "month" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTimeFrame("month")}
+              >
+                Monthly
+              </Button>
+              <Button 
+                variant={timeFrame === "quarter" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTimeFrame("quarter")}
+              >
+                Quarterly
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="pl-2">
-            <Tabs defaultValue="monthly">
-              <TabsList>
-                <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                <TabsTrigger value="quarterly">Quarterly</TabsTrigger>
-              </TabsList>
-              <TabsContent value="monthly" className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={monthlyScoreData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[50, 100]} />
-                    <Tooltip
-                      formatter={(value) => [`${value}%`, "Score"]}
-                      cursor={{ fillOpacity: 0.1 }}
-                    />
-                    <Bar
-                      dataKey="score"
-                      fill="hsl(var(--primary))"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </TabsContent>
-              <TabsContent value="quarterly" className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={quarterlyScoreData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="quarter" />
-                    <YAxis domain={[50, 100]} />
-                    <Tooltip
-                      formatter={(value) => [`${value}%`, "Score"]}
-                      cursor={{ fillOpacity: 0.1 }}
-                    />
-                    <Bar
-                      dataKey="score"
-                      fill="hsl(var(--primary))"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </TabsContent>
-            </Tabs>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={timeFrame === "month" ? monthlyScoreData : quarterlyScoreData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey={timeFrame === "month" ? "month" : "quarter"} />
+                  <YAxis domain={[50, 100]} />
+                  <Tooltip
+                    formatter={(value) => [`${value}%`, "Score"]}
+                    cursor={{ fillOpacity: 0.1 }}
+                  />
+                  <Bar
+                    dataKey="score"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
         <Card className="col-span-3">
