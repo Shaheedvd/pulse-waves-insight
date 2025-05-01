@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Table,
@@ -16,17 +15,60 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { generateAuditPdf } from "@/lib/pdf-utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface ShopAuditSheetProps {
   data: any;
 }
 
 const ShopAuditSheet: React.FC<ShopAuditSheetProps> = ({ data }) => {
+  const { toast } = useToast();
+
+  const handleDownloadAudit = () => {
+    // Create a comprehensive audit data object with all visible data
+    const auditData = {
+      name: data.name || "Shop Audit Sheet",
+      description: data.description || "",
+      date: new Date().toLocaleDateString(),
+      shopName: "",
+      location: "",
+      auditor: "",
+      evaluatorDetails: {
+        timeStart: "",
+        timeEnd: "",
+        odoStart: "",
+        odoEnd: "",
+        totalKm: "",
+        amountSpent: ""
+      },
+      sections: data.sections || [],
+      visualMerchandising: "",
+      customerServiceObservations: "",
+      actionItems: ""
+    };
+    
+    generateAuditPdf(auditData);
+    
+    toast({
+      title: "Audit PDF Generated",
+      description: `${data.name} has been downloaded as a PDF`,
+    });
+  };
+
   return (
     <div className="space-y-6 p-4 max-w-4xl mx-auto print:p-0">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold">{data.name || "Shop Audit Sheet"}</h1>
-        {data.description && <p className="text-muted-foreground mt-2">{data.description}</p>}
+      <div className="flex justify-between items-center mb-8">
+        <div className="text-center flex-1">
+          <h1 className="text-2xl font-bold">{data.name || "Shop Audit Sheet"}</h1>
+          {data.description && <p className="text-muted-foreground mt-2">{data.description}</p>}
+        </div>
+        <Button variant="outline" onClick={handleDownloadAudit}>
+          <Download className="mr-2 h-4 w-4" />
+          Download Audit
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2">

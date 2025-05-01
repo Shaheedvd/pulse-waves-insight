@@ -2,8 +2,11 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
-import { CalendarRange, Calculator, FileText, ListChecks, CreditCard, ArrowUpDown } from "lucide-react";
+import { CalendarRange, Calculator, FileText, ListChecks, CreditCard, ArrowUpDown, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { generateFinancialPdf } from "@/lib/pdf-utils";
 
 // Sample data for the charts
 const revenueData = [
@@ -30,8 +33,56 @@ const expenseData = [
 ];
 
 const FinancialDashboard = () => {
+  const { toast } = useToast();
+  
+  const handleDownloadReport = () => {
+    // Create financial data object with all dashboard information
+    const financialData = {
+      summary: {
+        totalRevenue: 'R 147,000',
+        totalExpenses: 'R 100,000',
+        pendingInvoices: '12',
+        pendingValue: 'R 66,000',
+        profitMargin: '32%',
+        trend: '+2.5%'
+      },
+      charts: {
+        revenueVsExpenses: revenueData,
+        incomeSources: incomeSourceData,
+        expenseCategories: expenseData
+      },
+      transactions: [
+        { date: '2023-06-15', description: 'Invoice #5591 - QuickMart Audit', amount: 'R 5,500', type: 'income' },
+        { date: '2023-06-12', description: 'Evaluator Payment - E. Walker', amount: 'R 2,500', type: 'expense' },
+        { date: '2023-06-10', description: 'Invoice #5590 - EcoFuel Forecourt', amount: 'R 5,500', type: 'income' },
+        { date: '2023-06-05', description: 'Evaluator Payment - S. Johnson', amount: 'R 2,000', type: 'expense' },
+        { date: '2023-06-01', description: 'Invoice #5589 - Central High School', amount: 'R 2,500', type: 'income' }
+      ],
+      upcomingPayments: [
+        { date: '2023-06-18', description: 'Evaluator Payment - T. Nkosi', amount: 'R 3,000', status: 'pending' },
+        { date: '2023-06-20', description: 'Invoice #5592 - LuxCafé', amount: 'R 5,500', status: 'scheduled' },
+        { date: '2023-06-22', description: 'Evaluator Payment - M. Patel', amount: 'R 2,500', status: 'pending' }
+      ]
+    };
+    
+    generateFinancialPdf("Financial Dashboard", financialData);
+    
+    toast({
+      title: "Financial Report Generated",
+      description: "Financial dashboard report has been downloaded as a PDF",
+    });
+  };
+  
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold tracking-tight">Financial Dashboard</h2>
+        <Button variant="outline" onClick={handleDownloadReport}>
+          <Download className="mr-2 h-4 w-4" />
+          Download Report
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

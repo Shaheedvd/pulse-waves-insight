@@ -62,6 +62,38 @@ const generateTableContent = (headers: string[], rows: any[][], startY: number) 
 };
 
 /**
+ * Generate a simple chart visualization for PDF
+ */
+const generateChartVisualization = (data: any[], startY: number, width: number = 400, height: number = 150) => {
+  let content = '';
+  const maxValue = Math.max(...data.map(item => typeof item.value === 'number' ? item.value : 0));
+  const barWidth = width / data.length;
+  const scaleFactor = height / maxValue;
+  
+  // Draw chart axes
+  content += `q\n1 0 0 1 50 ${startY - height} cm\n`;
+  content += `0.5 w\n0 0 m ${width} 0 l S\n`;
+  content += `0 0 m 0 ${height} l S\n`;
+  
+  // Draw bars
+  data.forEach((item, index) => {
+    const value = typeof item.value === 'number' ? item.value : 0;
+    const barHeight = value * scaleFactor;
+    content += `0.75 0.75 0.75 rg\n`;
+    content += `${index * barWidth} 0 ${barWidth * 0.8} ${barHeight} re f\n`;
+    
+    // Add label
+    content += `BT\n/F1 8 Tf\n`;
+    content += `${index * barWidth + barWidth / 2 - 10} -15 Td\n(${escapeSpecialChars(item.name || '')}) Tj\n`;
+    content += `ET\n`;
+  });
+  
+  content += `Q\n`;
+  
+  return { content, lastY: startY - height - 30 };
+};
+
+/**
  * Generates and triggers download of PDF content
  * @param fileName - Name of the file to be downloaded
  * @param content - Content to be included in the PDF
@@ -69,7 +101,7 @@ const generateTableContent = (headers: string[], rows: any[][], startY: number) 
 export const downloadAsPdf = (fileName: string, content?: any) => {
   console.log(`Generating PDF for ${fileName}...`, content);
   
-  // Create a valid PDF structure
+  // Create a valid PDF structure with better formatting
   let pdfContent = `%PDF-1.4
 1 0 obj
 <</Type /Catalog /Pages 2 0 R>>
@@ -94,7 +126,7 @@ endobj
   const date = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString();
   
-  // Begin content stream
+  // Begin content stream with better formatting
   let contentStream = `BT
 /F1 16 Tf
 50 750 Td
@@ -106,6 +138,11 @@ BT
 50 730 Td
 (Generated on: ${escapeSpecialChars(`${date} at ${time}`)}) Tj
 ET
+
+% Draw a header line
+1 0 0 1 0 0 cm
+0.5 w
+50 720 m 562 720 l S
 `;
 
   // Add specific content based on the content type
@@ -117,17 +154,18 @@ ET
       
       entries.forEach(([key, value]) => {
         if (key !== 'id' && key !== 'fileName') {
-          if (Array.isArray(value)) {
-            // Handle array data (like chart data)
-            contentStream += `
+          // Format section heading
+          contentStream += `
 BT
 /F1 14 Tf
 50 ${yPosition} Td
-(${escapeSpecialChars(key.replace(/([A-Z])/g, ' $1').trim())}) Tj
+(${escapeSpecialChars(key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim())}) Tj
 ET
 `;
-            yPosition -= 20;
+          yPosition -= 20;
 
+          if (Array.isArray(value)) {
+            // Handle array data (like chart data or tables)
             if (value.length > 0 && typeof value[0] === 'object') {
               // Create a table for object arrays
               const headers = Object.keys(value[0]);
@@ -135,6 +173,13 @@ ET
               const tableResult = generateTableContent(headers, rows, yPosition);
               contentStream += tableResult.content;
               yPosition = tableResult.lastY - 30;
+              
+              // Add a simple visualization for numeric data if it exists
+              if (value[0].value !== undefined && typeof value[0].value === 'number' && value[0].name !== undefined) {
+                const chartResult = generateChartVisualization(value, yPosition);
+                contentStream += chartResult.content;
+                yPosition = chartResult.lastY;
+              }
             } else {
               // Simple array
               value.forEach((item: any, index: number) => {
@@ -150,38 +195,91 @@ ET
               yPosition -= 10;
             }
           } else if (typeof value === 'object' && value !== null) {
-            // Handle nested objects
-            contentStream += `
+            // Enhanced handling of nested objects with better formatting
+            Object.entries(value).forEach(([subKey, subValue]) => {
+              const formattedKey = subKey.charAt(0).toUpperCase() + subKey.slice(1).replace(/([A-Z])/g, ' $1').trim();
+              
+              if (typeof subValue === 'object' && subValue !== null && !Array.isArray(subValue)) {
+                // Handle nested objects (two levels deep)
+                contentStream += `
 BT
-/F1 14 Tf
-50 ${yPosition} Td
-(${escapeSpecialChars(key.replace(/([A-Z])/g, ' $1').trim())}) Tj
+/F1 12 Tf
+70 ${yPosition} Td
+(${escapeSpecialChars(formattedKey)}:) Tj
 ET
 `;
-            yPosition -= 20;
-            
-            Object.entries(value).forEach(([subKey, subValue]) => {
-              contentStream += `
+                yPosition -= 20;
+                
+                Object.entries(subValue).forEach(([nestedKey, nestedValue]) => {
+                  const formattedNestedKey = nestedKey.charAt(0).toUpperCase() + 
+                    nestedKey.slice(1).replace(/([A-Z])/g, ' $1').trim();
+                  
+                  contentStream += `
+BT
+/F1 10 Tf
+90 ${yPosition} Td
+(${escapeSpecialChars(`${formattedNestedKey}: ${nestedValue}`)}) Tj
+ET
+`;
+                  yPosition -= 15;
+                });
+              } else if (Array.isArray(subValue)) {
+                // Handle arrays inside nested objects
+                contentStream += `
+BT
+/F1 12 Tf
+70 ${yPosition} Td
+(${escapeSpecialChars(formattedKey)}:) Tj
+ET
+`;
+                yPosition -= 20;
+                
+                subValue.forEach((item: any, index: number) => {
+                  const itemText = typeof item === 'object' ? 
+                    Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(', ') : 
+                    item.toString();
+                  
+                  contentStream += `
+BT
+/F1 10 Tf
+90 ${yPosition} Td
+(${escapeSpecialChars(`${index + 1}. ${itemText}`)}) Tj
+ET
+`;
+                  yPosition -= 15;
+                });
+              } else {
+                // Handle simple key-value pairs
+                contentStream += `
 BT
 /F1 10 Tf
 70 ${yPosition} Td
-(${escapeSpecialChars(`${subKey}: ${subValue}`)}) Tj
+(${escapeSpecialChars(`${formattedKey}: ${subValue}`)}) Tj
 ET
 `;
-              yPosition -= 15;
+                yPosition -= 15;
+              }
             });
             yPosition -= 10;
           } else {
-            // Handle simple key-value pairs
+            // Handle simple key-value pairs with better formatting
             contentStream += `
 BT
 /F1 12 Tf
 50 ${yPosition} Td
-(${escapeSpecialChars(`${key.replace(/([A-Z])/g, ' $1').trim()}: ${value}`)}) Tj
+(${escapeSpecialChars(`${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}: ${value}`)}) Tj
 ET
 `;
             yPosition -= 20;
           }
+          
+          // Add a separator line between sections
+          contentStream += `
+1 0 0 1 0 0 cm
+0.2 w
+50 ${yPosition} m 562 ${yPosition} l S
+`;
+          yPosition -= 10;
         }
       });
     } else {
@@ -195,6 +293,16 @@ ET
 `;
     }
   }
+  
+  // Add footer
+  contentStream += `
+% Footer
+BT
+/F1 8 Tf
+250 50 Td
+(${escapeSpecialChars(`Generated by Audit Management System on ${date}`)}) Tj
+ET
+`;
   
   // Finalize PDF
   const contentBytes = contentStream.length;
@@ -244,15 +352,25 @@ ${317 + contentBytes + 18}
  */
 export const generateDashboardPdf = (dashboardData: any) => {
   const fileName = 'Dashboard_Report.pdf';
+  
+  // Ensure we have a comprehensive data object with all dashboard information
   const formattedData = {
     title: "Dashboard Report",
-    overallCXScore: dashboardData.overallScore,
-    improvementArea: dashboardData.improvementArea,
-    topCategory: dashboardData.topCategory,
-    locationsCovered: dashboardData.locationsCovered,
-    monthlyScoreData: dashboardData.monthlyScoreData,
-    categoryScores: dashboardData.categoryScoreData,
-    upcomingEvaluations: dashboardData.upcomingEvaluations
+    date: new Date().toLocaleDateString(),
+    metrics: {
+      overallCXScore: dashboardData.overallScore || "89%",
+      improvementArea: dashboardData.improvementArea || "Product Knowledge",
+      topCategory: dashboardData.topCategory || "Store Cleanliness",
+      locationsCovered: dashboardData.locationsCovered || "42/50",
+    },
+    trends: {
+      monthlyScores: dashboardData.monthlyScoreData || [],
+      quarterlyScores: dashboardData.quarterlyScoreData || [],
+    },
+    categories: {
+      categoryScores: dashboardData.categoryScoreData || [],
+    },
+    upcomingEvaluations: dashboardData.upcomingEvaluations || []
   };
   
   downloadAsPdf(fileName, formattedData);
@@ -266,15 +384,17 @@ export const generateDashboardPdf = (dashboardData: any) => {
 export const generateReportPdf = (reportName: string, reportData?: any) => {
   const fileName = reportName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
   
-  // Create structured data for report PDF
+  // Create structured data for report PDF with comprehensive information
   const formattedData = {
     title: reportName,
     date: new Date().toLocaleDateString(),
     type: reportData?.type || "Standard Report",
     author: reportData?.createdBy || "System Generated",
     status: reportData?.status || "Generated",
+    summary: reportData?.summary || {},
+    metrics: reportData?.metrics || {},
     details: reportData?.details || {},
-    data: reportData || {}
+    data: reportData?.data || {}
   };
   
   downloadAsPdf(fileName, formattedData);
@@ -287,14 +407,35 @@ export const generateReportPdf = (reportName: string, reportData?: any) => {
 export const generateAuditPdf = (auditData: any) => {
   const fileName = `Audit_${auditData.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'Sheet'}.pdf`;
   
+  // Create comprehensive audit data with all details
   const formattedData = {
     title: auditData.name || "Business Audit",
     description: auditData.description || "Standard audit sheet",
     date: new Date().toLocaleDateString(),
-    sections: auditData.sections || [],
-    company: auditData.company || "",
-    location: auditData.location || "",
-    auditor: auditData.auditor || ""
+    companyInfo: {
+      company: auditData.company || "",
+      location: auditData.location || "",
+      auditor: auditData.auditor || "",
+      auditDate: auditData.date || new Date().toLocaleDateString()
+    },
+    sections: auditData.sections?.map((section: any) => ({
+      title: section.title,
+      items: section.items?.map((item: any) => ({
+        question: item.question,
+        maxScore: item.maxScore
+      }))
+    })) || [],
+    evaluatorDetails: auditData.evaluatorDetails || {},
+    observations: {
+      strengths: auditData.strengths || "",
+      improvementAreas: auditData.improvementAreas || "",
+      recommendations: auditData.recommendations || "",
+      followupActions: auditData.followupActions || "",
+      visualMerchandising: auditData.visualMerchandising || "",
+      customerServiceObservations: auditData.customerServiceObservations || "",
+      actionItems: auditData.actionItems || "",
+      generalNotes: auditData.generalNotes || ""
+    }
   };
   
   downloadAsPdf(fileName, formattedData);
@@ -308,15 +449,18 @@ export const generateAuditPdf = (auditData: any) => {
 export const generateFinancialPdf = (reportName: string, financialData?: any) => {
   const fileName = 'Financial_' + reportName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
   
-  // Create structured data for financial PDF
+  // Create structured data for financial PDF with comprehensive information
   const formattedData = {
     title: `Financial Report: ${reportName}`,
     date: new Date().toLocaleDateString(),
     period: financialData?.period || "Current Period",
     summary: financialData?.summary || {},
+    revenueData: financialData?.charts?.revenueVsExpenses || [],
+    incomeData: financialData?.charts?.incomeSources || [],
+    expenseData: financialData?.charts?.expenseCategories || [],
     transactions: financialData?.transactions || [],
+    upcomingPayments: financialData?.upcomingPayments || [],
     totals: financialData?.totals || {},
-    charts: financialData?.charts || {},
     notes: financialData?.notes || ""
   };
   
