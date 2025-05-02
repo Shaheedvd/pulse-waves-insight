@@ -12,10 +12,13 @@ import {
   FileText,
   FileDown,
   Calculator,
+  BarChart,
+  Bell,
+  Server,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const AuthenticatedLayout = () => {
   const location = useLocation();
@@ -31,6 +34,8 @@ const AuthenticatedLayout = () => {
     });
     navigate("/");
   };
+
+  const isSuperUserOrManager = currentUser?.role === "superuser" || currentUser?.role === "manager";
 
   const navItems = [
     { 
@@ -64,16 +69,46 @@ const AuthenticatedLayout = () => {
       superuserOnly: true
     },
     { 
-      path: "/users", 
-      name: "User Management", 
-      icon: <ShieldCheck className="h-5 w-5" />,
-      permission: "canManageUsers" as const
-    },
-    { 
       path: "/financial", 
       name: "Financial", 
       icon: <Calculator className="h-5 w-5" />,
       permission: "canManageFinancials" as const
+    },
+    { 
+      path: "/kpi-dashboard", 
+      name: "KPI Dashboard", 
+      icon: <BarChart className="h-5 w-5" />,
+      superUserOrManager: true
+    },
+    { 
+      path: "/users", 
+      name: "User Management", 
+      icon: <ShieldCheck className="h-5 w-5" />,
+      permission: "canManageUsers" as const
+    }
+  ];
+
+  // Additional superuser menu items
+  const superUserItems = [
+    { 
+      path: "/client-portal-settings", 
+      name: "Client Portal Settings", 
+      icon: <Settings className="h-5 w-5" />,
+    },
+    { 
+      path: "/audit-scheduling", 
+      name: "Audit Scheduling", 
+      icon: <ClipboardList className="h-5 w-5" />,
+    },
+    { 
+      path: "/notifications", 
+      name: "Notifications & Alerts", 
+      icon: <Bell className="h-5 w-5" />,
+    },
+    { 
+      path: "/system-logs", 
+      name: "System Logs", 
+      icon: <Server className="h-5 w-5" />,
     },
     { 
       path: "/settings", 
@@ -113,6 +148,7 @@ const AuthenticatedLayout = () => {
         {/* Sidebar Navigation */}
         <aside className="hidden border-r bg-muted/40 md:block">
           <nav className="grid gap-2 p-4">
+            {/* Regular navigation items */}
             {navItems.map((item) => {
               // Skip rendering items that require permissions the user doesn't have
               if (item.permission && !hasPermission(item.permission)) {
@@ -121,6 +157,11 @@ const AuthenticatedLayout = () => {
               
               // Skip rendering items marked as superuser only if user is not superuser
               if (item.superuserOnly && currentUser?.role !== "superuser") {
+                return null;
+              }
+              
+              // Skip rendering items marked for superusers or managers only if user is not one of them
+              if (item.superUserOrManager && !isSuperUserOrManager) {
                 return null;
               }
               
@@ -138,6 +179,38 @@ const AuthenticatedLayout = () => {
                 </Link>
               );
             })}
+
+            {/* Superuser additional navigation items */}
+            {currentUser?.role === "superuser" && (
+              <>
+                <div className="relative my-3">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"></span>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
+                      Super User Access
+                    </span>
+                  </div>
+                </div>
+
+                {superUserItems.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  
+                  return (
+                    <Link key={item.path} to={item.path}>
+                      <Button
+                        variant={isActive ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        {item.icon}
+                        <span className="ml-2">{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
         </aside>
 

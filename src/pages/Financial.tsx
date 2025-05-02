@@ -10,6 +10,7 @@ import FinancialDashboard from "@/components/financial/FinancialDashboard";
 import InvoiceManagement from "@/components/financial/InvoiceManagement";
 import FinancialReports from "@/components/financial/FinancialReports";
 import ExpenseManagement from "@/components/financial/ExpenseManagement";
+import KpiDashboard from "@/components/financial/KpiDashboard";
 
 const Financial = () => {
   const { currentUser, hasPermission } = useAuth();
@@ -43,11 +44,12 @@ const Financial = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="kpi">KPI Metrics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
@@ -64,6 +66,10 @@ const Financial = () => {
 
         <TabsContent value="reports" className="space-y-4">
           <FinancialReports />
+        </TabsContent>
+
+        <TabsContent value="kpi" className="space-y-4">
+          <KpiDashboard />
         </TabsContent>
       </Tabs>
     </div>
