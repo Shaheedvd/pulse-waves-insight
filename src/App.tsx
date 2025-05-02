@@ -19,6 +19,10 @@ import Financial from "./pages/Financial";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import MarketingActionItems from "./pages/MarketingActionItems";
+import ProjectManagement from "./pages/ProjectManagement";
+import TrainingResources from "./pages/TrainingResources";
+import AdminKpiDashboard from "./pages/AdminKpiDashboard";
 
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
@@ -80,6 +84,27 @@ const App: React.FC = () => {
                     <Route 
                       path="/settings" 
                       element={<Settings />} 
+                    />
+                    
+                    {/* New admin routes */}
+                    <Route 
+                      path="/marketing-actions" 
+                      element={<MarketingActionItems />} 
+                    />
+                    
+                    <Route 
+                      path="/project-management" 
+                      element={<ProjectManagement />} 
+                    />
+                    
+                    <Route 
+                      path="/training-resources" 
+                      element={<TrainingResources />} 
+                    />
+                    
+                    <Route 
+                      path="/admin-kpi" 
+                      element={<AdminKpiDashboard />} 
                     />
                   </Route>
                 </Route>

@@ -15,6 +15,11 @@ import {
   BarChart,
   Bell,
   Server,
+  Calendar,
+  Briefcase,
+  FileUp,
+  Folder,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,6 +41,7 @@ const AuthenticatedLayout = () => {
   };
 
   const isSuperUserOrManager = currentUser?.role === "superuser" || currentUser?.role === "manager";
+  const isAdmin = currentUser?.role === "admin" || isSuperUserOrManager;
 
   const navItems = [
     { 
@@ -88,6 +94,33 @@ const AuthenticatedLayout = () => {
     }
   ];
 
+  // Admin menu items
+  const adminItems = [
+    { 
+      path: "/marketing-actions", 
+      name: "Marketing Actions", 
+      icon: <Activity className="h-5 w-5" />,
+      adminOrHigher: true
+    },
+    { 
+      path: "/project-management", 
+      name: "Project Management", 
+      icon: <Briefcase className="h-5 w-5" />,
+      managerOrHigher: true
+    },
+    { 
+      path: "/training-resources", 
+      name: "Training Resources", 
+      icon: <FileUp className="h-5 w-5" />,
+    },
+    { 
+      path: "/admin-kpi", 
+      name: "Admin KPI Dashboard", 
+      icon: <BarChart className="h-5 w-5" />,
+      adminOrHigher: true
+    },
+  ];
+
   // Additional superuser menu items
   const superUserItems = [
     { 
@@ -98,7 +131,7 @@ const AuthenticatedLayout = () => {
     { 
       path: "/audit-scheduling", 
       name: "Audit Scheduling", 
-      icon: <ClipboardList className="h-5 w-5" />,
+      icon: <Calendar className="h-5 w-5" />,
     },
     { 
       path: "/notifications", 
@@ -179,6 +212,48 @@ const AuthenticatedLayout = () => {
                 </Link>
               );
             })}
+
+            {/* Admin navigation items */}
+            {isAdmin && (
+              <>
+                <div className="relative my-3">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"></span>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
+                      Admin Tools
+                    </span>
+                  </div>
+                </div>
+
+                {adminItems.map((item) => {
+                  // Skip rendering items marked for admin or higher only if user is not admin or higher
+                  if (item.adminOrHigher && !isAdmin) {
+                    return null;
+                  }
+                  
+                  // Skip rendering items marked for managers or higher only if user is not manager or higher
+                  if (item.managerOrHigher && !isSuperUserOrManager) {
+                    return null;
+                  }
+                  
+                  const isActive = location.pathname === item.path;
+                  
+                  return (
+                    <Link key={item.path} to={item.path}>
+                      <Button
+                        variant={isActive ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        {item.icon}
+                        <span className="ml-2">{item.name}</span>
+                      </Button>
+                    </Link>
+                  );
+                })}
+              </>
+            )}
 
             {/* Superuser additional navigation items */}
             {currentUser?.role === "superuser" && (
