@@ -23,6 +23,7 @@ import MarketingActionItems from "./pages/MarketingActionItems";
 import ProjectManagement from "./pages/ProjectManagement";
 import TrainingResources from "./pages/TrainingResources";
 import AdminKpiDashboard from "./pages/AdminKpiDashboard";
+import ManagerTraining from "./pages/ManagerTraining";
 
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
@@ -105,6 +106,12 @@ const App: React.FC = () => {
                     <Route 
                       path="/admin-kpi" 
                       element={<AdminKpiDashboard />} 
+                    />
+                    
+                    {/* Manager training route */}
+                    <Route 
+                      path="/manager-training" 
+                      element={<ManagerTraining />} 
                     />
                   </Route>
                 </Route>
