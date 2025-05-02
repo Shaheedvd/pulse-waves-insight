@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +11,7 @@ import AdminKpiTable from "@/components/kpi/AdminKpiTable";
 import AdminKpiForm from "@/components/kpi/AdminKpiForm";
 import { AdminKpi } from "@/types/marketing";
 import { Progress } from "@/components/ui/progress";
+import { KpiMetric } from "@/types/kpi";
 
 const AdminKpiDashboard = () => {
   const { currentUser, hasPermission } = useAuth();
