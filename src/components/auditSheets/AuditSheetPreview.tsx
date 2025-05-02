@@ -4,6 +4,7 @@ import BusinessAuditSheet from "./BusinessAuditSheet";
 import ForecourtShopAuditSheet from "./ForecourtShopAuditSheet";
 import ShopAuditSheet from "./ShopAuditSheet";
 import ISOAuditSheet from "./ISOAuditSheet";
+import ComprehensiveBusinessAuditSheet from "./ComprehensiveBusinessAuditSheet";
 
 interface AuditSheetPreviewProps {
   type: string;
@@ -20,6 +21,8 @@ const AuditSheetPreview: React.FC<AuditSheetPreviewProps> = ({ type, data }) => 
       return <ShopAuditSheet data={data} />;
     case "iso":
       return <ISOAuditSheet data={data} />;
+    case "comprehensive":
+      return <ComprehensiveBusinessAuditSheet data={data} />;
     default:
       return <div>Invalid audit sheet type</div>;
   }
