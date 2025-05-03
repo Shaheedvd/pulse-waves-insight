@@ -29,10 +29,10 @@ const SystemLogs = () => {
       case "ERROR": 
         return "destructive";
       case "WARNING":
-        return "warning";
+        return "secondary"; // Changed from "warning" to "secondary" as "warning" is not a valid variant
       case "INFO":
       default:
-        return "secondary";
+        return "outline"; // Changed from "secondary" to "outline" for better visual distinction
     }
   };
   
