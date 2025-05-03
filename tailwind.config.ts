@@ -57,9 +57,10 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
-        pulseBlue: '#1A5276',
-        pulseTeal: '#008080',
-        pulseGray: '#D3D3D3',
+        pulseBlue: '#1A5276',      // Deep blue (primary)
+        pulseTeal: '#3D8B75',      // Muted green (secondary)
+        pulseOrange: '#E67E22',    // Warm orange (accent)
+        pulseGray: '#EEEEEE',      // Light gray for backgrounds
         success: '#4CAF50',
         warning: '#FFC107',
         danger: '#F44336',
