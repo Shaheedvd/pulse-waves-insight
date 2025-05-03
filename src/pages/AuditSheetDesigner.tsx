@@ -8,8 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import AuditSheetPreview from "@/components/auditSheets/AuditSheetPreview";
-import { ISO_AUDIT_TEMPLATE } from "@/types/marketing";
-import { auditTemplates, COMPREHENSIVE_BUSINESS_AUDIT } from "@/types/auditTemplates";
+// Fix the import to reference auditTemplates instead of marketing
+import { ISO_AUDIT_TEMPLATE, auditTemplates, COMPREHENSIVE_BUSINESS_AUDIT } from "@/types/auditTemplates";
 import { FileText, ShoppingCart, Store, ClipboardCheck, FileCode } from "lucide-react";
 
 const AuditSheetDesigner = () => {

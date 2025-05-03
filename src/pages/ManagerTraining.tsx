@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,9 +12,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+// Import MARKETING_STRATEGIES from marketing.ts where it's defined
 import { MARKETING_STRATEGIES } from "@/types/marketing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AuditSheetPreview from "@/components/auditSheets/AuditSheetPreview";
+// Fix the import to reference auditTemplates instead of marketing
 import { ISO_AUDIT_TEMPLATE } from "@/types/auditTemplates";
 
 const ManagerTraining = () => {

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -16,7 +15,7 @@ import { MarketingTask } from "@/types/marketing";
 import MarketingTaskForm from "./MarketingTaskForm";
 import { useToast } from "@/hooks/use-toast";
 
-// Sample data
+// Sample data - updated to match the new interface
 const sampleTasks: { [key: string]: MarketingTask[] } = {
   "Digital Marketing": [
     {
@@ -26,7 +25,7 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
       title: "Keyword Research",
       description: "Conduct keyword research to identify relevant search terms for our services. Use tools like SEMrush or Ahrefs. Record the list of primary and secondary keywords.",
       trackingMethod: "Document with keyword list and search volume data",
-      assignedTo: "Jane Smith",
+      assignedTo: null,
       dueDate: "2025-05-15",
       status: "in-progress"
     },
@@ -37,7 +36,7 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
       title: "Content Optimization",
       description: "Optimize existing website pages for target keywords. Track changes made and before/after SEO metrics.",
       trackingMethod: "List of optimized pages, changes made, and any metric changes",
-      assignedTo: "John Doe",
+      assignedTo: null,
       dueDate: "2025-05-20",
       status: "pending"
     }
@@ -50,7 +49,7 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
       title: "Blog Post Creation",
       description: "Write a blog post on customer experience improvements. Follow the content calendar and SEO guidelines.",
       trackingMethod: "Link to published blog post, date of publication",
-      assignedTo: "Sarah Johnson",
+      assignedTo: null,
       dueDate: "2025-05-10",
       status: "completed",
       completionDate: "2025-05-07"
@@ -64,7 +63,7 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
       title: "LinkedIn Engagement",
       description: "Share relevant industry articles on LinkedIn and engage in discussions. Track the number of interactions.",
       trackingMethod: "List of posts shared, engagement metrics",
-      assignedTo: "Mike Brown",
+      assignedTo: null,
       dueDate: "2025-05-08",
       status: "overdue"
     }
@@ -77,7 +76,7 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
       title: "Prospect List Creation",
       description: "Research and compile a list of potential clients in the retail sector. Include contact information for key decision-makers.",
       trackingMethod: "Document with prospect list",
-      assignedTo: "Alex Green",
+      assignedTo: null,
       dueDate: "2025-05-25",
       status: "pending"
     }
@@ -90,7 +89,7 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
       title: "CRM Data Entry",
       description: "Update CRM with new leads and client interactions. Ensure data accuracy and completeness.",
       trackingMethod: "Number of records updated/added",
-      assignedTo: "Lisa Park",
+      assignedTo: null,
       dueDate: "2025-05-12",
       status: "in-progress"
     }
