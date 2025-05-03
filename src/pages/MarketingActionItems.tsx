@@ -49,15 +49,17 @@ const MarketingActionItems = () => {
       </div>
 
       <div className="flex justify-between items-center">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="digital">Digital Marketing</TabsTrigger>
-            <TabsTrigger value="content">Content Marketing</TabsTrigger>
-            <TabsTrigger value="social">Social Media</TabsTrigger>
-            <TabsTrigger value="sales">Direct Sales</TabsTrigger>
-            <TabsTrigger value="tools">Marketing Tools</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="digital">Digital Marketing</TabsTrigger>
+              <TabsTrigger value="content">Content Marketing</TabsTrigger>
+              <TabsTrigger value="social">Social Media</TabsTrigger>
+              <TabsTrigger value="sales">Direct Sales</TabsTrigger>
+              <TabsTrigger value="tools">Marketing Tools</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         
         <div className="flex gap-2 ml-4">
           <Button variant="outline" size="icon">
@@ -75,7 +77,7 @@ const MarketingActionItems = () => {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsContent value="digital" className="space-y-4">
           <MarketingTasksTable category="Digital Marketing" canEdit={canEditTasks} />
         </TabsContent>
@@ -95,7 +97,7 @@ const MarketingActionItems = () => {
         <TabsContent value="tools" className="space-y-4">
           <MarketingTasksTable category="Marketing Tools & Technology" canEdit={canEditTasks} />
         </TabsContent>
-      </div>
+      </Tabs>
 
       {/* Add Task Modal */}
       <Dialog open={isAddTaskModalOpen} onOpenChange={setIsAddTaskModalOpen}>
