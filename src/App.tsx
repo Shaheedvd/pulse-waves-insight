@@ -30,6 +30,10 @@ import AuditScheduling from "./pages/AuditScheduling";
 import Notifications from "./pages/Notifications";
 import SystemLogs from "./pages/SystemLogs";
 
+// Import new department dashboards
+import OperationsDashboard from "./pages/OperationsDashboard";
+import FinancialDashboardPage from "./pages/FinancialDashboardPage";
+
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
 
@@ -119,7 +123,7 @@ const App: React.FC = () => {
                       element={<ManagerTraining />} 
                     />
                     
-                    {/* Add the new routes for the missing pages */}
+                    {/* Add the new routes for the existing pages */}
                     <Route
                       path="/kpi-dashboard"
                       element={<KpiDashboard />}
@@ -143,6 +147,103 @@ const App: React.FC = () => {
                     <Route
                       path="/system-logs"
                       element={<SystemLogs />}
+                    />
+
+                    {/* New department-specific dashboards */}
+                    <Route
+                      path="/operations-dashboard"
+                      element={<OperationsDashboard />}
+                    />
+
+                    <Route
+                      path="/financial-dashboard"
+                      element={<FinancialDashboardPage />}
+                    />
+                    
+                    {/* Placeholder routes for future implementation */}
+                    <Route
+                      path="/hr-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">HR Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/marketing-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Marketing Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/sales-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Sales Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/product-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Product Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/it-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">IT Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/support-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Support Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/legal-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Legal Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/facilities-dashboard"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Facilities Dashboard</h1><p>This dashboard is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/recruitment"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Recruitment</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/payroll"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Payroll Management</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/crm"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Customer Relations Management</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/quality-control"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Quality Control</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/system-settings"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">System Settings</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/tickets"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Support Tickets</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/compliance"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Compliance</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/maintenance"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Maintenance</h1><p>This feature is under development.</p></div>}
+                    />
+                    
+                    <Route
+                      path="/financial-reports"
+                      element={<div className="p-6"><h1 className="text-2xl font-bold mb-4">Financial Reports</h1><p>This feature is under development.</p></div>}
                     />
                   </Route>
                 </Route>

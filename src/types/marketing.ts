@@ -82,6 +82,49 @@ export interface AdminKpi {
   lastUpdated: string;
 }
 
+// Add ISO audit template reference for AuditSheetDesigner
+export const ISO_AUDIT_TEMPLATE = {
+  id: "iso-audit",
+  name: "ISO 9001 Audit Template",
+  description: "Standard audit template for ISO 9001 quality management certification",
+  sections: [
+    {
+      title: "Quality Management System",
+      questions: [
+        {
+          id: "iso-1",
+          text: "Has the organization established a documented quality management system?",
+          type: "checkbox",
+          required: true
+        },
+        {
+          id: "iso-2",
+          text: "Are quality objectives established at relevant functions and levels?",
+          type: "checkbox",
+          required: true
+        }
+      ]
+    },
+    {
+      title: "Management Responsibility",
+      questions: [
+        {
+          id: "iso-3",
+          text: "Is there evidence that top management is committed to the QMS?",
+          type: "checkbox",
+          required: true
+        },
+        {
+          id: "iso-4",
+          text: "Is the quality policy documented and communicated?",
+          type: "checkbox",
+          required: true
+        }
+      ]
+    }
+  ]
+};
+
 // Add marketing strategies constant
 export const MARKETING_STRATEGIES = [
   {

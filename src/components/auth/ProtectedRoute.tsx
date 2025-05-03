@@ -5,9 +5,15 @@ import { useAuth, Permissions } from "@/contexts/AuthContext";
 
 interface ProtectedRouteProps {
   requiredPermission?: keyof Permissions;
+  allowedRoles?: string[];
+  requireMFA?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredPermission }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  requiredPermission,
+  allowedRoles,
+  requireMFA 
+}) => {
   const { isAuthenticated, hasPermission, currentUser } = useAuth();
   const location = useLocation();
 
@@ -15,9 +21,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredPermission }) =
     return <Navigate to="/" replace />;
   }
 
+  // Check for MFA requirement if specified
+  if (requireMFA && currentUser && !currentUser.requiresMFA) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   // Special case for user activity report - only superusers can access
   if (location.pathname === "/user-activity-report" && currentUser?.role !== "superuser") {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // Check for specific allowed roles if provided
+  if (allowedRoles && allowedRoles.length > 0) {
+    if (currentUser && !allowedRoles.includes(currentUser.role)) {
+      // Always allow superuser access regardless of role restrictions
+      if (currentUser.role !== "superuser") {
+        return <Navigate to="/dashboard" replace />;
+      }
+    }
   }
 
   // If a specific permission is required, check it
