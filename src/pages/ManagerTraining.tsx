@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,9 +11,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MARKETING_STRATEGIES, ISO_AUDIT_TEMPLATE } from "@/types/marketing";
+import { MARKETING_STRATEGIES } from "@/types/marketing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AuditSheetPreview from "@/components/auditSheets/AuditSheetPreview";
+import { ISO_AUDIT_TEMPLATE } from "@/types/auditTemplates";
 
 const ManagerTraining = () => {
   const { currentUser, hasPermission } = useAuth();
