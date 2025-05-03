@@ -24,6 +24,11 @@ import ProjectManagement from "./pages/ProjectManagement";
 import TrainingResources from "./pages/TrainingResources";
 import AdminKpiDashboard from "./pages/AdminKpiDashboard";
 import ManagerTraining from "./pages/ManagerTraining";
+import KpiDashboard from "./pages/KpiDashboard";
+import ClientPortalSettings from "./pages/ClientPortalSettings";
+import AuditScheduling from "./pages/AuditScheduling";
+import Notifications from "./pages/Notifications";
+import SystemLogs from "./pages/SystemLogs";
 
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
@@ -112,6 +117,32 @@ const App: React.FC = () => {
                     <Route 
                       path="/manager-training" 
                       element={<ManagerTraining />} 
+                    />
+                    
+                    {/* Add the new routes for the missing pages */}
+                    <Route
+                      path="/kpi-dashboard"
+                      element={<KpiDashboard />}
+                    />
+                    
+                    <Route
+                      path="/client-portal-settings"
+                      element={<ClientPortalSettings />}
+                    />
+                    
+                    <Route
+                      path="/audit-scheduling"
+                      element={<AuditScheduling />}
+                    />
+                    
+                    <Route
+                      path="/notifications"
+                      element={<Notifications />}
+                    />
+                    
+                    <Route
+                      path="/system-logs"
+                      element={<SystemLogs />}
                     />
                   </Route>
                 </Route>
