@@ -5,12 +5,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminKpiTable from "@/components/kpi/AdminKpiTable";
 import AdminKpiForm from "@/components/kpi/AdminKpiForm";
+import { AdminKpi } from "@/types/marketing";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminKpiDashboard = () => {
   const { currentUser } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("view");
+  const [selectedCategory, setSelectedCategory] = useState("marketing");
 
   const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superuser";
+
+  const handleKpiCreated = (kpi: AdminKpi) => {
+    toast({
+      title: "KPI Created",
+      description: "New KPI has been created successfully"
+    });
+    setActiveTab("view");
+  };
+
+  const handleCloseForm = () => {
+    setActiveTab("view");
+  };
 
   return (
     <div className="space-y-6">
@@ -28,7 +44,7 @@ const AdminKpiDashboard = () => {
         </TabsList>
 
         <TabsContent value="view" className="space-y-4">
-          <AdminKpiTable />
+          <AdminKpiTable category={selectedCategory} canEdit={isAdmin} />
         </TabsContent>
 
         {isAdmin && (
@@ -41,7 +57,10 @@ const AdminKpiDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AdminKpiForm />
+                <AdminKpiForm 
+                  onClose={handleCloseForm} 
+                  onSuccess={handleKpiCreated}
+                />
               </CardContent>
             </Card>
           </TabsContent>
