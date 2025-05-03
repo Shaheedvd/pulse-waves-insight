@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Plus, Search, Download } from "lucide-react";
 import { generateFinancialPdf } from "@/lib/pdf-utils";
+import ExpenseDetails from "./ExpenseDetails";
 
 interface Expense {
   id: string;
@@ -85,6 +85,8 @@ const ExpenseManagement: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>(sampleExpenses);
   const [showNewExpenseForm, setShowNewExpenseForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { toast } = useToast();
   
   // New expense form state
@@ -158,6 +160,11 @@ const ExpenseManagement: React.FC = () => {
       title: "Report Downloaded",
       description: "Expense report has been downloaded as a PDF."
     });
+  };
+  
+  const handleViewDetails = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setIsDetailsOpen(true);
   };
   
   return (
@@ -325,7 +332,11 @@ const ExpenseManagement: React.FC = () => {
                           {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
                         </span>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleViewDetails(expense)}
+                      >
                         View Details
                       </Button>
                     </div>
@@ -336,6 +347,12 @@ const ExpenseManagement: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+      
+      <ExpenseDetails
+        open={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        expense={selectedExpense}
+      />
     </div>
   );
 };

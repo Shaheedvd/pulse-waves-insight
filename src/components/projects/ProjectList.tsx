@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -14,6 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Edit, Eye, Trash } from "lucide-react";
 import { Project } from "@/types/marketing";
 import { Progress } from "@/components/ui/progress";
+import ProjectDetails from "./ProjectDetails";
 
 interface ProjectListProps {
   status: Project["status"][];
@@ -77,6 +77,9 @@ const sampleProjects: Project[] = [
 ];
 
 const ProjectList: React.FC<ProjectListProps> = ({ status, searchQuery }) => {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
   // Filter projects by status and search query
   const filteredProjects = sampleProjects.filter(project => 
     status.includes(project.status) && 
@@ -113,72 +116,85 @@ const ProjectList: React.FC<ProjectListProps> = ({ status, searchQuery }) => {
     }
   };
 
+  const handleViewDetails = (project: Project) => {
+    setSelectedProject(project);
+    setIsDetailsOpen(true);
+  };
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Project Name</TableHead>
-          <TableHead className="hidden md:table-cell">Description</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Priority</TableHead>
-          <TableHead className="hidden md:table-cell">Due Date</TableHead>
-          <TableHead className="hidden lg:table-cell">Progress</TableHead>
-          <TableHead>Assigned To</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {filteredProjects.length > 0 ? (
-          filteredProjects.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell className="font-medium">{project.name}</TableCell>
-              <TableCell className="hidden md:table-cell max-w-xs truncate">
-                {project.description}
-              </TableCell>
-              <TableCell>{getStatusBadge(project.status)}</TableCell>
-              <TableCell>{getPriorityBadge(project.priority)}</TableCell>
-              <TableCell className="hidden md:table-cell">
-                {new Date(project.dueDate).toLocaleDateString()}
-              </TableCell>
-              <TableCell className="hidden lg:table-cell">
-                <div className="flex items-center gap-2">
-                  <Progress value={project.completionPercentage} className="h-2 w-24" />
-                  <span className="text-xs">{project.completionPercentage}%</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex -space-x-2">
-                  {project.assignedTo.map((person, index) => (
-                    <Avatar key={index} className="border-2 border-background h-7 w-7">
-                      <AvatarFallback className="text-xs">
-                        {person.split(' ').map(n => n[0]).join('').toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="icon">
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Trash className="h-4 w-4" />
-                </Button>
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Project Name</TableHead>
+            <TableHead className="hidden md:table-cell">Description</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead className="hidden md:table-cell">Due Date</TableHead>
+            <TableHead className="hidden lg:table-cell">Progress</TableHead>
+            <TableHead>Assigned To</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredProjects.length > 0 ? (
+            filteredProjects.map((project) => (
+              <TableRow key={project.id}>
+                <TableCell className="font-medium">{project.name}</TableCell>
+                <TableCell className="hidden md:table-cell max-w-xs truncate">
+                  {project.description}
+                </TableCell>
+                <TableCell>{getStatusBadge(project.status)}</TableCell>
+                <TableCell>{getPriorityBadge(project.priority)}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {new Date(project.dueDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  <div className="flex items-center gap-2">
+                    <Progress value={project.completionPercentage} className="h-2 w-24" />
+                    <span className="text-xs">{project.completionPercentage}%</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex -space-x-2">
+                    {project.assignedTo.map((person, index) => (
+                      <Avatar key={index} className="border-2 border-background h-7 w-7">
+                        <AvatarFallback className="text-xs">
+                          {person.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" onClick={() => handleViewDetails(project)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={8} className="h-24 text-center">
+                No projects match the selected filters
               </TableCell>
             </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={8} className="h-24 text-center">
-              No projects match the selected filters
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+          )}
+        </TableBody>
+      </Table>
+
+      <ProjectDetails 
+        open={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        project={selectedProject}
+      />
+    </>
   );
 };
 
