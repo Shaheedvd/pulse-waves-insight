@@ -22,7 +22,6 @@ import {
   TrendingDown,
   DollarSign,
   FileText,
-  BarChart,
   Download,
   ArrowRight,
   Calendar,
@@ -33,7 +32,7 @@ import { useAuth } from "@/contexts/AuthContext";
 // Import recharts components for the financial charts
 import {
   Bar,
-  BarChart,
+  BarChart as RechartsBarChart,
   LineChart,
   Line,
   XAxis,
@@ -211,7 +210,7 @@ const FinancialDashboardPage = () => {
             <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
               <CardContent className="flex items-center pt-6">
                 <div className="bg-blue-200 p-3 rounded-lg">
-                  <BarChart className="h-8 w-8 text-blue-700" />
+                  <TrendingUp className="h-8 w-8 text-blue-700" />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Net Profit</p>
@@ -236,7 +235,7 @@ const FinancialDashboardPage = () => {
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
+                    <RechartsBarChart
                       data={revenueData}
                       margin={{
                         top: 20,
@@ -253,7 +252,7 @@ const FinancialDashboardPage = () => {
                       <Bar dataKey="revenue" name="Revenue" fill="#0088FE" />
                       <Bar dataKey="expenses" name="Expenses" fill="#FF8042" />
                       <Bar dataKey="profit" name="Profit" fill="#00C49F" />
-                    </BarChart>
+                    </RechartsBarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>

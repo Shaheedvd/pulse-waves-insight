@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -95,6 +94,19 @@ const UserManagement = () => {
     facilities: "Facilities",
   };
 
+  const getRoleBadgeVariant = (role: UserRole) => {
+    switch (role) {
+      case "superuser": return "destructive";
+      case "power_manager": return "orange";
+      case "manager": return "purple";
+      case "lead_admin": return "blue";
+      case "admin": return "default";
+      case "restricted_admin": return "outline";
+      case "viewer": return "secondary";
+      default: return "default" as const;
+    }
+  };
+
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email || !newUser.position) {
       toast({
@@ -187,19 +199,6 @@ const UserManagement = () => {
     
     return matchesSearch && matchesDepartment && matchesRole;
   });
-
-  const getRoleBadgeVariant = (role: UserRole) => {
-    switch (role) {
-      case "superuser": return "destructive";
-      case "power_manager": return "orange";
-      case "manager": return "purple";
-      case "lead_admin": return "blue";
-      case "admin": return "default";
-      case "restricted_admin": return "outline";
-      case "viewer": return "secondary";
-      default: return "default";
-    }
-  };
 
   return (
     <div className="space-y-6">
