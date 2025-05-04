@@ -582,7 +582,7 @@ interface EmployeeTableProps {
   users: any[];
   roleLabels: Record<UserRole, string>;
   departmentLabels: Record<Department, string>;
-  getRoleBadgeVariant: (role: UserRole) => string;
+  getRoleBadgeVariant: (role: UserRole) => "default" | "destructive" | "orange" | "purple" | "blue" | "outline" | "secondary";
   onEdit: (user: any) => void;
   onDelete: (id: string, name: string) => void;
   currentUserId: string;
