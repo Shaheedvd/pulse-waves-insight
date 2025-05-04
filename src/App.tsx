@@ -35,6 +35,7 @@ import SystemLogs from "./pages/SystemLogs";
 import OperationsDashboard from "./pages/OperationsDashboard";
 import FinancialDashboardPage from "./pages/FinancialDashboardPage";
 import FinancialDashboard from "./pages/FinancialDashboard";
+import { DepartmentDashboard } from "./components/dashboard/DepartmentDashboard";
 
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
