@@ -137,11 +137,11 @@ const DashboardLayout = () => {
       {/* Main content with resizable panels */}
       {!isMobile ? (
         <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
-          {/* Sidebar panel */}
+          {/* Sidebar panel - Updated to allow wider range */}
           <ResizablePanel 
             defaultSize={20} 
             minSize={15}
-            maxSize={30}
+            maxSize={40}  // Increased from 30 to 40 to allow wider sidebar
             collapsible={true}
             collapsedSize={5}
             onCollapse={() => setIsCollapsed(true)}
@@ -152,7 +152,7 @@ const DashboardLayout = () => {
               <div className="flex items-center h-16 px-4 border-b">
                 <Activity className="h-6 w-6 text-primary mr-2" />
                 {!isCollapsed && (
-                  <span className="text-lg font-semibold">Pulse Point CX</span>
+                  <span className="text-lg font-semibold truncate">Pulse Point CX</span>
                 )}
               </div>
 
@@ -167,12 +167,12 @@ const DashboardLayout = () => {
                               variant="ghost"
                               className={`w-full justify-${
                                 isCollapsed ? "center" : "start"
-                              } py-2`}
+                              } py-2 text-left whitespace-nowrap overflow-hidden text-ellipsis`}
                               onClick={() => handleNavigation(item.path, item.onClick)}
                             >
                               {item.icon}
                               {!isCollapsed && (
-                                <span className="ml-3">{item.name}</span>
+                                <span className="ml-3 truncate">{item.name}</span>
                               )}
                             </Button>
                           </TooltipTrigger>
@@ -196,9 +196,9 @@ const DashboardLayout = () => {
                     </AvatarFallback>
                   </Avatar>
                   {!isCollapsed && (
-                    <div className="ml-3">
-                      <p className="text-sm font-medium">{currentUser?.name || 'User'}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="ml-3 overflow-hidden">
+                      <p className="text-sm font-medium truncate">{currentUser?.name || 'User'}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {currentUser?.email || 'user@example.com'}
                       </p>
                     </div>
@@ -212,17 +212,17 @@ const DashboardLayout = () => {
                   onClick={handleLogout}
                 >
                   <LogOut size={20} />
-                  {!isCollapsed && <span className="ml-3">Logout</span>}
+                  {!isCollapsed && <span className="ml-3 truncate">Logout</span>}
                 </Button>
               </div>
             </div>
           </ResizablePanel>
 
-          {/* Resizable handle */}
-          <ResizableHandle withHandle />
+          {/* Resizable handle with more visible grip */}
+          <ResizableHandle withHandle className="transition-colors hover:bg-primary/10" />
 
           {/* Main content panel */}
-          <ResizablePanel defaultSize={80} minSize={70}>
+          <ResizablePanel defaultSize={80} minSize={60}>
             <main className="h-full overflow-auto">
               <div className="p-4 md:p-6">
                 <Outlet />
