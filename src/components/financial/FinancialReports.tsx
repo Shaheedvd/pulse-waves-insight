@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CalendarRange, Download, FileText, Filter, Search, ArrowDown, ArrowUp, Printer } from "lucide-react";
+import { CalendarRange, Download, FileText, Filter, Search, ArrowDown, ArrowUp, Printer, DollarSign, ChartBarIcon, ChartPieIcon } from "lucide-react";
 import { downloadAsPdf } from "@/lib/pdf-utils";
 
 const FinancialReports = () => {
@@ -55,11 +56,13 @@ const FinancialReports = () => {
       </div>
 
       <Tabs defaultValue="reports-library" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex flex-wrap">
           <TabsTrigger value="reports-library">Reports Library</TabsTrigger>
           <TabsTrigger value="income-statement">Income Statement</TabsTrigger>
           <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>
           <TabsTrigger value="cash-flow">Cash Flow</TabsTrigger>
+          <TabsTrigger value="equity-changes">Changes in Equity</TabsTrigger>
+          <TabsTrigger value="management-reports">Management Reports</TabsTrigger>
         </TabsList>
         
         <TabsContent value="reports-library" className="space-y-4">
@@ -141,6 +144,36 @@ const FinancialReports = () => {
                         type: "Cash Flow", 
                         date: "2023-06-02", 
                         period: "May 2023" 
+                      },
+                      { 
+                        name: "Balance Sheet - June 2023", 
+                        type: "Balance Sheet", 
+                        date: "2023-07-01", 
+                        period: "As of June 30, 2023" 
+                      },
+                      { 
+                        name: "Statement of Changes in Equity", 
+                        type: "Equity Changes", 
+                        date: "2023-07-01", 
+                        period: "Jan-June 2023" 
+                      },
+                      { 
+                        name: "Budget Variance Report", 
+                        type: "Management", 
+                        date: "2023-07-02", 
+                        period: "June 2023" 
+                      },
+                      { 
+                        name: "Aged Receivables Report", 
+                        type: "Specific Purpose", 
+                        date: "2023-07-03", 
+                        period: "As of July 1, 2023" 
+                      },
+                      { 
+                        name: "Financial Forecast", 
+                        type: "Strategic", 
+                        date: "2023-07-05", 
+                        period: "Q3-Q4 2023" 
                       },
                     ].map((report, i) => (
                       <TableRow key={i}>
@@ -496,6 +529,385 @@ const FinancialReports = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="equity-changes" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Statement of Changes in Equity</CardTitle>
+                <CardDescription>
+                  For the period Jan 1, 2023 - May 31, 2023
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => handlePrintReport("Statement of Changes in Equity")}>
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleDownloadReport("Statement of Changes in Equity")}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Particulars</TableHead>
+                      <TableHead>Owner's Capital</TableHead>
+                      <TableHead>Retained Earnings</TableHead>
+                      <TableHead>Total Equity</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">Balance at January 1, 2023</TableCell>
+                      <TableCell>R 150,000</TableCell>
+                      <TableCell>R 28,500</TableCell>
+                      <TableCell>R 178,500</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="pl-10">Net Income for the period</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>R 86,500</TableCell>
+                      <TableCell>R 86,500</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="pl-10">Dividends paid</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>(R 66,000)</TableCell>
+                      <TableCell>(R 66,000)</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="pl-10">Additional capital invested</TableCell>
+                      <TableCell>R 0</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>R 0</TableCell>
+                    </TableRow>
+                    <TableRow className="font-bold">
+                      <TableCell>Balance at May 31, 2023</TableCell>
+                      <TableCell>R 150,000</TableCell>
+                      <TableCell>R 49,000</TableCell>
+                      <TableCell>R 199,000</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+                
+                <div className="bg-muted p-4 rounded-md">
+                  <h4 className="font-medium mb-2">Notes:</h4>
+                  <ul className="list-disc pl-5 text-sm space-y-1">
+                    <li>Quarterly dividend of R 33,000 was paid in March 2023</li>
+                    <li>Additional dividend of R 33,000 was paid in May 2023</li>
+                    <li>No additional capital was invested during this period</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="management-reports" className="space-y-4">
+          <Tabs defaultValue="budget-variance">
+            <TabsList className="mb-4">
+              <TabsTrigger value="budget-variance">Budget Variance</TabsTrigger>
+              <TabsTrigger value="department-performance">Department Performance</TabsTrigger>
+              <TabsTrigger value="cost-analysis">Cost Analysis</TabsTrigger>
+              <TabsTrigger value="aged-receivables">Aged Receivables</TabsTrigger>
+              <TabsTrigger value="forecasting">Financial Forecasting</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="budget-variance" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <DollarSign className="h-5 w-5 mr-2" />
+                    Budget Variance Report
+                  </CardTitle>
+                  <CardDescription>
+                    Actual performance compared to budget for May 2023
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Budgeted</TableHead>
+                        <TableHead>Actual</TableHead>
+                        <TableHead>Variance</TableHead>
+                        <TableHead>Variance %</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={5} className="font-medium">Revenue</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Restaurant Audits</TableCell>
+                        <TableCell>R 70,000</TableCell>
+                        <TableCell>R 66,000</TableCell>
+                        <TableCell className="text-red-600">-R 4,000</TableCell>
+                        <TableCell className="text-red-600">-5.7%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Forecourt & Shop Audits</TableCell>
+                        <TableCell>R 50,000</TableCell>
+                        <TableCell>R 55,000</TableCell>
+                        <TableCell className="text-green-600">+R 5,000</TableCell>
+                        <TableCell className="text-green-600">+10%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">School Audits</TableCell>
+                        <TableCell>R 25,000</TableCell>
+                        <TableCell>R 20,000</TableCell>
+                        <TableCell className="text-red-600">-R 5,000</TableCell>
+                        <TableCell className="text-red-600">-20%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Hotel Audits</TableCell>
+                        <TableCell>R 15,000</TableCell>
+                        <TableCell>R 16,500</TableCell>
+                        <TableCell className="text-green-600">+R 1,500</TableCell>
+                        <TableCell className="text-green-600">+10%</TableCell>
+                      </TableRow>
+                      <TableRow className="font-medium bg-muted/50">
+                        <TableCell>Total Revenue</TableCell>
+                        <TableCell>R 160,000</TableCell>
+                        <TableCell>R 157,500</TableCell>
+                        <TableCell className="text-red-600">-R 2,500</TableCell>
+                        <TableCell className="text-red-600">-1.6%</TableCell>
+                      </TableRow>
+                      
+                      <TableRow>
+                        <TableCell colSpan={5} className="font-medium">Expenses</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Evaluator Payments</TableCell>
+                        <TableCell>R 48,000</TableCell>
+                        <TableCell>R 45,000</TableCell>
+                        <TableCell className="text-green-600">+R 3,000</TableCell>
+                        <TableCell className="text-green-600">+6.3%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Staff Salaries</TableCell>
+                        <TableCell>R 65,000</TableCell>
+                        <TableCell>R 65,000</TableCell>
+                        <TableCell>R 0</TableCell>
+                        <TableCell>0%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Marketing</TableCell>
+                        <TableCell>R 8,000</TableCell>
+                        <TableCell>R 5,000</TableCell>
+                        <TableCell className="text-green-600">+R 3,000</TableCell>
+                        <TableCell className="text-green-600">+37.5%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="pl-10">Other Expenses</TableCell>
+                        <TableCell>R 22,000</TableCell>
+                        <TableCell>R 20,000</TableCell>
+                        <TableCell className="text-green-600">+R 2,000</TableCell>
+                        <TableCell className="text-green-600">+9.1%</TableCell>
+                      </TableRow>
+                      <TableRow className="font-medium bg-muted/50">
+                        <TableCell>Total Expenses</TableCell>
+                        <TableCell>R 143,000</TableCell>
+                        <TableCell>R 135,000</TableCell>
+                        <TableCell className="text-green-600">+R 8,000</TableCell>
+                        <TableCell className="text-green-600">+5.6%</TableCell>
+                      </TableRow>
+                      
+                      <TableRow className="font-bold text-lg">
+                        <TableCell>Net Income</TableCell>
+                        <TableCell>R 17,000</TableCell>
+                        <TableCell>R 22,500</TableCell>
+                        <TableCell className="text-green-600">+R 5,500</TableCell>
+                        <TableCell className="text-green-600">+32.4%</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="mt-6 p-4 bg-muted rounded-md">
+                    <h4 className="font-medium mb-2">Analysis & Action Items:</h4>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li>
+                        <span className="font-medium">Restaurant Audits:</span> Revenue below budget by 5.7%. 
+                        <span className="text-muted-foreground block ml-5 mt-1">
+                          Action: Follow up with account managers to understand reasons for the shortfall.
+                        </span>
+                      </li>
+                      <li>
+                        <span className="font-medium">School Audits:</span> Significant revenue shortfall of 20%.
+                        <span className="text-muted-foreground block ml-5 mt-1">
+                          Action: Review pricing strategy and marketing efforts for school segment.
+                        </span>
+                      </li>
+                      <li>
+                        <span className="font-medium">Marketing:</span> Spent R3,000 less than budgeted.
+                        <span className="text-muted-foreground block ml-5 mt-1">
+                          Action: Evaluate if additional marketing would improve school audit numbers.
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="department-performance" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <ChartBarIcon className="h-5 w-5 mr-2" />
+                    Department Performance Report
+                  </CardTitle>
+                  <CardDescription>
+                    Key performance indicators by department for May 2023
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Revenue</TableHead>
+                        <TableHead>Expenses</TableHead>
+                        <TableHead>Contribution</TableHead>
+                        <TableHead>Margin</TableHead>
+                        <TableHead>YoY Growth</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">Restaurant Division</TableCell>
+                        <TableCell>R 66,000</TableCell>
+                        <TableCell>R 42,000</TableCell>
+                        <TableCell>R 24,000</TableCell>
+                        <TableCell>36.4%</TableCell>
+                        <TableCell>+8.2%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Forecourt Division</TableCell>
+                        <TableCell>R 55,000</TableCell>
+                        <TableCell>R 38,000</TableCell>
+                        <TableCell>R 17,000</TableCell>
+                        <TableCell>30.9%</TableCell>
+                        <TableCell>+15.8%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Education Division</TableCell>
+                        <TableCell>R 20,000</TableCell>
+                        <TableCell>R 15,000</TableCell>
+                        <TableCell>R 5,000</TableCell>
+                        <TableCell>25.0%</TableCell>
+                        <TableCell>-12.5%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Hospitality Division</TableCell>
+                        <TableCell>R 16,500</TableCell>
+                        <TableCell>R 12,000</TableCell>
+                        <TableCell>R 4,500</TableCell>
+                        <TableCell>27.3%</TableCell>
+                        <TableCell>+22.0%</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Corporate Overhead</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>R 28,000</TableCell>
+                        <TableCell>-R 28,000</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>-5.1%</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div className="p-4 bg-muted rounded-md">
+                      <h4 className="font-medium mb-2">Key Insights:</h4>
+                      <ul className="list-disc pl-5 space-y-1 text-sm">
+                        <li>Forecourt Division showing strongest YoY growth at 15.8%</li>
+                        <li>Education Division facing challenges with -12.5% decline</li>
+                        <li>Corporate overhead costs reduced by 5.1% from previous year</li>
+                        <li>Hospitality Division has potential for expansion given its 22% growth</li>
+                      </ul>
+                    </div>
+                    <div className="p-4 bg-muted rounded-md">
+                      <h4 className="font-medium mb-2">Action Items:</h4>
+                      <ul className="list-disc pl-5 space-y-1 text-sm">
+                        <li>Investigate Education Division decline and develop recovery plan</li>
+                        <li>Explore expansion opportunities in Hospitality sector</li>
+                        <li>Share Forecourt Division best practices with other units</li>
+                        <li>Review resource allocation based on departmental performance</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="cost-analysis">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <ChartPieIcon className="h-5 w-5 mr-2" />
+                    Cost Analysis Report
+                  </CardTitle>
+                  <CardDescription>
+                    Detailed breakdown of costs by category and analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Cost Analysis content would go here */}
+                  <div className="text-center py-12 text-muted-foreground">
+                    Select a specific cost analysis report type to view
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="aged-receivables">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Aged Receivables Report
+                  </CardTitle>
+                  <CardDescription>
+                    Outstanding customer payments as of May 31, 2023
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Aged Receivables content would go here */}
+                  <div className="text-center py-12 text-muted-foreground">
+                    Detailed aged receivables data not available in this view
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="forecasting">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="h-5 w-5 mr-2" />
+                    Financial Forecasting
+                  </CardTitle>
+                  <CardDescription>
+                    Projected financial performance for upcoming periods
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Forecasting content would go here */}
+                  <div className="text-center py-12 text-muted-foreground">
+                    Select a specific forecasting report to view
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
       </Tabs>
 
       {/* Generate Report Dialog */}
@@ -522,10 +934,17 @@ const FinancialReports = () => {
                   <SelectItem value="income-statement">Income Statement</SelectItem>
                   <SelectItem value="balance-sheet">Balance Sheet</SelectItem>
                   <SelectItem value="cash-flow">Cash Flow Statement</SelectItem>
+                  <SelectItem value="equity-changes">Statement of Changes in Equity</SelectItem>
                   <SelectItem value="budget">Budget Report</SelectItem>
                   <SelectItem value="expense">Expense Report</SelectItem>
-                  <SelectItem value="donation">Donation/Sponsorship Report</SelectItem>
-                  <SelectItem value="transparency">Transparency Report</SelectItem>
+                  <SelectItem value="aged-receivables">Aged Receivables Report</SelectItem>
+                  <SelectItem value="performance">Department Performance</SelectItem>
+                  <SelectItem value="cost-analysis">Cost Analysis</SelectItem>
+                  <SelectItem value="variance-analysis">Budget Variance Analysis</SelectItem>
+                  <SelectItem value="tax">Tax Report</SelectItem>
+                  <SelectItem value="forecasting">Financial Forecast</SelectItem>
+                  <SelectItem value="ratio-analysis">Financial Ratios Analysis</SelectItem>
+                  <SelectItem value="annual">Annual Report</SelectItem>
                 </SelectContent>
               </Select>
             </div>
