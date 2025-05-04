@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -442,14 +441,14 @@ const UserActivityReport = () => {
               </div>
               
               <Select
-                value={selectedDepartment || ""}
-                onValueChange={(value) => setSelectedDepartment(value === "" ? null : value)}
+                value={selectedDepartment || "all-departments"}
+                onValueChange={(value) => setSelectedDepartment(value === "all-departments" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Department" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Departments</SelectItem>
+                  <SelectItem value="all-departments">All Departments</SelectItem>
                   {departments.map(dept => (
                     <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                   ))}
@@ -457,14 +456,14 @@ const UserActivityReport = () => {
               </Select>
               
               <Select
-                value={selectedLocation || ""}
-                onValueChange={(value) => setSelectedLocation(value === "" ? null : value)}
+                value={selectedLocation || "all-locations"}
+                onValueChange={(value) => setSelectedLocation(value === "all-locations" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Locations</SelectItem>
+                  <SelectItem value="all-locations">All Locations</SelectItem>
                   {locations.map(loc => (
                     <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                   ))}
@@ -472,14 +471,14 @@ const UserActivityReport = () => {
               </Select>
               
               <Select
-                value={selectedRole || ""}
-                onValueChange={(value) => setSelectedRole(value === "" ? null : value)}
+                value={selectedRole || "all-roles"}
+                onValueChange={(value) => setSelectedRole(value === "all-roles" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all-roles">All Roles</SelectItem>
                   {roles.map(role => (
                     <SelectItem key={role} value={role}>{role}</SelectItem>
                   ))}
