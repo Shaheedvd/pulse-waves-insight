@@ -94,7 +94,7 @@ const UserManagement = () => {
     facilities: "Facilities",
   };
 
-  const getRoleBadgeVariant = (role: UserRole) => {
+  const getRoleBadgeVariant = (role: UserRole): "default" | "destructive" | "orange" | "purple" | "blue" | "outline" | "secondary" => {
     switch (role) {
       case "superuser": return "destructive";
       case "power_manager": return "orange";
@@ -103,7 +103,7 @@ const UserManagement = () => {
       case "admin": return "default";
       case "restricted_admin": return "outline";
       case "viewer": return "secondary";
-      default: return "default" as const;
+      default: return "default";
     }
   };
 
