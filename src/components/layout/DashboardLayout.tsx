@@ -36,6 +36,14 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+// Define a type for navigation items
+interface NavigationItem {
+  name: string;
+  icon: React.ReactNode;
+  path: string;
+  onClick?: () => void;
+}
+
 const DashboardLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,7 +62,7 @@ const DashboardLayout = () => {
     navigate("/");
   };
 
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     {
       name: "Dashboard",
       icon: <BarChart4 size={20} />,

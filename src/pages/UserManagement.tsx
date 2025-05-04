@@ -103,7 +103,7 @@ const UserManagement = () => {
       case "admin": return "default";
       case "restricted_admin": return "outline";
       case "viewer": return "secondary";
-      default: return "default";
+      default: return "default" as "default";
     }
   };
 
