@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Define user roles with their permission levels
@@ -37,6 +36,27 @@ export interface Permissions {
   canEditDepartmentalData: boolean;
   canApproveLeaves: boolean;
   canEscalateTickets: boolean;
+  // New granular permissions for department dashboards
+  canManageFinancialDashboard: boolean;
+  canGenerateFinancialReports: boolean;
+  canManagePayroll: boolean;
+  canManageHRDashboard: boolean;
+  canManageRecruitment: boolean;
+  canManageTraining: boolean;
+  canManageMarketingDashboard: boolean;
+  canManageCreativeAssets: boolean;
+  canManageSalesDashboard: boolean;
+  canManageSalesEnablement: boolean;
+  canManageClientOnboarding: boolean;
+  canManageCustomerService: boolean;
+  canManageSystems: boolean;
+  canManageProductDevelopment: boolean;
+  canManageUXUI: boolean;
+  canManageITHelpdesk: boolean;
+  canManageTechnicalSupport: boolean;
+  canManageLegalContracts: boolean;
+  canManageCompliance: boolean;
+  canManageFacilities: boolean;
 }
 
 // Define department types
@@ -92,6 +112,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: true,
     canApproveLeaves: true,
     canEscalateTickets: true,
+    // New granular permissions
+    canManageFinancialDashboard: true,
+    canGenerateFinancialReports: true,
+    canManagePayroll: true,
+    canManageHRDashboard: true,
+    canManageRecruitment: true,
+    canManageTraining: true,
+    canManageMarketingDashboard: true,
+    canManageCreativeAssets: true,
+    canManageSalesDashboard: true,
+    canManageSalesEnablement: true,
+    canManageClientOnboarding: true,
+    canManageCustomerService: true,
+    canManageSystems: true,
+    canManageProductDevelopment: true,
+    canManageUXUI: true,
+    canManageITHelpdesk: true,
+    canManageTechnicalSupport: true,
+    canManageLegalContracts: true,
+    canManageCompliance: true,
+    canManageFacilities: true,
   },
   power_manager: {
     canViewReports: true,
@@ -118,6 +159,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: true,
     canApproveLeaves: true,
     canEscalateTickets: true,
+    // New granular permissions - power managers can manage their department
+    canManageFinancialDashboard: true,
+    canGenerateFinancialReports: true,
+    canManagePayroll: true,
+    canManageHRDashboard: true,
+    canManageRecruitment: true,
+    canManageTraining: true,
+    canManageMarketingDashboard: true,
+    canManageCreativeAssets: true,
+    canManageSalesDashboard: true,
+    canManageSalesEnablement: true,
+    canManageClientOnboarding: true,
+    canManageCustomerService: true,
+    canManageSystems: true,
+    canManageProductDevelopment: true,
+    canManageUXUI: true,
+    canManageITHelpdesk: true,
+    canManageTechnicalSupport: true,
+    canManageLegalContracts: true,
+    canManageCompliance: true,
+    canManageFacilities: true,
   },
   manager: {
     canViewReports: true,
@@ -144,6 +206,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: true,
     canApproveLeaves: true,
     canEscalateTickets: true,
+    // Managers get department-specific permissions based on their department
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
   },
   lead_admin: {
     canViewReports: true,
@@ -170,6 +253,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: true,
     canApproveLeaves: true,
     canEscalateTickets: true,
+    // Limited department-specific permissions
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
   },
   admin: {
     canViewReports: true,
@@ -196,6 +300,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: true,
     canApproveLeaves: false,
     canEscalateTickets: false,
+    // Basic view permissions, no management
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
   },
   restricted_admin: {
     canViewReports: false,
@@ -222,6 +347,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: false,
     canApproveLeaves: false,
     canEscalateTickets: false,
+    // No department-specific management permissions
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
   },
   viewer: {
     canViewReports: true,
@@ -248,6 +394,27 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: false,
     canApproveLeaves: false,
     canEscalateTickets: false,
+    // No department-specific management permissions
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
   },
 };
 
@@ -633,6 +800,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Update permissions if role changed
           if (updates.role && updates.role !== user.role) {
             updatedUser.permissions = rolePermissions[updates.role];
+          }
+          
+          // Update department-specific permissions based on department and role
+          if ((updates.department && updates.department !== user.department) || 
+              (updates.role && updates.role !== user.role)) {
+            
+            const department = updates.department || user.department;
+            const role = updates.role || user.role;
+            
+            // Only managers and above get department-specific permissions
+            if (role === "manager" || role === "power_manager" || role === "superuser") {
+              const updatedPermissions = { ...updatedUser.permissions };
+              
+              // Reset all department-specific permissions first
+              Object.keys(updatedPermissions).forEach(key => {
+                if (key.startsWith('canManage') && key !== 'canManageUsers' && key !== 'canManageSystem' && 
+                    key !== 'canManageDepartment') {
+                  updatedPermissions[key as keyof Permissions] = false;
+                }
+              });
+              
+              // Grant permissions based on department
+              if (department) {
+                switch (department) {
+                  case "finance":
+                    updatedPermissions.canManageFinancialDashboard = true;
+                    updatedPermissions.canGenerateFinancialReports = true;
+                    updatedPermissions.canManagePayroll = role === "power_manager" || role === "superuser";
+                    break;
+                  case "hr":
+                    updatedPermissions.canManageHRDashboard = true;
+                    updatedPermissions.canManageRecruitment = true;
+                    updatedPermissions.canManageTraining = true;
+                    break;
+                  case "marketing":
+                    updatedPermissions.canManageMarketingDashboard = true;
+                    updatedPermissions.canManageCreativeAssets = true;
+                    break;
+                  case "sales":
+                    updatedPermissions.canManageSalesDashboard = true;
+                    updatedPermissions.canManageSalesEnablement = true;
+                    break;
+                  case "customer_support":
+                    updatedPermissions.canManageCustomerService = true;
+                    updatedPermissions.canManageClientOnboarding = true;
+                    break;
+                  case "it":
+                    updatedPermissions.canManageSystems = true;
+                    updatedPermissions.canManageITHelpdesk = true;
+                    break;
+                  case "product":
+                    updatedPermissions.canManageProductDevelopment = true;
+                    updatedPermissions.canManageUXUI = true;
+                    break;
+                  case "legal":
+                    updatedPermissions.canManageLegalContracts = true;
+                    break;
+                  case "facilities":
+                    updatedPermissions.canManageFacilities = true;
+                    break;
+                }
+              }
+              
+              updatedUser.permissions = updatedPermissions;
+            }
           }
           
           return updatedUser;

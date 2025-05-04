@@ -7,12 +7,14 @@ interface ProtectedRouteProps {
   requiredPermission?: keyof Permissions;
   allowedRoles?: string[];
   requireMFA?: boolean;
+  children?: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   requiredPermission,
   allowedRoles,
-  requireMFA 
+  requireMFA,
+  children 
 }) => {
   const { isAuthenticated, hasPermission, currentUser } = useAuth();
   const location = useLocation();
@@ -49,6 +51,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
+  // For nested routes with direct children prop
+  if (children) {
+    return <>{children}</>;
+  }
+  
+  // Default case, allow access
   return <Outlet />;
 };
 
