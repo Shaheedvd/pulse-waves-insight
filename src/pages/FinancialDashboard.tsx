@@ -1,175 +1,117 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { DepartmentDashboard } from "@/components/dashboard/DepartmentDashboard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar, FileText, Calculator, ListTodo } from "lucide-react";
-import { TaskItem } from "@/contexts/TaskContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
-const FinancialDashboard: React.FC = () => {
-  const { currentUser, hasPermission } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
+// Define what your FinancialDashboard component should look like
+const FinancialDashboard = () => {
+  const [data, setData] = useState({
+    overallScore: 85,
+    locationsCovered: 12,
+    topCategory: "Customer Service",
+    improvementArea: "Product Quality",
+    categoryScoreData: [
+      { name: "Customer Service", value: 92 },
+      { name: "Cleanliness", value: 88 },
+      { name: "Product Quality", value: 78 },
+      { name: "Pricing", value: 85 },
+    ],
+    upcomingEvaluations: [
+      {
+        id: "EVAL-2301",
+        client: "QuickMart Retail Group",
+        location: "Cape Town CBD Branch",
+        date: "2025-05-15",
+      },
+      {
+        id: "EVAL-2302",
+        client: "EcoFuel Stations",
+        location: "Pretoria East Branch",
+        date: "2025-05-18",
+      },
+      {
+        id: "EVAL-2303",
+        client: "LuxCafé Chain",
+        location: "Sandton City Mall",
+        date: "2025-05-20",
+      },
+    ],
+  });
 
-  // Custom metrics for Financial Department
-  const FinancialMetrics = (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+  // Create custom metrics and content components that will be displayed outside of DepartmentDashboard
+  const financialMetrics = (
+    <div className="grid gap-4">
+      {/* Custom financial metrics content */}
       <Card>
         <CardHeader>
-          <CardTitle>Financial Reporting Status</CardTitle>
-          <CardDescription>Current status of financial reports</CardDescription>
+          <CardTitle>Financial Metrics</CardTitle>
+          <CardDescription>Key financial performance indicators</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Monthly P&L Report</p>
-                <div className="text-xs text-muted-foreground">Due May 15, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <FileText className="mr-2 h-4 w-4" />
-                View
-              </Button>
+          {/* Financial metrics content */}
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Revenue YTD</span>
+              <span className="font-bold">R 1,245,000</span>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Quarterly Balance Sheet</p>
-                <div className="text-xs text-muted-foreground">Due June 10, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <FileText className="mr-2 h-4 w-4" />
-                View
-              </Button>
+            <div className="flex justify-between">
+              <span>Expenses YTD</span>
+              <span className="font-bold">R 876,500</span>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Cash Flow Statement</p>
-                <div className="text-xs text-muted-foreground">Due May 30, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <FileText className="mr-2 h-4 w-4" />
-                View
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Payroll Schedule</CardTitle>
-          <CardDescription>Upcoming payroll tasks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Validate Timesheets</p>
-                <div className="text-xs text-muted-foreground">Due May 10, 2025</div>
-              </div>
-              <div className="text-sm font-medium text-green-600">Completed</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Process Payroll</p>
-                <div className="text-xs text-muted-foreground">Due May 28, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <ListTodo className="mr-2 h-4 w-4" />
-                Start
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Submit Tax Filings</p>
-                <div className="text-xs text-muted-foreground">Due June 2, 2025</div>
-              </div>
-              <div className="text-sm font-medium text-orange-600">Pending</div>
+            <div className="flex justify-between">
+              <span>Profit Margin</span>
+              <span className="font-bold text-green-600">29.6%</span>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-  
-  // Custom content for Financial Department
-  const FinanceCustomContent = (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Financial Calendar</CardTitle>
-          <CardDescription>Upcoming financial events</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Monthly P&L Review</p>
-                <div className="text-xs text-muted-foreground">May 15, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <Calendar className="mr-2 h-4 w-4" />
-                View
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Budget Planning Meeting</p>
-                <div className="text-xs text-muted-foreground">May 20, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <Calendar className="mr-2 h-4 w-4" />
-                View
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Quarterly Finance Review</p>
-                <div className="text-xs text-muted-foreground">June 10, 2025</div>
-              </div>
-              <Button size="sm" variant="outline">
-                <Calendar className="mr-2 h-4 w-4" />
-                View
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
+  const customDashboardContent = (
+    <div className="space-y-4 mt-6">
       <Card>
         <CardHeader>
-          <CardTitle>Financial Tools</CardTitle>
-          <CardDescription>Quick access to financial tools</CardDescription>
+          <CardTitle>Outstanding Invoices</CardTitle>
+          <CardDescription>Invoices requiring attention</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <Button className="w-full justify-start">
-              <Calculator className="mr-2 h-5 w-5" />
-              Budget Calculator
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <FileText className="mr-2 h-5 w-5" />
-              Financial Reports
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <ListTodo className="mr-2 h-5 w-5" />
-              Expense Tracker
-            </Button>
+          {/* Custom financial content */}
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Total Outstanding</span>
+              <span className="font-bold text-amber-600">R 124,500</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Overdue</span>
+              <span className="font-bold text-red-600">R 45,300</span>
+            </div>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 
+  // Use DepartmentDashboard component 
   return (
-    <DepartmentDashboard
-      department="finance"
-      title="Financial Department Dashboard"
-      description="Track financial operations, reports, and payroll management"
-      metrics={FinancialMetrics}
-      customContent={FinanceCustomContent}
-    />
+    <div className="space-y-6">
+      <DepartmentDashboard 
+        department="finance"
+        title="Finance Department Dashboard"
+        description="Key performance indicators and tasks for the finance department"
+      />
+      
+      {/* Render custom financial metrics and content separately */}
+      <div className="mt-6">
+        <h2 className="text-xl font-bold mb-4">Financial Metrics</h2>
+        {financialMetrics}
+      </div>
+      
+      <div>
+        <h2 className="text-xl font-bold mb-4">Financial Status</h2>
+        {customDashboardContent}
+      </div>
+    </div>
   );
 };
 

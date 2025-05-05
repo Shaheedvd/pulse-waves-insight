@@ -2,7 +2,8 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import TaskList from "@/components/dashboard/TaskList";
-import TaskMetrics from "@/components/dashboard/TaskMetrics";
+import { TaskMetrics } from "@/components/dashboard/TaskMetrics";
+import { useTask } from "@/contexts/TaskContext";
 
 interface DepartmentDashboardProps {
   department: string;
@@ -11,6 +12,9 @@ interface DepartmentDashboardProps {
 }
 
 export function DepartmentDashboard({ department, title, description }: DepartmentDashboardProps) {
+  const { filterTasks } = useTask();
+  const departmentTasks = filterTasks({ department: [department] });
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -90,7 +94,7 @@ export function DepartmentDashboard({ department, title, description }: Departme
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <TaskMetrics departmentId={department} />
+            <TaskMetrics tasks={departmentTasks} />
           </CardContent>
         </Card>
       </div>

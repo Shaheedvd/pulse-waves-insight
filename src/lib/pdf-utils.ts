@@ -305,10 +305,10 @@ export const generateAuditPdf = (auditData: any) => {
 };
 
 // Generate financial PDF report
-export const generateFinancialPdf = (title: string, financialData: any) => {
+export const generateFinancialPdf = (financialData: any) => {
   // Create HTML content for the financial report
   const content = `
-    <h1>${title || 'Financial Report'}</h1>
+    <h1>Financial Report</h1>
     <p>Generated on: ${new Date().toLocaleDateString()}</p>
     <p>Period: ${financialData.period || 'N/A'}</p>
     
