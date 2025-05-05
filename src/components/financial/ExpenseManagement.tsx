@@ -1,171 +1,218 @@
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Download, Eye, Plus, Check, X } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { generateFinancialPdf } from "@/lib/pdf-utils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useAuth } from "@/contexts/AuthContext";
+import { generateFinancialPdf } from "@/lib/utils";
 
-const sampleExpenses = [
-  {
-    id: "EXP-001",
-    date: "2023-06-15",
-    category: "Evaluator Fees",
-    description: "Payment to J. Smith - 5 evaluations",
-    amount: 3500,
-    status: "approved"
-  },
-  {
-    id: "EXP-002",
-    date: "2023-06-14",
-    category: "Office Supplies",
-    description: "Monthly stationery order",
-    amount: 1200,
-    status: "pending"
-  },
-  {
-    id: "EXP-003",
-    date: "2023-06-12",
-    category: "Travel",
-    description: "Field team travel expenses - Cape Town visits",
-    amount: 2800,
-    status: "approved"
-  },
-  {
-    id: "EXP-004",
-    date: "2023-06-10",
-    category: "Software",
-    description: "Annual CRM subscription",
-    amount: 9500,
-    status: "approved"
-  },
-  {
-    id: "EXP-005",
-    date: "2023-06-08",
-    category: "Marketing",
-    description: "Trade show booth materials",
-    amount: 4200,
-    status: "pending"
-  }
-];
+// Define a schema for the expense form
+const expenseSchema = z.object({
+  description: z.string().min(2, { message: "Description must be at least 2 characters." }),
+  amount: z.string().refine((value) => {
+    const num = Number(value);
+    return !isNaN(num) && num > 0;
+  }, {
+    message: "Amount must be a positive number."
+  }),
+  category: z.string().min(1, { message: "Category is required." }),
+  date: z.string().min(1, { message: "Date is required." }),
+});
 
-const ExpenseManagement = () => {
-  const { toast } = useToast();
-  const [isViewOpen, setIsViewOpen] = React.useState(false);
-  const [selectedExpense, setSelectedExpense] = React.useState<any>(null);
+type ExpenseFormValues = z.infer<typeof expenseSchema>;
 
-  const handleViewExpense = (expense: any) => {
-    setSelectedExpense(expense);
-    setIsViewOpen(true);
-  };
+// Define a type for the expense
+type Expense = {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+};
 
-  const handleApproveExpense = (id: string) => {
-    toast({
-      title: "Expense Approved",
-      description: `Expense ${id} has been approved.`,
-    });
-  };
+// Define a type for the expense category
+type ExpenseCategory = {
+  id: string;
+  name: string;
+};
 
-  const handleRejectExpense = (id: string) => {
-    toast({
-      title: "Expense Rejected",
-      description: `Expense ${id} has been rejected.`,
-    });
-  };
+export const ExpenseManagement = () => {
+  const { users } = useAuth();
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([
+    { id: "1", name: "Salaries" },
+    { id: "2", name: "Rent" },
+    { id: "3", name: "Supplies" },
+    { id: "4", name: "Marketing" },
+  ]);
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-  const handleDownloadExpense = (expense: any) => {
-    // Create expense data for the PDF
-    const expenseData = {
-      id: expense.id,
-      date: expense.date,
-      category: expense.category,
-      description: expense.description,
-      amount: expense.amount,
-      status: expense.status,
-      approver: "Financial Manager",
-      notes: "Expense documentation verified and approved.",
-      paymentDetails: {
-        method: "Bank Transfer",
-        date: "Within 7 working days",
-        reference: `REF-${expense.id}`
-      }
+  // Initialize react-hook-form
+  const form = useForm<ExpenseFormValues>({
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      description: "",
+      amount: "",
+      category: expenseCategories[0]?.name || "",
+      date: new Date().toISOString().split('T')[0],
+    },
+  });
+
+  // Calculate total expenses
+  const totalExpenses = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+
+  // Calculate total invoiced amount (assuming this is a fixed value or comes from another source)
+  const totalInvoiced = 500000;
+
+  // Calculate pending amount (assuming this is a fixed value or comes from another source)
+  const pendingAmount = 50000;
+
+  // Filter expenses based on search term and category
+  const filteredExpenses = expenses.filter(expense => {
+    const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || expense.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Function to handle adding a new expense
+  const handleAddExpense = (values: ExpenseFormValues) => {
+    const newExpense: Expense = {
+      id: String(expenses.length + 1),
+      description: values.description,
+      amount: Number(values.amount),
+      category: values.category,
+      date: values.date,
     };
+    setExpenses([...expenses, newExpense]);
+    setIsAddExpenseOpen(false);
+    form.reset();
+  };
 
-    // Generate the PDF
-    generateFinancialPdf("Expense Details", expenseData);
-    
-    toast({
-      title: "Expense Report Generated",
-      description: "Expense details have been downloaded as a PDF",
+  // Function to handle adding a new category
+  const handleAddCategory = (categoryName: string) => {
+    const newCategory: ExpenseCategory = {
+      id: String(expenseCategories.length + 1),
+      name: categoryName,
+    };
+    setExpenseCategories([...expenseCategories, newCategory]);
+    setIsAddCategoryOpen(false);
+  };
+
+  // Function to handle downloading the report as PDF
+  const handleDownloadReport = () => {
+    generateFinancialPdf({
+      period: "Current Period",
+      revenue: totalInvoiced,
+      expenses: totalExpenses,
+      profit: totalInvoiced - totalExpenses,
+      outstandingInvoices: pendingAmount,
+      expenseBreakdown: expenseCategories.map(category => ({
+        category: category.name,
+        amount: expenses
+          .filter(expense => expense.category === category.name)
+          .reduce((sum, expense) => sum + expense.amount, 0),
+        percentage: Math.round(
+          (expenses
+            .filter(expense => expense.category === category.name)
+            .reduce((sum, expense) => sum + expense.amount, 0) / totalExpenses) * 100
+        )
+      }))
     });
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Expense Management</h2>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Expense
-        </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h2 className="text-2xl font-bold">Expense Management</h2>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <Button onClick={() => setIsAddExpenseOpen(true)}>Add Expense</Button>
+          <Button onClick={() => setIsAddCategoryOpen(true)} variant="outline">Add Category</Button>
+        </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Expenses</CardTitle>
+        <CardHeader className="flex flex-col md:flex-row space-y-2 md:space-y-0 items-start md:items-center md:justify-between">
+          <div>
+            <CardTitle>Expenses</CardTitle>
+            <CardDescription>Manage and track your expenses</CardDescription>
+          </div>
+          <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+            <div className="relative w-full md:w-64">
+              <Input
+                placeholder="Search expenses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full md:w-40">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {expenseCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Category</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sampleExpenses.map((expense) => (
+              {filteredExpenses.map((expense) => (
                 <TableRow key={expense.id}>
-                  <TableCell>{expense.id}</TableCell>
-                  <TableCell>{expense.date}</TableCell>
-                  <TableCell>{expense.category}</TableCell>
                   <TableCell>{expense.description}</TableCell>
                   <TableCell>R {expense.amount.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      expense.status === 'approved' 
-                        ? 'bg-green-100 text-green-800' 
-                        : expense.status === 'pending' 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-red-100 text-red-800'
-                    }`}>
-                      {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleViewExpense(expense)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDownloadExpense(expense)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      {expense.status === 'pending' && (
-                        <>
-                          <Button variant="ghost" size="sm" className="text-green-600" onClick={() => handleApproveExpense(expense.id)}>
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => handleRejectExpense(expense.id)}>
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+                  <TableCell>{expense.category}</TableCell>
+                  <TableCell>{expense.date}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -173,61 +220,142 @@ const ExpenseManagement = () => {
         </CardContent>
       </Card>
 
-      {selectedExpense && (
-        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Expense Details</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">ID</h4>
-                  <p>{selectedExpense.id}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Date</h4>
-                  <p>{selectedExpense.date}</p>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground">Category</h4>
-                <p>{selectedExpense.category}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground">Description</h4>
-                <p>{selectedExpense.description}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Amount</h4>
-                  <p>R {selectedExpense.amount.toFixed(2)}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    selectedExpense.status === 'approved' 
-                      ? 'bg-green-100 text-green-800' 
-                      : selectedExpense.status === 'pending' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-red-100 text-red-800'
-                  }`}>
-                    {selectedExpense.status.charAt(0).toUpperCase() + selectedExpense.status.slice(1)}
-                  </span>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Expenses</CardTitle>
+            <CardDescription>Total amount of all expenses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">R {totalExpenses.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Download Report</CardTitle>
+            <CardDescription>Generate a report of all expenses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleDownloadReport}>Download</Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Add Expense Dialog */}
+      <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Expense</DialogTitle>
+            <DialogDescription>Add a new expense to track</DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleAddExpense)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Description" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Amount" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {expenseCategories.map((category) => (
+                          <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit">Add Expense</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Category Dialog */}
+      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Category</DialogTitle>
+            <DialogDescription>Add a new expense category</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                defaultValue=""
+                className="col-span-3"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddCategory((e.target as HTMLInputElement).value);
+                    setIsAddCategoryOpen(false);
+                  }
+                }}
+              />
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button>
-              <Button onClick={() => handleDownloadExpense(selectedExpense)}>
-                <Download className="mr-2 h-4 w-4" /> Download
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={() => {
+              const categoryName = document.getElementById("name") as HTMLInputElement;
+              handleAddCategory(categoryName?.value);
+              setIsAddCategoryOpen(false);
+            }}>
+              Add Category
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
-
-export default ExpenseManagement;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDesc, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,11 +14,12 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 
-const FinancialReports = () => {
+export const FinancialReports = () => {
   const { toast } = useToast();
-  const [dateRange, setDateRange] = useState({
-    from: new Date(),
-    to: new Date()
+  const [isGenerateReportOpen, setIsGenerateReportOpen] = useState(false);
+  const [dateRange, setDateRange] = useState({ 
+    from: new Date(), 
+    to: new Date() 
   });
   const [reportType, setReportType] = useState("income");
   
@@ -71,6 +72,27 @@ const FinancialReports = () => {
     }, 500);
   };
 
+  const generateReport = (reportType) => {
+    switch(reportType) {
+      case 'income':
+        generateFinancialPdf({
+          period: `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`,
+          // Add other fields needed for income report
+        });
+        break;
+      case 'expense':
+        generateFinancialPdf({
+          period: `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`,
+          // Add other fields needed for expense report
+        });
+        break;
+      // ... handle other report types
+      default:
+        break;
+    }
+    setIsGenerateReportOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -95,9 +117,9 @@ const FinancialReports = () => {
           <Card>
             <CardHeader>
               <CardTitle>Available Reports</CardTitle>
-              <CardDescription>
+              <CardDesc>
                 Access all your financial reports in one place
-              </CardDescription>
+              </CardDesc>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2 mb-4">
@@ -241,9 +263,9 @@ const FinancialReports = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle>Income Statement</CardTitle>
-                <CardDescription>
+                <CardDesc>
                   May 2023 | Generated on June 1, 2023
-                </CardDescription>
+                </CardDesc>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handlePrintReport("Income Statement")}>
@@ -349,9 +371,9 @@ const FinancialReports = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle>Balance Sheet</CardTitle>
-                <CardDescription>
+                <CardDesc>
                   As of May 31, 2023 | Generated on June 1, 2023
-                </CardDescription>
+                </CardDesc>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handlePrintReport("Balance Sheet")}>
@@ -458,9 +480,9 @@ const FinancialReports = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle>Cash Flow Statement</CardTitle>
-                <CardDescription>
+                <CardDesc>
                   May 2023 | Generated on June 1, 2023
-                </CardDescription>
+                </CardDesc>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handlePrintReport("Cash Flow Statement")}>
@@ -561,9 +583,9 @@ const FinancialReports = () => {
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle>Statement of Changes in Equity</CardTitle>
-                <CardDescription>
+                <CardDesc>
                   For the period Jan 1, 2023 - May 31, 2023
-                </CardDescription>
+                </CardDesc>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handlePrintReport("Statement of Changes in Equity")}>
@@ -651,9 +673,9 @@ const FinancialReports = () => {
                     <DollarSign className="h-5 w-5 mr-2" />
                     Budget Variance Report
                   </CardTitle>
-                  <CardDescription>
+                  <CardDesc>
                     Actual performance compared to budget for May 2023
-                  </CardDescription>
+                  </CardDesc>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -789,9 +811,9 @@ const FinancialReports = () => {
                     <ChartBarIcon className="h-5 w-5 mr-2" />
                     Department Performance Report
                   </CardTitle>
-                  <CardDescription>
+                  <CardDesc>
                     Key performance indicators by department for May 2023
-                  </CardDescription>
+                  </CardDesc>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -880,9 +902,9 @@ const FinancialReports = () => {
                     <ChartPieIcon className="h-5 w-5 mr-2" />
                     Cost Analysis Report
                   </CardTitle>
-                  <CardDescription>
+                  <CardDesc>
                     Detailed breakdown of costs by category and analysis
-                  </CardDescription>
+                  </CardDesc>
                 </CardHeader>
                 <CardContent>
                   {/* Cost Analysis content would go here */}
@@ -900,9 +922,9 @@ const FinancialReports = () => {
                     <FileText className="h-5 w-5 mr-2" />
                     Aged Receivables Report
                   </CardTitle>
-                  <CardDescription>
+                  <CardDesc>
                     Outstanding customer payments as of May 31, 2023
-                  </CardDescription>
+                  </CardDesc>
                 </CardHeader>
                 <CardContent>
                   {/* Aged Receivables content would go here */}
@@ -920,9 +942,9 @@ const FinancialReports = () => {
                     <TrendingUp className="h-5 w-5 mr-2" />
                     Financial Forecasting
                   </CardTitle>
-                  <CardDescription>
+                  <CardDesc>
                     Projected financial performance for upcoming periods
-                  </CardDescription>
+                  </CardDesc>
                 </CardHeader>
                 <CardContent>
                   {/* Forecasting content would go here */}
@@ -1011,7 +1033,7 @@ const FinancialReports = () => {
             <Button variant="outline" onClick={() => setIsGenerateReportOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleGenerateReport}>
+            <Button onClick={() => generateReport(reportType)}>
               Generate Report
             </Button>
           </DialogFooter>

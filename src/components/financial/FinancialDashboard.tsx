@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -72,7 +71,28 @@ const FinancialDashboard = () => {
       description: "Financial dashboard report has been downloaded as a PDF",
     });
   };
-  
+
+  const handleDownloadAsPDF = () => {
+    generateFinancialPdf({
+      period: "Q2 2025",
+      revenue: 2456000,
+      expenses: 1890000,
+      profit: 566000,
+      outstandingInvoices: 230000,
+      revenueBreakdown: [
+        { category: "Evaluations", amount: 1300000, percentage: 53 },
+        { category: "Consulting", amount: 750000, percentage: 30 },
+        { category: "Training", amount: 406000, percentage: 17 },
+      ],
+      expenseBreakdown: [
+        { category: "Salaries", amount: 1100000, percentage: 58 },
+        { category: "Operations", amount: 450000, percentage: 24 },
+        { category: "Marketing", amount: 180000, percentage: 10 },
+        { category: "Other", amount: 160000, percentage: 8 },
+      ]
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">

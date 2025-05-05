@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { User, useAuth, Department } from "@/contexts/AuthContext";
-import { database, shield, users, fileText, briefcase, mail } from "lucide-react";
+import { Database, Shield, Users, FileText, Briefcase, Mail } from "lucide-react";
 
 // Define form schema for employee data
 const employeeFormSchema = z.object({
@@ -105,7 +104,7 @@ export const HREmployeeManagement = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-2">
-          <database className="h-5 w-5 text-primary" />
+          <Database className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-bold">Employee Data Management</h2>
         </div>
         
@@ -117,7 +116,7 @@ export const HREmployeeManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
             />
-            <users className="h-4 w-4 absolute left-2 top-3 text-muted-foreground" />
+            <Users className="h-4 w-4 absolute left-2 top-3 text-muted-foreground" />
           </div>
           
           <Select value={departmentFilter} onValueChange={(value: Department | "all") => setDepartmentFilter(value)}>
@@ -319,7 +318,7 @@ export const HREmployeeManagement = () => {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <users className="h-5 w-5" />
+              <Users className="h-5 w-5" />
               Add New Employee
             </DialogTitle>
             <DialogDescription>
@@ -537,7 +536,7 @@ export const HREmployeeManagement = () => {
                     .filter(([key, value]) => value === true)
                     .map(([key]) => (
                       <div key={key} className="flex items-center gap-2">
-                        <shield className="h-4 w-4 text-green-500" />
+                        <Shield className="h-4 w-4 text-green-500" />
                         <span className="capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
                       </div>
                     ))
@@ -549,7 +548,7 @@ export const HREmployeeManagement = () => {
                 <div className="flex flex-col gap-2">
                   <p className="text-muted-foreground">No documents available</p>
                   <Button variant="outline" className="w-full justify-start">
-                    <fileText className="h-4 w-4 mr-2" />
+                    <FileText className="h-4 w-4 mr-2" />
                     Upload Document
                   </Button>
                 </div>

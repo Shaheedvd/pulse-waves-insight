@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,7 +40,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth, Department } from "@/contexts/AuthContext";
-import { book, bookOpen, users, calendar, check, fileText } from "lucide-react";
+import { Book, BookOpen, Users, Calendar, Check, FileText, Star } from "lucide-react";
 
 // Course schema
 const courseSchema = z.object({
@@ -254,7 +253,13 @@ export const HRLearningDevelopment = () => {
     console.log("New course added:", data);
     const newCourse = {
       id: (courses.length + 1).toString(),
-      ...data,
+      title: data.title,
+      description: data.description,
+      type: data.type,
+      category: data.category,
+      duration: data.duration,
+      provider: data.provider || "",
+      cost: data.cost || "",
       enrollments: 0,
       rating: 0,
     };
@@ -321,17 +326,17 @@ export const HRLearningDevelopment = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-2">
-          <book className="h-5 w-5 text-primary" />
+          <Book className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-bold">Learning & Development</h2>
         </div>
         
         <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
           <Button onClick={() => setIsAddCourseOpen(true)} className="flex gap-1">
-            <bookOpen className="h-4 w-4" />
+            <BookOpen className="h-4 w-4" />
             Add Training Course
           </Button>
           <Button onClick={() => setIsAssignCourseOpen(true)} variant="outline" className="flex gap-1">
-            <users className="h-4 w-4" />
+            <Users className="h-4 w-4" />
             Assign Training
           </Button>
         </div>
@@ -363,7 +368,7 @@ export const HRLearningDevelopment = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8"
                   />
-                  <bookOpen className="h-4 w-4 absolute left-2 top-3 text-muted-foreground" />
+                  <BookOpen className="h-4 w-4 absolute left-2 top-3 text-muted-foreground" />
                 </div>
                 
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -410,7 +415,7 @@ export const HRLearningDevelopment = () => {
                         {course.rating > 0 ? (
                           <div className="flex items-center gap-1">
                             <span className="text-sm font-medium">{course.rating}</span>
-                            <star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                            <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                           </div>
                         ) : "-"}
                       </TableCell>
@@ -700,7 +705,7 @@ export const HRLearningDevelopment = () => {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <bookOpen className="h-5 w-5" />
+              <BookOpen className="h-5 w-5" />
               Add New Training Course
             </DialogTitle>
             <DialogDescription>
@@ -846,7 +851,7 @@ export const HRLearningDevelopment = () => {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <users className="h-5 w-5" />
+              <Users className="h-5 w-5" />
               Assign Training Course
             </DialogTitle>
             <DialogDescription>
@@ -1027,7 +1032,7 @@ export const HRLearningDevelopment = () => {
                 
                 {selectedCourse.rating > 0 && (
                   <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-md">
-                    <star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                    <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                     <span className="text-sm font-medium text-amber-800">{selectedCourse.rating}</span>
                   </div>
                 )}
