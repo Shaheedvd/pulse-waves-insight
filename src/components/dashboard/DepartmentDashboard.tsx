@@ -83,7 +83,6 @@ export function DepartmentDashboard({ department, title, description }: Departme
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Fixed: passing tasks as prop to the TaskList component */}
             <TaskList tasks={departmentTasks.filter(task => task.department === department)} />
           </CardContent>
         </Card>
@@ -103,3 +102,5 @@ export function DepartmentDashboard({ department, title, description }: Departme
     </div>
   );
 }
+
+export default DepartmentDashboard;

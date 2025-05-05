@@ -13,8 +13,8 @@ const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
   // Sort tasks by priority (high to low) and due date
   const sortedTasks = [...tasks].sort((a, b) => {
     // Sort by completion status first
-    if (a.completed !== b.completed) {
-      return a.completed ? 1 : -1;
+    if ((!!a.completedAt) !== (!!b.completedAt)) {
+      return a.completedAt ? 1 : -1;
     }
     
     // Then by priority
@@ -28,7 +28,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
   });
 
   const getStatusIcon = (task: TaskItem) => {
-    if (task.completed) {
+    if (task.completedAt) {
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
     
@@ -65,13 +65,13 @@ const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
     <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
       {sortedTasks.length > 0 ? (
         sortedTasks.map((task) => (
-          <Card key={task.id} className={`border-l-4 ${task.completed ? 'border-l-green-500 bg-green-50' : 'border-l-blue-500'}`}>
+          <Card key={task.id} className={`border-l-4 ${task.completedAt ? 'border-l-green-500 bg-green-50' : 'border-l-blue-500'}`}>
             <CardContent className="p-3">
               <div className="flex justify-between items-start gap-2">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     {getStatusIcon(task)}
-                    <span className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                    <span className={`font-medium ${task.completedAt ? 'line-through text-muted-foreground' : ''}`}>
                       {task.title}
                     </span>
                   </div>
@@ -84,7 +84,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
                     {task.priority}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {task.assignee || "Unassigned"}
+                    {task.userId || "Unassigned"}
                   </span>
                 </div>
               </div>

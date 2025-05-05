@@ -1,8 +1,21 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Table, 
   TableBody, 
@@ -11,7 +24,6 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dialog, 
   DialogContent, 
@@ -20,198 +32,24 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useAuth, Department } from "@/contexts/AuthContext";
-import { Book, BookOpen, Users, Calendar, Check, FileText, Star } from "lucide-react";
+import { Book, BookOpen, Users, Calendar, Check, FileText } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
-// Course schema
-const courseSchema = z.object({
-  title: z.string().min(2, { message: "Course title is required" }),
-  description: z.string().min(10, { message: "Description is required" }),
-  type: z.enum(["internal", "external", "online", "workshop"]),
-  category: z.string().min(1, { message: "Category is required" }),
-  duration: z.string().min(1, { message: "Duration is required" }),
-  provider: z.string().optional(),
-  cost: z.string().optional(),
-});
-
-type CourseFormValues = z.infer<typeof courseSchema>;
-
-// Assignment schema
-const assignmentSchema = z.object({
-  courseId: z.string({ required_error: "Course is required" }),
-  employeeIds: z.array(z.string()).min(1, { message: "At least one employee must be selected" }),
-  dueDate: z.string({ required_error: "Due date is required" }),
-  mandatory: z.boolean().default(false),
-});
-
-type AssignmentFormValues = z.infer<typeof assignmentSchema>;
-
-// Sample courses data
-const initialCourses = [
-  {
-    id: "1",
-    title: "Leadership Essentials",
-    description: "A foundational course covering key leadership principles, communication skills, and team management techniques.",
-    type: "internal",
-    category: "Leadership",
-    duration: "16 hours",
-    provider: "Internal L&D Team",
-    cost: "R0",
-    enrollments: 8,
-    rating: 4.7,
-  },
-  {
-    id: "2",
-    title: "Financial Management for Non-Financial Managers",
-    description: "Learn to understand financial statements, budgeting, and financial decision-making without a finance background.",
-    type: "workshop",
-    category: "Finance",
-    duration: "8 hours",
-    provider: "SA Financial Training Institute",
-    cost: "R3,500 per person",
-    enrollments: 12,
-    rating: 4.2,
-  },
-  {
-    id: "3",
-    title: "Advanced Excel Skills",
-    description: "Master advanced Excel functions including VLOOKUP, pivot tables, macros, and data analysis tools.",
-    type: "online",
-    category: "Technical Skills",
-    duration: "Self-paced (approx. 10 hours)",
-    provider: "SkillSoft",
-    cost: "R1,200 per license",
-    enrollments: 24,
-    rating: 4.5,
-  },
-  {
-    id: "4",
-    title: "Effective Communication Skills",
-    description: "Develop key communication skills including active listening, conflict resolution, and persuasive speaking.",
-    type: "workshop",
-    category: "Soft Skills",
-    duration: "12 hours",
-    provider: "Communication Excellence Ltd",
-    cost: "R2,800 per person",
-    enrollments: 18,
-    rating: 4.8,
-  },
-  {
-    id: "5",
-    title: "Project Management Fundamentals",
-    description: "Learn the basics of project management including planning, execution, monitoring, and closing projects successfully.",
-    type: "external",
-    category: "Project Management",
-    duration: "24 hours",
-    provider: "PM Institute South Africa",
-    cost: "R4,500 per person",
-    enrollments: 10,
-    rating: 4.3,
-  },
-];
-
-// Sample assignments data
-const initialAssignments = [
-  {
-    id: "1",
-    courseId: "1",
-    courseTitle: "Leadership Essentials",
-    employees: [
-      { id: "6", name: "Oliver Operations" },
-      { id: "7", name: "Fiona Finance" },
-      { id: "10", name: "Helen HR" },
-    ],
-    assignedDate: "2025-04-15",
-    dueDate: "2025-06-15",
-    mandatory: true,
-    completionRate: 33,
-  },
-  {
-    id: "2",
-    courseId: "3",
-    courseTitle: "Advanced Excel Skills",
-    employees: [
-      { id: "8", name: "Andrew Accountant" },
-      { id: "9", name: "Paula Payroll" },
-      { id: "14", name: "Carlos CRM" },
-      { id: "25", name: "Frank Facilities" },
-    ],
-    assignedDate: "2025-04-01",
-    dueDate: "2025-05-15",
-    mandatory: true,
-    completionRate: 50,
-  },
-  {
-    id: "3",
-    courseId: "4",
-    courseTitle: "Effective Communication Skills",
-    employees: [
-      { id: "22", name: "Harry Helpdesk" },
-      { id: "13", name: "Sally SalesRep" },
-      { id: "11", name: "Rachel Recruiter" },
-    ],
-    assignedDate: "2025-03-10",
-    dueDate: "2025-05-10",
-    mandatory: false,
-    completionRate: 67,
-  },
-];
-
-// Sample skill data
-const skillsData = [
-  {
-    category: "Technical Skills",
-    skills: [
-      { name: "Microsoft Excel", employees: 18 },
-      { name: "Salesforce CRM", employees: 9 },
-      { name: "Financial Analysis", employees: 6 },
-      { name: "Project Management", employees: 8 },
-      { name: "SQL", employees: 5 },
-      { name: "JavaScript", employees: 4 },
-      { name: "HR Systems", employees: 3 },
-    ]
-  },
-  {
-    category: "Soft Skills",
-    skills: [
-      { name: "Leadership", employees: 12 },
-      { name: "Communication", employees: 21 },
-      { name: "Team Management", employees: 10 },
-      { name: "Conflict Resolution", employees: 15 },
-      { name: "Presentation", employees: 14 },
-      { name: "Negotiation", employees: 7 },
-    ]
-  },
-  {
-    category: "Certifications",
-    skills: [
-      { name: "PMP", employees: 3 },
-      { name: "ACCA", employees: 2 },
-      { name: "MCSA", employees: 2 },
-      { name: "ITIL", employees: 4 },
-      { name: "SHRM-CP", employees: 1 },
-    ]
-  }
-];
+// Define proper types for TrainingCourse
+type TrainingCourse = {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  category: string;
+  duration: string;
+  provider: string;
+  cost: string;
+  enrollments: number;
+  rating: number;
+};
 
 export const HRLearningDevelopment = () => {
   const { users: allUsers } = useAuth();
@@ -249,23 +87,22 @@ export const HRLearningDevelopment = () => {
   });
   
   // Handlers
-  const handleAddCourse = (data: CourseFormValues) => {
-    console.log("New course added:", data);
-    const newCourse = {
-      id: (courses.length + 1).toString(),
-      title: data.title,
-      description: data.description,
-      type: data.type,
-      category: data.category,
-      duration: data.duration,
-      provider: data.provider || "",
-      cost: data.cost || "",
+  const handleAddCourse = () => {
+    const newCourse: TrainingCourse = {
+      id: `course-${Date.now()}`,
+      title: "New Training Course",
+      description: "Description for the new course",
+      type: "online",
+      category: "Technical Skills",
+      duration: "4 weeks",
+      provider: "Internal",
+      cost: "R0",
       enrollments: 0,
-      rating: 0,
+      rating: 0
     };
+    
     setCourses([...courses, newCourse]);
     setIsAddCourseOpen(false);
-    courseForm.reset();
   };
 
   const handleAssignCourse = (data: AssignmentFormValues) => {

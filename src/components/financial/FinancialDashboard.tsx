@@ -1,319 +1,300 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
-import { CalendarRange, Calculator, FileText, ListChecks, CreditCard, ArrowUpDown, Download } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { generateFinancialPdf } from "@/lib/pdf-utils";
-
-// Sample data for the charts
-const revenueData = [
-  { month: 'Jan', income: 15500, expenses: 12000 },
-  { month: 'Feb', income: 18200, expenses: 13400 },
-  { month: 'Mar', income: 16800, expenses: 11900 },
-  { month: 'Apr', income: 19500, expenses: 14200 },
-  { month: 'May', income: 21000, expenses: 15800 },
-  { month: 'Jun', income: 22000, expenses: 16500 },
-];
-
-const incomeSourceData = [
-  { name: 'Restaurant Audits', value: 55000, color: '#8884d8' },
-  { name: 'Forecourt & Shop Audits', value: 45000, color: '#82ca9d' },
-  { name: 'School Audits', value: 25000, color: '#ffc658' },
-  { name: 'Hotel Audits', value: 22000, color: '#ff8042' },
-];
-
-const expenseData = [
-  { name: 'Evaluator Payments', value: 30000, color: '#0088FE' },
-  { name: 'Staff Salaries', value: 45000, color: '#00C49F' },
-  { name: 'Operations', value: 15000, color: '#FFBB28' },
-  { name: 'Marketing', value: 10000, color: '#FF8042' },
-];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { generateFinancialPdf } from "@/utils/pdf-generation";
 
 const FinancialDashboard = () => {
-  const { toast } = useToast();
+  const [period, setPeriod] = useState("monthly");
+  
+  // Sample data for financial metrics
+  const revenueData = [
+    { month: 'Jan', revenue: 145000 },
+    { month: 'Feb', revenue: 132000 },
+    { month: 'Mar', revenue: 157000 },
+    { month: 'Apr', revenue: 169000 },
+    { month: 'May', revenue: 187000 },
+    { month: 'Jun', revenue: 190000 },
+  ];
+  
+  const expenseData = [
+    { month: 'Jan', expenses: 67000 },
+    { month: 'Feb', expenses: 71000 },
+    { month: 'Mar', expenses: 70000 },
+    { month: 'Apr', expenses: 68000 },
+    { month: 'May', expenses: 73000 },
+    { month: 'Jun', expenses: 80000 },
+  ];
+  
+  const profitData = revenueData.map((item, index) => ({
+    month: item.month,
+    profit: item.revenue - expenseData[index].expenses
+  }));
+  
+  const cashFlowData = [
+    { month: 'Jan', inflow: 150000, outflow: 70000 },
+    { month: 'Feb', inflow: 135000, outflow: 75000 },
+    { month: 'Mar', inflow: 160000, outflow: 72000 },
+    { month: 'Apr', inflow: 175000, outflow: 70000 },
+    { month: 'May', inflow: 190000, outflow: 75000 },
+    { month: 'Jun', inflow: 195000, outflow: 82000 },
+  ];
+  
+  const expenseBreakdownData = [
+    { name: 'Salaries', value: 45000 },
+    { name: 'Rent', value: 15000 },
+    { name: 'Utilities', value: 5000 },
+    { name: 'Marketing', value: 8000 },
+    { name: 'Equipment', value: 7000 },
+  ];
+  
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
   
   const handleDownloadReport = () => {
-    // Create financial data object with all dashboard information
-    const financialData = {
-      summary: {
-        totalRevenue: 'R 147,000',
-        totalExpenses: 'R 100,000',
-        pendingInvoices: '12',
-        pendingValue: 'R 66,000',
-        profitMargin: '32%',
-        trend: '+2.5%'
-      },
-      charts: {
-        revenueVsExpenses: revenueData,
-        incomeSources: incomeSourceData,
-        expenseCategories: expenseData
-      },
-      transactions: [
-        { date: '2023-06-15', description: 'Invoice #5591 - QuickMart Audit', amount: 'R 5,500', type: 'income' },
-        { date: '2023-06-12', description: 'Evaluator Payment - E. Walker', amount: 'R 2,500', type: 'expense' },
-        { date: '2023-06-10', description: 'Invoice #5590 - EcoFuel Forecourt', amount: 'R 5,500', type: 'income' },
-        { date: '2023-06-05', description: 'Evaluator Payment - S. Johnson', amount: 'R 2,000', type: 'expense' },
-        { date: '2023-06-01', description: 'Invoice #5589 - Central High School', amount: 'R 2,500', type: 'income' }
-      ],
-      upcomingPayments: [
-        { date: '2023-06-18', description: 'Evaluator Payment - T. Nkosi', amount: 'R 3,000', status: 'pending' },
-        { date: '2023-06-20', description: 'Invoice #5592 - LuxCafé', amount: 'R 5,500', status: 'scheduled' },
-        { date: '2023-06-22', description: 'Evaluator Payment - M. Patel', amount: 'R 2,500', status: 'pending' }
-      ]
-    };
-    
-    generateFinancialPdf("Financial Dashboard", financialData);
-    
-    toast({
-      title: "Financial Report Generated",
-      description: "Financial dashboard report has been downloaded as a PDF",
+    generateFinancialPdf({ 
+      period: period,
+      revenue: revenueData 
     });
   };
-
-  const handleDownloadAsPDF = () => {
-    generateFinancialPdf({
-      period: "Q2 2025",
-      revenue: 2456000,
-      expenses: 1890000,
-      profit: 566000,
-      outstandingInvoices: 230000,
-      revenueBreakdown: [
-        { category: "Evaluations", amount: 1300000, percentage: 53 },
-        { category: "Consulting", amount: 750000, percentage: 30 },
-        { category: "Training", amount: 406000, percentage: 17 },
-      ],
-      expenseBreakdown: [
-        { category: "Salaries", amount: 1100000, percentage: 58 },
-        { category: "Operations", amount: 450000, percentage: 24 },
-        { category: "Marketing", amount: 180000, percentage: 10 },
-        { category: "Other", amount: 160000, percentage: 8 },
-      ]
-    });
-  };
-
+  
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold tracking-tight">Financial Dashboard</h2>
-        <Button variant="outline" onClick={handleDownloadReport}>
-          <Download className="mr-2 h-4 w-4" />
-          Download Report
-        </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h2 className="text-2xl font-bold">Financial Dashboard</h2>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-full md:w-40">
+              <SelectValue placeholder="Period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="weekly">Weekly</SelectItem>
+              <SelectItem value="monthly">Monthly</SelectItem>
+              <SelectItem value="quarterly">Quarterly</SelectItem>
+              <SelectItem value="yearly">Yearly</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={handleDownloadReport}>Download Report</Button>
+        </div>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R 147,000</div>
+            <div className="text-2xl font-bold">R 980,000</div>
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              +20.1% from last period
             </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
-            <Calculator className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R 100,000</div>
+            <div className="text-2xl font-bold">R 429,000</div>
             <p className="text-xs text-muted-foreground">
-              +12.5% from last month
+              +4.3% from last period
             </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">R 551,000</div>
             <p className="text-xs text-muted-foreground">
-              Total value: R 66,000
+              +35.2% from last period
             </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profit Margin</CardTitle>
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Cash Flow</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">32%</div>
+            <div className="text-2xl font-bold">R 428,000</div>
             <p className="text-xs text-muted-foreground">
-              +2.5% from last month
+              +12.5% from last period
             </p>
           </CardContent>
         </Card>
       </div>
-
-      <Tabs defaultValue="overview" className="space-y-4">
+      
+      <Tabs defaultValue="revenue" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger value="profit">Profit</TabsTrigger>
+          <TabsTrigger value="cashflow">Cash Flow</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-4">
+        <TabsContent value="revenue" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Revenue vs Expenses</CardTitle>
+              <CardTitle>Revenue Overview</CardTitle>
               <CardDescription>
-                Financial performance for the last 6 months
+                Monthly revenue for the current period
               </CardDescription>
             </CardHeader>
             <CardContent className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueData}>
+                <BarChart
+                  data={revenueData}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value) => `R ${value}`} />
+                  <Tooltip formatter={(value) => [`R ${value}`, 'Revenue']} />
                   <Legend />
-                  <Bar dataKey="income" name="Income" fill="#8884d8" />
-                  <Bar dataKey="expenses" name="Expenses" fill="#82ca9d" />
+                  <Bar dataKey="revenue" fill="#0088FE" name="Revenue" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="income" className="space-y-4">
+        <TabsContent value="expenses" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Expense Overview</CardTitle>
+                <CardDescription>
+                  Monthly expenses for the current period
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={expenseData}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`R ${value}`, 'Expenses']} />
+                    <Legend />
+                    <Bar dataKey="expenses" fill="#FF8042" name="Expenses" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Expense Breakdown</CardTitle>
+                <CardDescription>
+                  Distribution of expenses by category
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={expenseBreakdownData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {expenseBreakdownData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`R ${value}`, 'Amount']} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="profit" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Income by Source</CardTitle>
+              <CardTitle>Profit Overview</CardTitle>
               <CardDescription>
-                Breakdown of revenue streams
+                Monthly profit for the current period
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-80 flex justify-center">
+            <CardContent className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={incomeSourceData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {incomeSourceData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `R ${value}`} />
-                </PieChart>
+                <LineChart
+                  data={profitData}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`R ${value}`, 'Profit']} />
+                  <Legend />
+                  <Line type="monotone" dataKey="profit" stroke="#00C49F" activeDot={{ r: 8 }} />
+                </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="expenses" className="space-y-4">
+        <TabsContent value="cashflow" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Expense Categories</CardTitle>
+              <CardTitle>Cash Flow Overview</CardTitle>
               <CardDescription>
-                Breakdown of operational costs
+                Monthly cash flow for the current period
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-80 flex justify-center">
+            <CardContent className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={expenseData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {expenseData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `R ${value}`} />
-                </PieChart>
+                <BarChart
+                  data={cashFlowData}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`R ${value}`, 'Amount']} />
+                  <Legend />
+                  <Bar dataKey="inflow" fill="#0088FE" name="Cash In" />
+                  <Bar dataKey="outflow" fill="#FF8042" name="Cash Out" />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>
-              Latest financial activities
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { date: '2023-06-15', description: 'Invoice #5591 - QuickMart Audit', amount: 'R 5,500', type: 'income' },
-                { date: '2023-06-12', description: 'Evaluator Payment - E. Walker', amount: 'R 2,500', type: 'expense' },
-                { date: '2023-06-10', description: 'Invoice #5590 - EcoFuel Forecourt', amount: 'R 5,500', type: 'income' },
-                { date: '2023-06-05', description: 'Evaluator Payment - S. Johnson', amount: 'R 2,000', type: 'expense' },
-                { date: '2023-06-01', description: 'Invoice #5589 - Central High School', amount: 'R 2,500', type: 'income' },
-              ].map((transaction, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{transaction.description}</span>
-                    <span className="text-xs text-muted-foreground">{transaction.date}</span>
-                  </div>
-                  <span className={`font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                    {transaction.type === 'income' ? '+' : '-'} {transaction.amount}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Payments</CardTitle>
-            <CardDescription>
-              Scheduled transactions for next 7 days
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { date: '2023-06-18', description: 'Evaluator Payment - T. Nkosi', amount: 'R 3,000', status: 'pending' },
-                { date: '2023-06-20', description: 'Invoice #5592 - LuxCafé', amount: 'R 5,500', status: 'scheduled' },
-                { date: '2023-06-22', description: 'Evaluator Payment - M. Patel', amount: 'R 2,500', status: 'pending' },
-              ].map((payment, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{payment.description}</span>
-                    <span className="text-xs text-muted-foreground">{payment.date}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="font-medium mr-2">{payment.amount}</span>
-                    <span className={`text-xs rounded-full px-2 py-1 ${
-                      payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {payment.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

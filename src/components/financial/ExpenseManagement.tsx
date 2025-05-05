@@ -39,7 +39,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import { generateFinancialPdf } from "@/lib/utils";
+import { generateFinancialPdf } from "@/utils/pdf-generation";
 
 // Define a schema for the expense form
 const expenseSchema = z.object({
