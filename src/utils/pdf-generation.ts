@@ -9,6 +9,7 @@ interface FinancialPdfData {
   expenses?: number;
   profit?: number;
   outstandingInvoices?: number;
+  reportType?: string;
   expenseBreakdown?: Array<{
     category: string;
     amount: number;

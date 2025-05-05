@@ -1,13 +1,16 @@
+
 import React, { useState } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -15,198 +18,369 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { generateFinancialPdf } from "@/utils/pdf-generation";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generateFinancialPdf } from "@/lib/utils";
 
-export const FinancialReports = () => {
-  const [activeReport, setActiveReport] = useState("income");
+const FinancialReports = () => {
+  const [activeTab, setActiveTab] = useState("income");
   const [isGenerateReportOpen, setIsGenerateReportOpen] = useState(false);
-  const [reportPeriod, setReportPeriod] = useState("monthly");
+  const [reportType, setReportType] = useState("income");
+  const [reportFormat, setReportFormat] = useState("pdf");
   const [dateRange, setDateRange] = useState({
-    from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // First day of current month
     to: new Date(),
   });
-  const [customReport, setCustomReport] = useState({
-    title: "",
-    description: "",
-    metrics: ["revenue", "expenses", "profit_margin"],
-  });
-
-  // Sample data for reports
-  const monthlyIncomeData = [
-    { month: 'Jan', revenue: 145000, expenses: 67000, profit: 78000 },
-    { month: 'Feb', revenue: 132000, expenses: 71000, profit: 61000 },
-    { month: 'Mar', revenue: 157000, expenses: 70000, profit: 87000 },
-    { month: 'Apr', revenue: 169000, expenses: 68000, profit: 101000 },
-    { month: 'May', revenue: 187000, expenses: 73000, profit: 114000 },
-    { month: 'Jun', revenue: 190000, expenses: 80000, profit: 110000 },
-  ];
 
   const handleGenerateReport = () => {
-    // Example of updating the generateFinancialPdf call
-    generateFinancialPdf({
-      period: `${reportPeriod.charAt(0).toUpperCase() + reportPeriod.slice(1)} Report: ${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`,
-      revenue: 245000,
-      expenses: 110000,
-      profit: 135000
-    });
+    const reportData = {
+      period: `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`,
+      reportType,
+    };
     
+    generateFinancialPdf(reportData);
     setIsGenerateReportOpen(false);
-  };
-
-  const handleExport = (type) => {
-    let data;
-    let title = "";
-    
-    switch (activeReport) {
-      case "income":
-        data = monthlyIncomeData;
-        title = "Income Report";
-        break;
-      case "expense":
-        data = monthlyIncomeData;
-        title = "Expense Report";
-        break;
-      default:
-        data = monthlyIncomeData;
-        title = "Financial Report";
-    }
-
-    // Fix the function call to use the correct parameters
-    generateFinancialPdf({
-      period: title
-    });
-  };
-
-  // For handling date range picker (this would need a custom implementation or library)
-  const handleDateRangeChange = (range) => {
-    // In a real implementation, this would update the date range
-    console.log("Date range changed:", range);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 className="text-2xl font-bold">Financial Reports</h2>
-        <p className="text-muted-foreground">
-          Generate and analyze financial reports
-        </p>
+        <Button onClick={() => setIsGenerateReportOpen(true)}>Generate Report</Button>
       </div>
 
-      <Tabs value={activeReport} onValueChange={setActiveReport} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="income">Income Report</TabsTrigger>
-          <TabsTrigger value="expense">Expense Report</TabsTrigger>
-          <TabsTrigger value="custom">Custom Report</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger value="cashflow">Cash Flow</TabsTrigger>
+          <TabsTrigger value="balance">Balance Sheet</TabsTrigger>
         </TabsList>
 
         <TabsContent value="income" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Income Report</CardTitle>
-              <CardDescription>Monthly income overview</CardDescription>
+              <CardTitle>Income Statement</CardTitle>
+              <CardDescription>Revenue and expense summary</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex justify-between">
+                <span className="font-medium">Revenue</span>
+                <span>R 325,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Cost of Sales</span>
+                <span>R 120,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Gross Profit</span>
+                <span>R 205,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Operating Expenses</span>
+                <span>R 95,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Net Profit</span>
+                <span className="font-bold">R 110,000.00</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue Breakdown</CardTitle>
+              <CardDescription>Revenue by category</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyIncomeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="revenue" stroke="#8884d8" activeDot={{ r: 8 }} />
-                  <Line type="monotone" dataKey="expenses" stroke="#82ca9d" />
-                  <Line type="monotone" dataKey="profit" stroke="#ffc658" />
-                </LineChart>
-              </ResponsiveContainer>
-              <Button onClick={() => handleExport("income")}>Export</Button>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span>Services</span>
+                  <span>R 210,000.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Products</span>
+                  <span>R 85,000.00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Other Income</span>
+                  <span>R 30,000.00</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="expense" className="space-y-4">
+        <TabsContent value="expenses" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Expense Report</CardTitle>
-              <CardDescription>Monthly expense breakdown</CardDescription>
+              <CardDescription>Breakdown of all expenses</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyIncomeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="expenses" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-              <Button onClick={() => handleExport("expense")}>Export</Button>
+            <CardContent className="space-y-2">
+              <div className="flex justify-between">
+                <span className="font-medium">Salaries</span>
+                <span>R 65,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Rent</span>
+                <span>R 12,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Utilities</span>
+                <span>R 5,000.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Office Supplies</span>
+                <span>R 3,500.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Marketing</span>
+                <span>R 8,500.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Other Expenses</span>
+                <span>R 1,000.00</span>
+              </div>
+              <div className="flex justify-between mt-2 pt-2 border-t">
+                <span className="font-bold">Total Expenses</span>
+                <span className="font-bold">R 95,000.00</span>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="custom" className="space-y-4">
+        <TabsContent value="cashflow" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Custom Report</CardTitle>
-              <CardDescription>Create and customize your own report</CardDescription>
+              <CardTitle>Cash Flow Statement</CardTitle>
+              <CardDescription>Cash movement summary</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button onClick={() => setIsGenerateReportOpen(true)}>Generate Report</Button>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Operating Activities</h4>
+                <div className="pl-4 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Net Income</span>
+                    <span>R 110,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Depreciation</span>
+                    <span>R 8,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Changes in Working Capital</span>
+                    <span>R -15,000.00</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Cash from Operating</span>
+                    <span>R 103,000.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-2">Investing Activities</h4>
+                <div className="pl-4 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Capital Expenditures</span>
+                    <span>R -35,000.00</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Cash from Investing</span>
+                    <span>R -35,000.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-2">Financing Activities</h4>
+                <div className="pl-4 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Loan Repayments</span>
+                    <span>R -12,000.00</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Cash from Financing</span>
+                    <span>R -12,000.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t">
+                <div className="flex justify-between font-bold">
+                  <span>Net Cash Flow</span>
+                  <span>R 56,000.00</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="balance" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Balance Sheet</CardTitle>
+              <CardDescription>Assets, liabilities, and equity</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Assets</h4>
+                <div className="pl-4 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Cash and Cash Equivalents</span>
+                    <span>R 185,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Accounts Receivable</span>
+                    <span>R 95,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Inventory</span>
+                    <span>R 45,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fixed Assets</span>
+                    <span>R 320,000.00</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Total Assets</span>
+                    <span>R 645,000.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-2">Liabilities</h4>
+                <div className="pl-4 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Accounts Payable</span>
+                    <span>R 35,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Short-term Loans</span>
+                    <span>R 25,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Long-term Loans</span>
+                    <span>R 180,000.00</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Total Liabilities</span>
+                    <span>R 240,000.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium mb-2">Equity</h4>
+                <div className="pl-4 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Share Capital</span>
+                    <span>R 250,000.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Retained Earnings</span>
+                    <span>R 155,000.00</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Total Equity</span>
+                    <span>R 405,000.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t">
+                <div className="flex justify-between font-bold">
+                  <span>Total Liabilities and Equity</span>
+                  <span>R 645,000.00</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-      
-      {/* Fix the Dialog open state management */}
+
+      {/* Generate Report Dialog */}
       <Dialog open={isGenerateReportOpen} onOpenChange={setIsGenerateReportOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Generate Report</DialogTitle>
-            <DialogDescription>
-              Customize the report settings
-            </DialogDescription>
+            <DialogTitle>Generate Financial Report</DialogTitle>
+            <DialogDescription>Select report options</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="report-period" className="text-right">
-                Report Period
+              <label htmlFor="report-type" className="text-right">
+                Report Type
               </label>
-              <Select value={reportPeriod} onValueChange={(value) => setReportPeriod(value)}>
+              <Select
+                value={reportType}
+                onValueChange={(value) => setReportType(value)}
+              >
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select period" />
+                  <SelectValue placeholder="Select report type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="quarterly">Quarterly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="income">Income Statement</SelectItem>
+                  <SelectItem value="expenses">Expense Report</SelectItem>
+                  <SelectItem value="cashflow">Cash Flow</SelectItem>
+                  <SelectItem value="balance">Balance Sheet</SelectItem>
+                  <SelectItem value="comprehensive">Comprehensive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="date-range" className="text-right">
-                Date Range
+              <label htmlFor="format" className="text-right">
+                Format
+              </label>
+              <Select
+                value={reportFormat}
+                onValueChange={(value) => setReportFormat(value)}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="excel">Excel</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="date-from" className="text-right">
+                From
               </label>
               <Input
-                id="date-range"
+                id="date-from"
+                type="date"
                 className="col-span-3"
-                value={`${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`}
-                onChange={(value: string) => setDateRange(value)}
+                value={dateRange.from.toISOString().split('T')[0]}
+                onChange={(e) => {
+                  const newDate = new Date(e.target.value);
+                  setDateRange(prev => ({ ...prev, from: newDate }));
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="date-to" className="text-right">
+                To
+              </label>
+              <Input
+                id="date-to"
+                type="date"
+                className="col-span-3" 
+                value={dateRange.to.toISOString().split('T')[0]}
+                onChange={(e) => {
+                  const newDate = new Date(e.target.value);
+                  setDateRange(prev => ({ ...prev, to: newDate }));
+                }}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleGenerateReport}>Generate Report</Button>
+            <Button type="submit" onClick={handleGenerateReport}>
+              Generate Report
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

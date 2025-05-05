@@ -39,7 +39,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import { generateFinancialPdf } from "@/utils/pdf-generation";
+import { generateFinancialPdf } from "@/lib/utils";
 
 // Define a schema for the expense form
 const expenseSchema = z.object({
@@ -71,7 +71,7 @@ type ExpenseCategory = {
   name: string;
 };
 
-export const ExpenseManagement = () => {
+const ExpenseManagement = () => {
   const { users } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([
@@ -152,7 +152,7 @@ export const ExpenseManagement = () => {
         percentage: Math.round(
           (expenses
             .filter(expense => expense.category === category.name)
-            .reduce((sum, expense) => sum + expense.amount, 0) / totalExpenses) * 100
+            .reduce((sum, expense) => sum + expense.amount, 0) / (totalExpenses || 1)) * 100
         )
       }))
     });
@@ -359,3 +359,5 @@ export const ExpenseManagement = () => {
     </div>
   );
 };
+
+export default ExpenseManagement;
