@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -42,6 +42,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Plus, Eye, Download, User, Edit, UploadCloud, Users, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { downloadAsPdf } from "@/lib/pdf-utils";
 
 // Sample client data
 const initialClientsData = [
@@ -217,6 +218,7 @@ const Clients = () => {
   const [isViewClientOpen, setIsViewClientOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("active");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  
   const [newClient, setNewClient] = useState({
     name: "",
     industry: "",
@@ -225,8 +227,9 @@ const Clients = () => {
     contactPhone: "",
     businessAddress: "",
     numberOfLocations: "1",
-    sites: [],
+    sites: [] as { name: string; address: string; contactPerson: string; contactDetails: string; isPrimary: boolean }[],
   });
+  
   const [selectedSite, setSelectedSite] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportOptions, setReportOptions] = useState({
@@ -264,6 +267,59 @@ const Clients = () => {
   // Get unique industries for the filter
   const industries = [...new Set(clients.map((client) => client.industry))];
 
+  // Function to handle site changes
+  const handleSiteChange = (index: number, field: string, value: string) => {
+    const updatedSites = [...newClient.sites];
+    updatedSites[index] = { ...updatedSites[index], [field]: value };
+    setNewClient({ ...newClient, sites: updatedSites });
+  };
+
+  // Function to set a site as primary
+  const setPrimarySite = (index: number) => {
+    const updatedSites = newClient.sites.map((site, idx) => ({
+      ...site,
+      isPrimary: idx === index,
+    }));
+    setNewClient({ ...newClient, sites: updatedSites });
+  };
+
+  // Update sites when number of locations changes
+  useEffect(() => {
+    const numLocations = parseInt(newClient.numberOfLocations) || 0;
+    const currentSites = [...newClient.sites];
+    
+    if (numLocations > currentSites.length) {
+      // Add new sites
+      const sitesToAdd = numLocations - currentSites.length;
+      const newSites = Array(sitesToAdd)
+        .fill(null)
+        .map(() => ({
+          name: "",
+          address: "",
+          contactPerson: "",
+          contactDetails: "",
+          isPrimary: currentSites.length === 0 // First site is primary by default
+        }));
+      
+      setNewClient({
+        ...newClient,
+        sites: [...currentSites, ...newSites]
+      });
+    } else if (numLocations < currentSites.length) {
+      // Remove sites
+      const updatedSites = currentSites.slice(0, numLocations);
+      // Ensure at least one site is primary
+      if (numLocations > 0 && !updatedSites.some(site => site.isPrimary)) {
+        updatedSites[0].isPrimary = true;
+      }
+      
+      setNewClient({
+        ...newClient,
+        sites: updatedSites
+      });
+    }
+  }, [newClient.numberOfLocations]);
+
   const handleAddClient = () => {
     if (!newClient.name || !newClient.industry) {
       toast({
@@ -275,6 +331,13 @@ const Clients = () => {
     }
 
     const id = (clients.length + archivedClients.length + 1).toString();
+    
+    // Map site data to the format expected by the client object
+    const formattedSites = newClient.sites.map((site, index) => ({
+      id: `${id}-${index + 1}`,
+      name: site.name || `Site ${index + 1}`,
+    }));
+    
     const newClientData: Client = {
       id,
       name: newClient.name,
@@ -286,7 +349,7 @@ const Clients = () => {
       contactEmail: newClient.contactEmail,
       contactPhone: newClient.contactPhone,
       businessAddress: newClient.businessAddress,
-      sites: [],
+      sites: formattedSites,
     };
 
     setClients([...clients, newClientData]);
@@ -331,6 +394,38 @@ const Clients = () => {
   };
 
   const handleDownload = () => {
+    // In a real app, this would generate and download a PDF
+    const clientsList = activeTab === "active" ? filteredActiveClients : filteredArchivedClients;
+    
+    const content = `
+      <h1>Clients Report</h1>
+      <p>Generated on ${new Date().toLocaleDateString()}</p>
+      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background-color: #f3f4f6;">
+            <th>Name</th>
+            <th>Industry</th>
+            <th>Locations</th>
+            <th>Status</th>
+            <th>Recent Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${clientsList.map(client => `
+            <tr>
+              <td>${client.name}</td>
+              <td>${client.industry}</td>
+              <td>${client.locations}</td>
+              <td>${client.status}</td>
+              <td>${client.recentScore > 0 ? client.recentScore + '%' : 'No data'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    
+    downloadAsPdf(content, "clients-report.pdf");
+    
     toast({
       title: "Report Downloaded",
       description: "Client data has been downloaded successfully",
@@ -379,6 +474,16 @@ const Clients = () => {
       return;
     }
     
+    // In a real app, this would generate and download a PDF
+    const content = `
+      <h1>Client Report</h1>
+      <p><strong>Client:</strong> ${clients.find(c => c.id === reportOptions.client)?.name}</p>
+      <p><strong>Date Range:</strong> ${reportOptions.startDate} to ${reportOptions.endDate}</p>
+      <p><strong>Metrics:</strong> ${reportOptions.metrics.join(', ')}</p>
+    `;
+    
+    downloadAsPdf(content, "client-report.pdf");
+    
     toast({
       title: "Report Generated",
       description: "Your report has been generated successfully",
@@ -404,6 +509,31 @@ const Clients = () => {
   // Function to check if user can view the client
   const canViewClient = (client: Client) => {
     return hasPermission("canViewClients") || isClientOwner(client);
+  };
+
+  // Handle logo file selection
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // In a real application, you'd upload this file to a server
+      toast({
+        title: "Logo Selected",
+        description: `File '${file.name}' selected and ready for upload`,
+      });
+    }
+  };
+
+  const handleViewSiteDetails = (clientId: string, siteId: string) => {
+    const client = clients.find(c => c.id === clientId) || archivedClients.find(c => c.id === clientId);
+    const site = client?.sites.find(s => s.id === siteId);
+    
+    if (site) {
+      // In a real app, you'd fetch detailed site information here
+      toast({
+        title: site.name,
+        description: "Site details would be displayed here in a real application",
+      });
+    }
   };
 
   // Client table component based on status (active/archived)
@@ -589,7 +719,7 @@ const Clients = () => {
 
       {/* Add Client Modal */}
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Client</DialogTitle>
             <DialogDescription>
@@ -672,7 +802,7 @@ const Clients = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="businessAddress">Business Address</Label>
+              <Label htmlFor="businessAddress">Main Business Address</Label>
               <Input
                 id="businessAddress"
                 value={newClient.businessAddress}
@@ -685,14 +815,92 @@ const Clients = () => {
             <div className="grid gap-2">
               <Label htmlFor="logo">Logo Upload</Label>
               <div className="flex items-center gap-4">
-                <Button variant="outline" type="button">
-                  <UploadCloud className="mr-2 h-4 w-4" /> Upload Logo
-                </Button>
+                <input
+                  type="file"
+                  id="logo"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
+                <label 
+                  htmlFor="logo" 
+                  className="flex items-center gap-2 px-4 py-2 border border-input bg-background rounded-md cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                >
+                  <UploadCloud className="h-4 w-4" /> Upload Logo
+                </label>
                 <span className="text-sm text-muted-foreground">
                   No file selected
                 </span>
               </div>
             </div>
+            
+            {newClient.sites.length > 0 && (
+              <div className="grid gap-4 mt-4">
+                <h3 className="font-medium">Location Details</h3>
+                
+                {newClient.sites.map((site, index) => (
+                  <div key={index} className="space-y-4 border rounded-md p-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Location {index + 1}</h4>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`primary-${index}`}
+                          checked={site.isPrimary}
+                          onChange={() => setPrimarySite(index)}
+                          className="mr-2"
+                        />
+                        <Label htmlFor={`primary-${index}`}>Primary Location</Label>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor={`site-name-${index}`}>Site Name</Label>
+                        <Input
+                          id={`site-name-${index}`}
+                          value={site.name}
+                          onChange={(e) => handleSiteChange(index, 'name', e.target.value)}
+                          placeholder="Branch name or identifier"
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor={`site-address-${index}`}>Address</Label>
+                        <Input
+                          id={`site-address-${index}`}
+                          value={site.address}
+                          onChange={(e) => handleSiteChange(index, 'address', e.target.value)}
+                          placeholder="Physical address"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor={`site-contact-${index}`}>Contact Person</Label>
+                        <Input
+                          id={`site-contact-${index}`}
+                          value={site.contactPerson}
+                          onChange={(e) => handleSiteChange(index, 'contactPerson', e.target.value)}
+                          placeholder="Site manager or contact"
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor={`site-details-${index}`}>Contact Details</Label>
+                        <Input
+                          id={`site-details-${index}`}
+                          value={site.contactDetails}
+                          onChange={(e) => handleSiteChange(index, 'contactDetails', e.target.value)}
+                          placeholder="Phone/Email"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddClientOpen(false)}>
@@ -727,431 +935,3 @@ const Clients = () => {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="editIndustry">Industry</Label>
-                  <Input
-                    id="editIndustry"
-                    value={selectedClient.industry}
-                    onChange={(e) =>
-                      setSelectedClient({ ...selectedClient, industry: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="editContactName">Contact Person</Label>
-                  <Input
-                    id="editContactName"
-                    value={selectedClient.contactName}
-                    onChange={(e) =>
-                      setSelectedClient({ ...selectedClient, contactName: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="editContactEmail">Contact Email</Label>
-                  <Input
-                    id="editContactEmail"
-                    type="email"
-                    value={selectedClient.contactEmail}
-                    onChange={(e) =>
-                      setSelectedClient({ ...selectedClient, contactEmail: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="editContactPhone">Contact Phone</Label>
-                  <Input
-                    id="editContactPhone"
-                    value={selectedClient.contactPhone}
-                    onChange={(e) =>
-                      setSelectedClient({ ...selectedClient, contactPhone: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="editLocations">Number of Locations</Label>
-                  <Input
-                    id="editLocations"
-                    type="number"
-                    min="1"
-                    value={selectedClient.locations}
-                    onChange={(e) =>
-                      setSelectedClient({ ...selectedClient, locations: parseInt(e.target.value) || 1 })
-                    }
-                  />
-                </div>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="editBusinessAddress">Business Address</Label>
-                <Input
-                  id="editBusinessAddress"
-                  value={selectedClient.businessAddress}
-                  onChange={(e) =>
-                    setSelectedClient({ ...selectedClient, businessAddress: e.target.value })
-                  }
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label>Site Management</Label>
-                <div className="border rounded-md p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="font-medium">Client Sites</h4>
-                    <Button variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-1" /> Add Site
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {selectedClient.sites.length > 0 ? (
-                      selectedClient.sites.map(site => (
-                        <div key={site.id} className="flex justify-between items-center py-2 px-3 bg-muted/50 rounded-md">
-                          <span>{site.name}</span>
-                          <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-6 text-muted-foreground">
-                        No sites added yet
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditClientOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditClient}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* View Client Dialog */}
-      <Dialog open={isViewClientOpen} onOpenChange={setIsViewClientOpen}>
-        {selectedClient && (
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>{selectedClient.name}</DialogTitle>
-              <DialogDescription>
-                Client information and performance data
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-6 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Industry</Label>
-                  <p className="font-medium">{selectedClient.industry}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Status</Label>
-                  <p>
-                    <Badge
-                      className={
-                        selectedClient.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }
-                    >
-                      {selectedClient.status === "active" ? "Active" : "Inactive"}
-                    </Badge>
-                  </p>
-                </div>
-                
-                <div>
-                  <Label className="text-muted-foreground">Locations</Label>
-                  <p className="font-medium">{selectedClient.locations}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Recent Score</Label>
-                  <p>
-                    {selectedClient.recentScore > 0 ? (
-                      <Badge
-                        className={getScoreBadgeColor(selectedClient.recentScore)}
-                      >
-                        {selectedClient.recentScore}%
-                      </Badge>
-                    ) : (
-                      "No data"
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <h3 className="font-medium mb-3">Contact Information</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <Label className="text-muted-foreground">Contact Person</Label>
-                    <p className="font-medium">{selectedClient.contactName}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium">{selectedClient.contactEmail}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Phone</Label>
-                    <p className="font-medium">{selectedClient.contactPhone}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Last Audit</Label>
-                    <p className="font-medium">{selectedClient.lastAudit || "No audit recorded"}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <Label className="text-muted-foreground">Address</Label>
-                  <p className="font-medium">{selectedClient.businessAddress}</p>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <h3 className="font-medium mb-3">Sites</h3>
-                {selectedClient.sites.length > 0 ? (
-                  <div className="space-y-3">
-                    <Select
-                      value={selectedSite || ""}
-                      onValueChange={setSelectedSite}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a site" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedClient.sites.map(site => (
-                          <SelectItem key={site.id} value={site.id}>
-                            {site.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    {selectedSite && (
-                      <div className="grid grid-cols-2 gap-4 mt-4 p-4 bg-muted/30 rounded-md">
-                        <div>
-                          <Label className="text-muted-foreground">Site</Label>
-                          <p className="font-medium">
-                            {selectedClient.sites.find(s => s.id === selectedSite)?.name}
-                          </p>
-                        </div>
-                        <div>
-                          <Label className="text-muted-foreground">Latest Score</Label>
-                          <p>
-                            <Badge className="bg-green-100 text-green-800">
-                              {selectedClient.recentScore}%
-                            </Badge>
-                          </p>
-                        </div>
-                        <div className="col-span-2">
-                          <Button variant="outline" size="sm" className="mt-2">
-                            <Eye className="mr-2 h-4 w-4" /> View Site Details
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No sites available for this client</p>
-                )}
-              </div>
-            </div>
-            <DialogFooter className="flex justify-between">
-              <div>
-                {canManageClients && (
-                  <Button
-                    variant={selectedClient.status === "active" ? "destructive" : "default"}
-                    onClick={() => handleToggleClientStatus()}
-                  >
-                    {selectedClient.status === "active" ? "Deactivate" : "Activate"} Client
-                  </Button>
-                )}
-              </div>
-              <div className="flex space-x-2">
-                {canManageClients && (
-                  <Button variant="outline" onClick={() => {
-                    setIsViewClientOpen(false);
-                    openEditDialog(selectedClient);
-                  }}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
-                  </Button>
-                )}
-                <Button variant="outline" onClick={() => setIsViewClientOpen(false)}>
-                  Close
-                </Button>
-              </div>
-            </DialogFooter>
-          </DialogContent>
-        )}
-      </Dialog>
-
-      {/* Report Generator Modal */}
-      <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Generate Client Report</DialogTitle>
-            <DialogDescription>
-              Select report parameters to generate a customized report
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="reportClient">Client</Label>
-                <Select
-                  value={reportOptions.client}
-                  onValueChange={(value) => setReportOptions({...reportOptions, client: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="reportSite">Site</Label>
-                <Select
-                  value={reportOptions.site}
-                  onValueChange={(value) => setReportOptions({...reportOptions, site: value})}
-                  disabled={!reportOptions.client}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select site" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {reportOptions.client && clients.find(c => c.id === reportOptions.client)?.sites.map(site => (
-                      <SelectItem key={site.id} value={site.id}>
-                        {site.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={reportOptions.startDate}
-                  onChange={(e) => setReportOptions({...reportOptions, startDate: e.target.value})}
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={reportOptions.endDate}
-                  onChange={(e) => setReportOptions({...reportOptions, endDate: e.target.value})}
-                />
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label>Report Format</Label>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={reportOptions.format === "tables+charts" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setReportOptions({...reportOptions, format: "tables+charts"})}
-                >
-                  Tables + Charts
-                </Button>
-                <Button
-                  variant={reportOptions.format === "tables" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setReportOptions({...reportOptions, format: "tables"})}
-                >
-                  Tables Only
-                </Button>
-                <Button
-                  variant={reportOptions.format === "charts" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setReportOptions({...reportOptions, format: "charts"})}
-                >
-                  Charts Only
-                </Button>
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label>Metrics</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {["Overall Score", "Signage", "Lighting", "Exterior", "Shop", "Yard", 
-                  "Staff Facilities", "Bakery", "Store", "Staff", "HSSE", "Admin", "Action Items"].map(metric => (
-                  <div key={metric} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`metric-${metric}`}
-                      checked={reportOptions.metrics.includes(metric)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setReportOptions({
-                            ...reportOptions,
-                            metrics: [...reportOptions.metrics, metric]
-                          });
-                        } else {
-                          setReportOptions({
-                            ...reportOptions,
-                            metrics: reportOptions.metrics.filter(m => m !== metric)
-                          });
-                        }
-                      }}
-                      className="rounded border-gray-300"
-                    />
-                    <Label htmlFor={`metric-${metric}`}>{metric}</Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label>Breakdown By</Label>
-              <Select
-                value={reportOptions.breakdown}
-                onValueChange={(value) => setReportOptions({...reportOptions, breakdown: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="client">Client</SelectItem>
-                  <SelectItem value="evaluator">Evaluator</SelectItem>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="location">Location</SelectItem>
-                  <SelectItem value="section">Section</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsReportModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleGenerateReport}>Generate Report</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default Clients;

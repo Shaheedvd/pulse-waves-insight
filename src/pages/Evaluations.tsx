@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -37,9 +37,10 @@ import { Badge } from "@/components/ui/badge";
 import EvaluationForm from "@/components/evaluations/EvaluationForm";
 import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
 import { useToast } from "@/components/ui/use-toast";
+import { downloadAsPdf } from "@/lib/pdf-utils";
 
 // Sample evaluation data
-const evaluationsData = [
+const initialEvaluationsData = [
   {
     id: "EV-2023-1001",
     client: "Retail Corp SA",
@@ -153,8 +154,21 @@ const Evaluations = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [evaluationsData, setEvaluationsData] = useState(initialEvaluationsData);
   const { toast } = useToast();
   const itemsPerPage = 8;
+
+  // Check for globally updated evaluations data
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).evaluationsData) {
+      setEvaluationsData((window as any).evaluationsData);
+    }
+    
+    // Make our evaluations data globally available
+    if (typeof window !== 'undefined') {
+      (window as any).evaluationsData = evaluationsData;
+    }
+  }, []);
 
   // Filter evaluations based on search term and status
   const filteredEvaluations = evaluationsData.filter((evaluation) => {
@@ -206,10 +220,53 @@ const Evaluations = () => {
   };
 
   const handleDownload = () => {
+    // Generate PDF with filteredEvaluations data
+    const content = `
+      <h1>Evaluations Report</h1>
+      <p>Generated on ${new Date().toLocaleDateString()}</p>
+      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <thead>
+          <tr style="background-color: #f3f4f6;">
+            <th>ID</th>
+            <th>Client</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Evaluator</th>
+            <th>Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredEvaluations.map(eval => `
+            <tr>
+              <td>${eval.id}</td>
+              <td>${eval.client}</td>
+              <td>${eval.location}</td>
+              <td>${eval.date}</td>
+              <td>${eval.evaluator}</td>
+              <td>${eval.status === "Completed" ? eval.score + "%" : "-"}</td>
+              <td>${eval.status}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    
+    downloadAsPdf(content, "evaluations-report.pdf");
+    
     toast({
       title: "Downloading evaluations",
       description: "Your file has been downloaded successfully",
     });
+  };
+
+  // After a successful form submission, this function will be called to add the new evaluation
+  const addNewEvaluation = (newEvaluation: any) => {
+    setEvaluationsData(prevData => [...prevData, newEvaluation]);
+    // Also update the global data
+    if (typeof window !== 'undefined') {
+      (window as any).evaluationsData = [...evaluationsData, newEvaluation];
+    }
   };
 
   return (

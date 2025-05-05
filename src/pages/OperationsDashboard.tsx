@@ -16,6 +16,8 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle2,
+  Eye,
+  Download,
 } from "lucide-react";
 import {
   Table,
@@ -28,10 +30,24 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { downloadAsPdf } from "@/lib/pdf-utils";
 
 const OperationsDashboard = () => {
   const { currentUser } = useAuth();
   const isDepartmentHead = currentUser?.role === "power_manager" || currentUser?.role === "superuser";
+  const navigate = useNavigate();
+  const [selectedTask, setSelectedTask] = React.useState<any | null>(null);
+  const [isTaskDetailsOpen, setIsTaskDetailsOpen] = React.useState(false);
   
   // Mock data for the operations dashboard
   const operationalKPIs = [
@@ -76,7 +92,14 @@ const OperationsDashboard = () => {
       assignedTo: "Eric Evaluator",
       dueDate: "2025-05-06",
       status: "in-progress",
-      priority: "high"
+      priority: "high",
+      description: "Conduct weekly quality audit for ABC Corp's Cape Town branch",
+      location: "Cape Town CBD",
+      clientName: "ABC Corp",
+      contactPerson: "John Smith",
+      contactEmail: "john@abccorp.com",
+      contactPhone: "+27 21 555 1234",
+      notes: "Previous audit noted issues with inventory management"
     },
     {
       id: "2",
@@ -84,7 +107,14 @@ const OperationsDashboard = () => {
       assignedTo: "Admin User",
       dueDate: "2025-05-08",
       status: "pending",
-      priority: "medium"
+      priority: "medium",
+      description: "Complete all onboarding documentation for new client ABC Corp",
+      location: "Remote",
+      clientName: "ABC Corp",
+      contactPerson: "Sarah Johnson",
+      contactEmail: "sarah@abccorp.com",
+      contactPhone: "+27 11 444 5678",
+      notes: "Client requires ISO certification documentation"
     },
     {
       id: "3",
@@ -92,7 +122,14 @@ const OperationsDashboard = () => {
       assignedTo: "Sarah Manager",
       dueDate: "2025-05-12",
       status: "in-progress",
-      priority: "medium"
+      priority: "medium",
+      description: "Review service delivery metrics for Q1 and prepare report",
+      location: "Head Office",
+      clientName: "Multiple Clients",
+      contactPerson: "N/A",
+      contactEmail: "N/A",
+      contactPhone: "N/A",
+      notes: "Focus on areas showing performance decline"
     },
     {
       id: "4",
@@ -100,7 +137,14 @@ const OperationsDashboard = () => {
       assignedTo: "Oliver Operations",
       dueDate: "2025-05-15",
       status: "pending",
-      priority: "low"
+      priority: "low",
+      description: "Conduct quarterly team performance evaluations",
+      location: "Head Office",
+      clientName: "Internal",
+      contactPerson: "HR Department",
+      contactEmail: "hr@company.com",
+      contactPhone: "+27 11 222 3333",
+      notes: "Schedule individual meetings with team members"
     }
   ];
   
@@ -123,6 +167,15 @@ const OperationsDashboard = () => {
       timestamp: "2025-04-30 16:45",
       severity: "warning"
     }
+  ];
+
+  // Mock data for staff, clients, projects, and quality scores
+  const staffData = [
+    { id: "1", name: "John Smith", position: "Senior Evaluator", email: "john@company.com", phone: "+27 11 222 3333" },
+    { id: "2", name: "Sarah Johnson", position: "Client Manager", email: "sarah@company.com", phone: "+27 11 222 4444" },
+    { id: "3", name: "Michael Brown", position: "Field Auditor", email: "michael@company.com", phone: "+27 11 222 5555" },
+    { id: "4", name: "Emily Davis", position: "Operations Manager", email: "emily@company.com", phone: "+27 11 222 6666" },
+    { id: "5", name: "David Wilson", position: "Quality Assessor", email: "david@company.com", phone: "+27 11 222 7777" }
   ];
 
   const getTrendIcon = (trend: string) => {
@@ -160,6 +213,50 @@ const OperationsDashboard = () => {
     }
   };
 
+  const handleCardClick = (type: string) => {
+    switch(type) {
+      case "staff":
+        navigate("/users");
+        break;
+      case "clients":
+        navigate("/clients");
+        break;
+      case "projects":
+        navigate("/projects");
+        break;
+      case "quality":
+        navigate("/evaluations");
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleViewTask = (task: any) => {
+    setSelectedTask(task);
+    setIsTaskDetailsOpen(true);
+  };
+
+  const handleDownloadTask = (task: any) => {
+    // Generate PDF with task details
+    const content = `
+      <h1>${task.name}</h1>
+      <p><strong>Due Date:</strong> ${new Date(task.dueDate).toLocaleDateString()}</p>
+      <p><strong>Assigned To:</strong> ${task.assignedTo}</p>
+      <p><strong>Priority:</strong> ${task.priority}</p>
+      <p><strong>Status:</strong> ${task.status}</p>
+      <p><strong>Description:</strong> ${task.description}</p>
+      <p><strong>Location:</strong> ${task.location}</p>
+      <p><strong>Client:</strong> ${task.clientName}</p>
+      <p><strong>Contact Person:</strong> ${task.contactPerson}</p>
+      <p><strong>Contact Email:</strong> ${task.contactEmail}</p>
+      <p><strong>Contact Phone:</strong> ${task.contactPhone}</p>
+      <p><strong>Notes:</strong> ${task.notes}</p>
+    `;
+    
+    downloadAsPdf(content, `task-${task.id}.pdf`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -171,7 +268,10 @@ const OperationsDashboard = () => {
 
       {isDepartmentHead && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card 
+            className="bg-gradient-to-br from-blue-50 to-blue-100 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick("staff")}
+          >
             <CardContent className="flex items-center pt-6">
               <div className="bg-blue-200 p-3 rounded-lg">
                 <Users className="h-8 w-8 text-blue-700" />
@@ -183,7 +283,10 @@ const OperationsDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100">
+          <Card 
+            className="bg-gradient-to-br from-green-50 to-green-100 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick("clients")}
+          >
             <CardContent className="flex items-center pt-6">
               <div className="bg-green-200 p-3 rounded-lg">
                 <Building className="h-8 w-8 text-green-700" />
@@ -195,7 +298,10 @@ const OperationsDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card 
+            className="bg-gradient-to-br from-purple-50 to-purple-100 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick("projects")}
+          >
             <CardContent className="flex items-center pt-6">
               <div className="bg-purple-200 p-3 rounded-lg">
                 <ClipboardCheck className="h-8 w-8 text-purple-700" />
@@ -207,7 +313,10 @@ const OperationsDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100">
+          <Card 
+            className="bg-gradient-to-br from-amber-50 to-amber-100 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleCardClick("quality")}
+          >
             <CardContent className="flex items-center pt-6">
               <div className="bg-amber-200 p-3 rounded-lg">
                 <BarChart className="h-8 w-8 text-amber-700" />
@@ -292,6 +401,7 @@ const OperationsDashboard = () => {
                 <TableHead>Due Date</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -302,12 +412,112 @@ const OperationsDashboard = () => {
                   <TableCell>{new Date(task.dueDate).toLocaleDateString()}</TableCell>
                   <TableCell>{getPriorityBadge(task.priority)}</TableCell>
                   <TableCell>{getStatusBadge(task.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleViewTask(task)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" /> View
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDownloadTask(task)}
+                      >
+                        <Download className="h-4 w-4 mr-1" /> Download
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Task Details Dialog */}
+      <Dialog open={isTaskDetailsOpen} onOpenChange={setIsTaskDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{selectedTask?.name}</DialogTitle>
+            <DialogDescription>
+              Task details and information
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTask && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Priority</h4>
+                  <div className="mt-1">{getPriorityBadge(selectedTask.priority)}</div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
+                  <div className="mt-1">{getStatusBadge(selectedTask.status)}</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Description</h4>
+                <p className="mt-1">{selectedTask.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Assigned To</h4>
+                  <p className="mt-1">{selectedTask.assignedTo}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Due Date</h4>
+                  <p className="mt-1">{new Date(selectedTask.dueDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Client</h4>
+                  <p className="mt-1">{selectedTask.clientName}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Location</h4>
+                  <p className="mt-1">{selectedTask.location}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Contact Person</h4>
+                  <p className="mt-1">{selectedTask.contactPerson}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground">Contact Email</h4>
+                  <p className="mt-1">{selectedTask.contactEmail}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Contact Phone</h4>
+                <p className="mt-1">{selectedTask.contactPhone}</p>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground">Notes</h4>
+                <p className="mt-1">{selectedTask.notes}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTaskDetailsOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={() => handleDownloadTask(selectedTask)}>
+              <Download className="h-4 w-4 mr-2" /> Download Details
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

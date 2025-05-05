@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Image, X } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Image, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface EvaluationFormProps {
@@ -53,6 +50,17 @@ const locationsData = [
   { id: "9", name: "Port Elizabeth", clientId: "6" },
   { id: "10", name: "Cape Town South", clientId: "2" },
 ];
+
+// Create a variable to store evaluations globally
+let globalEvaluations = [...Array(10)].map((_, idx) => ({
+  id: `EV-2023-${1001 + idx}`,
+  client: ["Retail Corp SA", "QuickMart", "EcoFuel", "LuxCafé", "FreshGrocer", "HealthPharm"][Math.floor(Math.random() * 6)],
+  location: ["Cape Town CBD", "Johannesburg North", "Durban Beachfront", "Pretoria Central", "Bloemfontein"][Math.floor(Math.random() * 5)],
+  date: new Date(2023, 5, 20 + Math.floor(Math.random() * 6)).toISOString().split('T')[0],
+  evaluator: ["John Smith", "Sarah Johnson", "Michael Brown", "Emily Davis", "David Wilson", "Lisa Taylor", "Unassigned"][Math.floor(Math.random() * 7)],
+  score: idx < 8 ? 75 + Math.floor(Math.random() * 20) : 0,
+  status: idx < 8 ? "Completed" : idx === 8 ? "Scheduled" : "Pending"
+}));
 
 const EvaluationForm: React.FC<EvaluationFormProps> = ({
   open,
@@ -85,15 +93,38 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
       return;
     }
 
+    // Create a new evaluation entry
+    const newId = `EV-${new Date().getFullYear()}-${1001 + globalEvaluations.length}`;
+    const selectedClientName = clientsData.find(c => c.id === client)?.name || "";
+    const selectedLocationName = locationsData.find(l => l.id === location)?.name || "";
+    
+    const newEvaluation = {
+      id: newId,
+      client: selectedClientName,
+      location: selectedLocationName,
+      date: date.toISOString().split('T')[0],
+      evaluator: evaluator,
+      score: 0,
+      status: "Scheduled"
+    };
+    
+    // Add to global evaluations array
+    globalEvaluations = [...globalEvaluations, newEvaluation];
+    
     // In a real app, this would submit to a backend
     console.log("Submitting evaluation:", {
-      client,
-      location,
+      client: selectedClientName,
+      location: selectedLocationName,
       evaluator,
       date,
       notes,
       photos: photos.map(p => p.name) // Just log names in console
     });
+    
+    // Update window.evaluations if it exists (for the Evaluations page)
+    if (typeof window !== 'undefined') {
+      (window as any).evaluationsData = globalEvaluations;
+    }
 
     toast({
       title: "Evaluation Scheduled",
@@ -217,29 +248,11 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date"
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePicker
+              value={date}
+              onChange={setDate}
+              placeholder="Select date"
+            />
           </div>
 
           <div className="space-y-2">
