@@ -84,7 +84,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks }) => {
                     {task.priority}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {task.userId || "Unassigned"}
+                    {task.assignedTo || "Unassigned"}
                   </span>
                 </div>
               </div>
