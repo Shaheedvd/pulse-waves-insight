@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CalendarRange, Download, FileText, Filter, Search, ArrowDown, ArrowUp, Printer, DollarSign, ChartBarIcon, ChartPieIcon } from "lucide-react";
+import { CalendarRange, Download, FileText, Filter, Search, ArrowDown, ArrowUp, Printer, DollarSign, ChartBarIcon, ChartPieIcon, TrendingUp } from "lucide-react";
 import { downloadAsPdf } from "@/lib/pdf-utils";
 
 const FinancialReports = () => {
