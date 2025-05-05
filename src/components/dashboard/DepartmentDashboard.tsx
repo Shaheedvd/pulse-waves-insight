@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import TaskList from "@/components/dashboard/TaskList";
 import { TaskMetrics } from "@/components/dashboard/TaskMetrics";
 import { useTask } from "@/contexts/TaskContext";
+import { Department } from "@/contexts/AuthContext";
 
 interface DepartmentDashboardProps {
-  department: string;
+  department: Department;
   title: string;
   description: string;
 }
@@ -82,7 +83,7 @@ export function DepartmentDashboard({ department, title, description }: Departme
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <TaskList departmentId={department} />
+            <TaskList tasks={departmentTasks.filter(task => task.department === department)} />
           </CardContent>
         </Card>
         
