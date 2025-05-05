@@ -32,6 +32,7 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Award, TrendingUp, Star, StarHalf, Users, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
@@ -421,7 +422,7 @@ export const HRPerformance = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {users && users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>{user.firstName} {user.lastName}</SelectItem>
+                    <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -485,7 +486,7 @@ export const HRPerformance = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {users && users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>{user.firstName} {user.lastName}</SelectItem>
+                    <SelectItem key={user.id} value={user.id}>{user.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -554,3 +555,5 @@ export const HRPerformance = () => {
     </div>
   );
 };
+
+export default HRPerformance;
