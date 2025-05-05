@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -25,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowUpRight, Download, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { generateDashboardPdf } from "@/lib/pdf-utils";
+import { downloadAsPdf, generateDashboardPdf } from "@/lib/pdf-utils";
 
 // Updated data for Pulse Point CX
 const monthlyScoreData = [
