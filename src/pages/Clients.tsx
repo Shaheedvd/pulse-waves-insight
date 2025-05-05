@@ -935,3 +935,27 @@ const Clients = () => {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="editIndustry">Industry</Label>
+                  <Input
+                    id="editIndustry"
+                    value={selectedClient.industry}
+                    onChange={(e) =>
+                      setSelectedClient({ ...selectedClient, industry: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditClientOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditClient}>Update Client</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Clients;

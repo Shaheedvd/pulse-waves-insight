@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -117,7 +116,7 @@ const initialEvaluationsData = [
     id: "EV-2023-1009",
     client: "EcoFuel",
     location: "Johannesburg East",
-    date: "2023-06-25",
+    date: "2025-05-25",
     evaluator: "Michael Brown",
     score: 0,
     status: "Scheduled",
@@ -126,7 +125,7 @@ const initialEvaluationsData = [
     id: "EV-2023-1010",
     client: "QuickMart",
     location: "Cape Town South",
-    date: "2023-06-26",
+    date: "2025-05-26",
     evaluator: "Unassigned",
     score: 0,
     status: "Pending",
@@ -237,15 +236,15 @@ const Evaluations = () => {
           </tr>
         </thead>
         <tbody>
-          ${filteredEvaluations.map(eval => `
+          ${filteredEvaluations.map(item => `
             <tr>
-              <td>${eval.id}</td>
-              <td>${eval.client}</td>
-              <td>${eval.location}</td>
-              <td>${eval.date}</td>
-              <td>${eval.evaluator}</td>
-              <td>${eval.status === "Completed" ? eval.score + "%" : "-"}</td>
-              <td>${eval.status}</td>
+              <td>${item.id}</td>
+              <td>${item.client}</td>
+              <td>${item.location}</td>
+              <td>${item.date}</td>
+              <td>${item.evaluator}</td>
+              <td>${item.status === "Completed" ? item.score + "%" : "-"}</td>
+              <td>${item.status}</td>
             </tr>
           `).join('')}
         </tbody>
