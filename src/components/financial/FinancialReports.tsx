@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,20 +9,47 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { CalendarRange, Download, FileText, Filter, Search, ArrowDown, ArrowUp, Printer, DollarSign, ChartBarIcon, ChartPieIcon, TrendingUp } from "lucide-react";
-import { downloadAsPdf } from "@/lib/pdf-utils";
+import { downloadAsPdf, generateFinancialPdf } from "@/lib/pdf-utils";
+import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
 
 const FinancialReports = () => {
   const { toast } = useToast();
-  const [dateRange, setDateRange] = useState("this-month");
-  const [isGenerateReportOpen, setIsGenerateReportOpen] = useState(false);
-  const [reportType, setReportType] = useState("income-statement");
+  const [dateRange, setDateRange] = useState({
+    from: new Date(),
+    to: new Date()
+  });
+  const [reportType, setReportType] = useState("income");
   
   const handleGenerateReport = () => {
+    // Sample financial report data
+    const reportData = {
+      period: `${format(dateRange.from, "yyyy-MM-dd")} to ${format(dateRange.to, "yyyy-MM-dd")}`,
+      revenue: 157500,
+      expenses: 89200,
+      profit: 68300,
+      outstandingInvoices: 42500,
+      revenueBreakdown: [
+        { category: "Restaurant Audits", amount: 65000, percentage: 41 },
+        { category: "Forecourt & Shop Audits", amount: 48000, percentage: 30 },
+        { category: "School Audits", amount: 24500, percentage: 16 },
+        { category: "Hotel Audits", amount: 20000, percentage: 13 }
+      ],
+      expenseBreakdown: [
+        { category: "Staff Salaries", amount: 45000, percentage: 50 },
+        { category: "Evaluator Payments", amount: 25000, percentage: 28 },
+        { category: "Office Rent", amount: 12000, percentage: 13 },
+        { category: "Marketing", amount: 7200, percentage: 9 }
+      ]
+    };
+
+    generateFinancialPdf(`${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`, reportData);
+    
     toast({
-      title: "Report Generated",
-      description: "Your financial report has been generated successfully",
+      title: "Financial Report Generated",
+      description: `The ${reportType} report has been generated and downloaded.`,
     });
-    setIsGenerateReportOpen(false);
   };
 
   const handleDownloadReport = (reportName) => {

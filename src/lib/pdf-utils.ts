@@ -90,12 +90,12 @@ export const generateDashboardPdf = (dashboardData: any) => {
         <th>Location</th>
         <th>Date</th>
       </tr>
-      ${dashboardData.upcomingEvaluations?.map((eval: any) => `
+      ${dashboardData.upcomingEvaluations?.map((evaluation: any) => `
         <tr>
-          <td>${eval.id}</td>
-          <td>${eval.client}</td>
-          <td>${eval.location}</td>
-          <td>${eval.date}</td>
+          <td>${evaluation.id}</td>
+          <td>${evaluation.client}</td>
+          <td>${evaluation.location}</td>
+          <td>${evaluation.date}</td>
         </tr>
       `).join('') || '<tr><td colspan="4">No upcoming evaluations</td></tr>'}
     </table>
@@ -305,10 +305,10 @@ export const generateAuditPdf = (auditData: any) => {
 };
 
 // Generate financial PDF report
-export const generateFinancialPdf = (financialData: any) => {
+export const generateFinancialPdf = (title: string, financialData: any) => {
   // Create HTML content for the financial report
   const content = `
-    <h1>Financial Report</h1>
+    <h1>${title || 'Financial Report'}</h1>
     <p>Generated on: ${new Date().toLocaleDateString()}</p>
     <p>Period: ${financialData.period || 'N/A'}</p>
     
