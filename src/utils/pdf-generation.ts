@@ -27,7 +27,8 @@ export const generateFinancialPdf = (data: FinancialPdfData) => {
   // In a real implementation, this would generate and download a PDF
   // For this example, we'll just simulate the download
   
-  alert(`PDF report for ${data.period} would be generated and downloaded here.`);
+  const reportName = data.reportType ? data.reportType : "Financial Report";
+  alert(`${reportName} for ${data.period} would be generated and downloaded here.`);
   
   // Return a promise that resolves when the PDF generation is complete
   return Promise.resolve({ success: true, message: "PDF generated successfully" });

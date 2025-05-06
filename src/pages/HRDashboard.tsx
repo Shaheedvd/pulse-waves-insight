@@ -9,6 +9,7 @@ import { HRLearningDevelopment } from "@/components/hr/HRLearningDevelopment";
 import { HRCompensation } from "@/components/hr/HRCompensation";
 import { HRReporting } from "@/components/hr/HRReporting";
 import { HRTeamMeetings } from "@/components/hr/HRTeamMeetings";
+import { HRPayroll } from "@/components/hr/payroll/HRPayroll";
 import { useAuth } from "@/contexts/AuthContext";
 
 const HRDashboard = () => {
@@ -23,12 +24,13 @@ const HRDashboard = () => {
       />
       
       <Tabs defaultValue="employees" className="w-full mt-6">
-        <TabsList className="grid grid-cols-7 mb-4">
+        <TabsList className="grid grid-cols-8 mb-4">
           <TabsTrigger value="employees">Employee Data</TabsTrigger>
           <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="learning">Learning & Dev</TabsTrigger>
           <TabsTrigger value="compensation">Compensation</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll</TabsTrigger>
           <TabsTrigger value="reporting">Reporting</TabsTrigger>
           <TabsTrigger value="meetings">Team Meetings</TabsTrigger>
         </TabsList>
@@ -51,6 +53,10 @@ const HRDashboard = () => {
         
         <TabsContent value="compensation">
           <HRCompensation />
+        </TabsContent>
+        
+        <TabsContent value="payroll">
+          <HRPayroll />
         </TabsContent>
         
         <TabsContent value="reporting">
