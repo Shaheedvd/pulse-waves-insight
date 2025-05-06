@@ -36,6 +36,7 @@ import OperationsDashboard from "./pages/OperationsDashboard";
 import FinancialDashboardPage from "./pages/FinancialDashboardPage";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import { DepartmentDashboard } from "./components/dashboard/DepartmentDashboard";
+import { HRPayroll } from "./components/hr/payroll/HRPayroll";
 
 // Create a new QueryClient instance - using the default configuration
 const queryClient = new QueryClient();
@@ -303,8 +304,7 @@ const App: React.FC = () => {
                         element={
                           <ProtectedRoute requiredPermission="canManagePayroll">
                             <div className="p-6">
-                              <h1 className="text-2xl font-bold mb-4">Payroll Management</h1>
-                              <p>This feature is under development.</p>
+                              <HRPayroll />
                             </div>
                           </ProtectedRoute>
                         }
