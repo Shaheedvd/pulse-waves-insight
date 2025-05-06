@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, DollarSign, Calendar } from "lucide-react";
+import { FileText, Download, Calculator, Calendar } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 
@@ -180,7 +180,7 @@ export const TaxManagement = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
-                  <DollarSign className="h-4 w-4 mr-2 text-primary" />
+                  <Calculator className="h-4 w-4 mr-2 text-primary" />
                   Monthly PAYE Liability
                 </CardTitle>
               </CardHeader>
@@ -193,7 +193,7 @@ export const TaxManagement = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
-                  <DollarSign className="h-4 w-4 mr-2 text-primary" />
+                  <Calculator className="h-4 w-4 mr-2 text-primary" />
                   Monthly UIF Liability
                 </CardTitle>
               </CardHeader>
@@ -206,7 +206,7 @@ export const TaxManagement = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center">
-                  <DollarSign className="h-4 w-4 mr-2 text-primary" />
+                  <Calculator className="h-4 w-4 mr-2 text-primary" />
                   Monthly SDL Liability
                 </CardTitle>
               </CardHeader>
@@ -347,7 +347,7 @@ export const TaxManagement = () => {
                 <div>
                   <h4 className="text-sm font-medium mb-2">SDL Rate</h4>
                   <p className="font-medium">1% of payroll</p>
-                  <p className="text-xs text-muted-foreground">Applied to employers with annual payroll > R500,000</p>
+                  <p className="text-xs text-muted-foreground">Applied to employers with annual payroll &gt; R500,000</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium mb-2">Tax Rebates</h4>
@@ -374,3 +374,5 @@ export const TaxManagement = () => {
     </div>
   );
 };
+
+export default TaxManagement;
