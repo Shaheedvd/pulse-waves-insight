@@ -94,7 +94,7 @@ export const PayrollProcessing = () => {
           toast({
             title: "Payroll Complete",
             description: `Successfully processed payroll for ${selectedPeriod.period}`,
-            variant: "success",
+            variant: "default", // Changed from "success" to "default"
           });
           
           // Reset after completion
@@ -278,3 +278,4 @@ export const PayrollProcessing = () => {
     </div>
   );
 };
+

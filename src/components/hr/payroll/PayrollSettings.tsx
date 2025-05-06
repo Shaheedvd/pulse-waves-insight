@@ -40,7 +40,7 @@ export const PayrollSettings = () => {
     toast({
       title: "Settings Saved",
       description: "Your payroll settings have been updated successfully.",
-      variant: "success",
+      variant: "default", // Changed from "success" to "default"
     });
   };
 
@@ -580,3 +580,4 @@ export const PayrollSettings = () => {
     </div>
   );
 };
+

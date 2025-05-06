@@ -118,7 +118,7 @@ export const PayrollReports = () => {
       toast({
         title: "Report Generated",
         description: `Successfully generated ${reportType} report`,
-        variant: "success",
+        variant: "default", // Changed from "success" to "default"
       });
     }, 2000);
   };
@@ -510,3 +510,4 @@ export const PayrollReports = () => {
     </div>
   );
 };
+
