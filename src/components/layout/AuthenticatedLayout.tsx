@@ -32,19 +32,26 @@ import {
   Scale,
   Hammer,
   LayoutDashboard,
+  ChevronDown,
+  ChevronRight,
+  Target,
+  TrendingUp,
+  Database,
+  Headphones
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAuth, Department } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const AuthenticatedLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout, hasPermission } = useAuth();
   const { toast } = useToast();
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | "all">("all");
+  const [openCategories, setOpenCategories] = useState<string[]>(["dashboard"]);
 
   const handleLogout = () => {
     logout();
@@ -53,6 +60,14 @@ const AuthenticatedLayout = () => {
       description: "You have been successfully logged out",
     });
     navigate("/");
+  };
+
+  const toggleCategory = (categoryId: string) => {
+    setOpenCategories(prev => 
+      prev.includes(categoryId) 
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
   // Define role-based access criteria
@@ -66,305 +81,6 @@ const AuthenticatedLayout = () => {
   // Get user's department (if any)
   const userDepartment = currentUser?.department;
 
-  // Define department-specific icons
-  const getDepartmentIcon = (dept: Department) => {
-    switch (dept) {
-      case "operations": return <Building className="h-5 w-5" />;
-      case "finance": return <Calculator className="h-5 w-5" />;
-      case "hr": return <UserRound className="h-5 w-5" />;
-      case "marketing": return <Megaphone className="h-5 w-5" />;
-      case "sales": return <BadgePercent className="h-5 w-5" />;
-      case "product": return <Package className="h-5 w-5" />;
-      case "it": return <MonitorSmartphone className="h-5 w-5" />;
-      case "customer_support": return <HeartHandshake className="h-5 w-5" />;
-      case "legal": return <Scale className="h-5 w-5" />;
-      case "facilities": return <Hammer className="h-5 w-5" />;
-      default: return <Folder className="h-5 w-5" />;
-    }
-  };
-
-  // Common navigation items - available to all authenticated users
-  const commonNavItems = [
-    { 
-      path: "/dashboard", 
-      name: "Dashboard", 
-      icon: <Home className="h-5 w-5" />,
-      availableTo: "all"
-    }
-  ];
-  
-  // Core functionality - available to most roles based on permissions
-  const coreNavItems = [
-    { 
-      path: "/evaluations", 
-      name: "Evaluations", 
-      icon: <ClipboardList className="h-5 w-5" />,
-      permission: "canViewEvaluations" as const,
-      availableTo: "restricted"
-    },
-    { 
-      path: "/clients", 
-      name: "Clients", 
-      icon: <Users className="h-5 w-5" />,
-      permission: "canViewClients" as const,
-      availableTo: "restricted"
-    },
-    { 
-      path: "/reports", 
-      name: "Reports", 
-      icon: <FileText className="h-5 w-5" />,
-      permission: "canViewReports" as const,
-      availableTo: "admin"
-    }
-  ];
-
-  // Department-specific navigation items
-  const departmentNavItems: { [key in Department]?: any[] } = {
-    operations: [
-      { 
-        path: "/operations-dashboard", 
-        name: "Operations Dashboard", 
-        icon: <LayoutDashboard className="h-5 w-5" />,
-        availableTo: "admin"
-      },
-      { 
-        path: "/audit-scheduling", 
-        name: "Audit Scheduling", 
-        icon: <Calendar className="h-5 w-5" />,
-        availableTo: "lead"
-      }
-    ],
-    finance: [
-      { 
-        path: "/financial", 
-        name: "Financial Dashboard", 
-        icon: <Calculator className="h-5 w-5" />,
-        permission: "canManageFinancials" as const,
-        availableTo: "admin"
-      },
-      { 
-        path: "/financial-reports", 
-        name: "Financial Reports", 
-        icon: <BarChart className="h-5 w-5" />,
-        availableTo: "lead"
-      },
-      { 
-        path: "/payroll", 
-        name: "Payroll Management", 
-        icon: <Calculator className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "finance"
-      }
-    ],
-    hr: [
-      { 
-        path: "/hr-dashboard", 
-        name: "HR Dashboard", 
-        icon: <LayoutDashboard className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "hr"
-      },
-      { 
-        path: "/recruitment", 
-        name: "Recruitment", 
-        icon: <UserRound className="h-5 w-5" />,
-        availableTo: "lead",
-        department: "hr"
-      },
-      {
-        path: "/training-resources", 
-        name: "Training Resources", 
-        icon: <FileUp className="h-5 w-5" />,
-        availableTo: "admin"
-      },
-    ],
-    marketing: [
-      { 
-        path: "/marketing-actions", 
-        name: "Marketing Actions", 
-        icon: <Activity className="h-5 w-5" />,
-        permission: "canManageMarketing" as const,
-        availableTo: "admin"
-      },
-      {
-        path: "/marketing-dashboard", 
-        name: "Marketing Dashboard", 
-        icon: <LayoutDashboard className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "marketing"
-      }
-    ],
-    sales: [
-      { 
-        path: "/sales-dashboard", 
-        name: "Sales Dashboard", 
-        icon: <BarChart className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "sales"
-      },
-      { 
-        path: "/crm", 
-        name: "Customer Relations", 
-        icon: <HeartHandshake className="h-5 w-5" />,
-        availableTo: "lead",
-        department: "sales"
-      }
-    ],
-    product: [
-      { 
-        path: "/product-dashboard", 
-        name: "Product Dashboard", 
-        icon: <Package className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "product"
-      },
-      { 
-        path: "/quality-control", 
-        name: "Quality Control", 
-        icon: <ShieldCheck className="h-5 w-5" />,
-        availableTo: "restricted",
-        department: "product"
-      }
-    ],
-    it: [
-      { 
-        path: "/it-dashboard", 
-        name: "IT Dashboard", 
-        icon: <Server className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "it"
-      },
-      { 
-        path: "/system-logs", 
-        name: "System Logs", 
-        icon: <Server className="h-5 w-5" />,
-        availableTo: "lead",
-        department: "it"
-      },
-      { 
-        path: "/system-settings", 
-        name: "System Settings", 
-        icon: <Settings className="h-5 w-5" />,
-        availableTo: "power",
-        department: "it"
-      }
-    ],
-    customer_support: [
-      { 
-        path: "/support-dashboard", 
-        name: "Support Dashboard", 
-        icon: <PhoneCall className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "customer_support"
-      },
-      { 
-        path: "/tickets", 
-        name: "Support Tickets", 
-        icon: <ClipboardList className="h-5 w-5" />,
-        availableTo: "restricted",
-        department: "customer_support"
-      }
-    ],
-    legal: [
-      { 
-        path: "/legal-dashboard", 
-        name: "Legal Dashboard", 
-        icon: <Scale className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "legal"
-      },
-      { 
-        path: "/compliance", 
-        name: "Compliance", 
-        icon: <ShieldCheck className="h-5 w-5" />,
-        availableTo: "lead",
-        department: "legal"
-      }
-    ],
-    facilities: [
-      { 
-        path: "/facilities-dashboard", 
-        name: "Facilities Dashboard", 
-        icon: <Building className="h-5 w-5" />,
-        availableTo: "admin",
-        department: "facilities"
-      },
-      { 
-        path: "/maintenance", 
-        name: "Maintenance", 
-        icon: <Hammer className="h-5 w-5" />,
-        availableTo: "restricted",
-        department: "facilities"
-      }
-    ]
-  };
-
-  // Management navigation items
-  const managementNavItems = [
-    { 
-      path: "/kpi-dashboard", 
-      name: "KPI Dashboard", 
-      icon: <BarChart className="h-5 w-5" />,
-      availableTo: "manager"
-    },
-    { 
-      path: "/project-management", 
-      name: "Project Management", 
-      icon: <Briefcase className="h-5 w-5" />,
-      availableTo: "manager"
-    },
-    { 
-      path: "/admin-kpi", 
-      name: "Admin KPI Dashboard", 
-      icon: <BarChart className="h-5 w-5" />,
-      availableTo: "power"
-    }
-  ];
-
-  // Administrative navigation items
-  const adminNavItems = [
-    { 
-      path: "/users", 
-      name: "User Management", 
-      icon: <ShieldCheck className="h-5 w-5" />,
-      permission: "canManageUsers" as const,
-      availableTo: "power"
-    },
-    { 
-      path: "/client-portal-settings", 
-      name: "Client Portal Settings", 
-      icon: <Settings className="h-5 w-5" />,
-      availableTo: "super"
-    },
-    { 
-      path: "/audit-sheet-designer", 
-      name: "Design Audit Sheets", 
-      icon: <FileDown className="h-5 w-5" />,
-      permission: "canCreateAuditSheets" as const,
-      availableTo: "manager"
-    }
-  ];
-
-  // System configuration items - superuser only
-  const superUserItems = [
-    {
-      path: "/notifications", 
-      name: "System Notifications", 
-      icon: <Bell className="h-5 w-5" />,
-    },
-    {
-      path: "/user-activity-report", 
-      name: "User Activity Report", 
-      icon: <FileText className="h-5 w-5" />,
-    },
-    {
-      path: "/settings", 
-      name: "Global Settings", 
-      icon: <Settings className="h-5 w-5" />,
-      permission: "canEditSettings" as const
-    }
-  ];
-  
   // Helper function to check if menu item should be visible
   const shouldShowMenuItem = (item: any) => {
     // Check permission-based visibility
@@ -394,34 +110,374 @@ const AuthenticatedLayout = () => {
     return true;
   };
 
-  // Function to render menu items
-  const renderMenuItems = (items: any[]) => {
-    return items
-      .filter(shouldShowMenuItem)
-      .map((item) => {
-        const isActive = location.pathname === item.path;
-        
-        return (
-          <Link key={item.path} to={item.path}>
-            <Button
-              variant={isActive ? "secondary" : "ghost"}
-              className="w-full justify-start"
-            >
-              {item.icon}
-              <span className="ml-2">{item.name}</span>
-            </Button>
-          </Link>
-        );
-      });
-  };
+  // Define navigation categories with their items
+  const navigationCategories = [
+    {
+      id: "dashboard",
+      name: "Dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/dashboard", 
+          name: "Main Dashboard", 
+          icon: <Home className="h-4 w-4" />,
+          availableTo: "all"
+        },
+        { 
+          path: "/kpi-dashboard", 
+          name: "KPI Dashboard", 
+          icon: <TrendingUp className="h-4 w-4" />,
+          availableTo: "manager"
+        },
+        { 
+          path: "/admin-kpi", 
+          name: "Admin KPI", 
+          icon: <Target className="h-4 w-4" />,
+          availableTo: "power"
+        }
+      ]
+    },
+    {
+      id: "evaluations",
+      name: "Evaluations",
+      icon: <ClipboardList className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/evaluations", 
+          name: "View Evaluations", 
+          icon: <ClipboardList className="h-4 w-4" />,
+          permission: "canViewEvaluations" as const,
+          availableTo: "restricted"
+        },
+        { 
+          path: "/audit-sheet-designer", 
+          name: "Design Audit Sheets", 
+          icon: <FileDown className="h-4 w-4" />,
+          permission: "canCreateAuditSheets" as const,
+          availableTo: "manager"
+        },
+        { 
+          path: "/audit-scheduling", 
+          name: "Audit Scheduling", 
+          icon: <Calendar className="h-4 w-4" />,
+          availableTo: "lead"
+        }
+      ]
+    },
+    {
+      id: "clients",
+      name: "Clients",
+      icon: <Users className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/clients", 
+          name: "Client Management", 
+          icon: <Users className="h-4 w-4" />,
+          permission: "canViewClients" as const,
+          availableTo: "restricted"
+        },
+        { 
+          path: "/crm", 
+          name: "Customer Relations", 
+          icon: <HeartHandshake className="h-4 w-4" />,
+          availableTo: "lead",
+          department: "sales"
+        },
+        { 
+          path: "/client-portal-settings", 
+          name: "Portal Settings", 
+          icon: <Settings className="h-4 w-4" />,
+          availableTo: "super"
+        }
+      ]
+    },
+    {
+      id: "reports",
+      name: "Reports",
+      icon: <FileText className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/reports", 
+          name: "Standard Reports", 
+          icon: <FileText className="h-4 w-4" />,
+          permission: "canViewReports" as const,
+          availableTo: "admin"
+        },
+        { 
+          path: "/user-activity-report", 
+          name: "User Activity", 
+          icon: <Activity className="h-4 w-4" />,
+          availableTo: "super"
+        },
+        { 
+          path: "/financial-reports", 
+          name: "Financial Reports", 
+          icon: <BarChart className="h-4 w-4" />,
+          availableTo: "lead",
+          department: "finance"
+        }
+      ]
+    },
+    {
+      id: "operations",
+      name: "Operations",
+      icon: <Building className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/operations-dashboard", 
+          name: "Operations Dashboard", 
+          icon: <LayoutDashboard className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "operations"
+        },
+        { 
+          path: "/project-management", 
+          name: "Project Management", 
+          icon: <Briefcase className="h-4 w-4" />,
+          availableTo: "manager"
+        },
+        { 
+          path: "/quality-control", 
+          name: "Quality Control", 
+          icon: <ShieldCheck className="h-4 w-4" />,
+          availableTo: "restricted",
+          department: "product"
+        }
+      ]
+    },
+    {
+      id: "finance",
+      name: "Finance",
+      icon: <Calculator className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/financial", 
+          name: "Financial Dashboard", 
+          icon: <Calculator className="h-4 w-4" />,
+          permission: "canManageFinancials" as const,
+          availableTo: "admin"
+        },
+        { 
+          path: "/financial-dashboard", 
+          name: "Finance Analytics", 
+          icon: <BarChart className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "finance"
+        },
+        { 
+          path: "/payroll", 
+          name: "Payroll Management", 
+          icon: <UserRound className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "finance"
+        }
+      ]
+    },
+    {
+      id: "hr",
+      name: "Human Resources",
+      icon: <UserRound className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/hr-dashboard", 
+          name: "HR Dashboard", 
+          icon: <LayoutDashboard className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "hr"
+        },
+        { 
+          path: "/recruitment", 
+          name: "Recruitment", 
+          icon: <User className="h-4 w-4" />,
+          availableTo: "lead",
+          department: "hr"
+        },
+        { 
+          path: "/training-resources", 
+          name: "Training Resources", 
+          icon: <FileUp className="h-4 w-4" />,
+          availableTo: "admin"
+        },
+        { 
+          path: "/manager-training", 
+          name: "Manager Training", 
+          icon: <Briefcase className="h-4 w-4" />,
+          availableTo: "manager"
+        }
+      ]
+    },
+    {
+      id: "marketing",
+      name: "Marketing",
+      icon: <Megaphone className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/marketing-dashboard", 
+          name: "Marketing Dashboard", 
+          icon: <LayoutDashboard className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "marketing"
+        },
+        { 
+          path: "/marketing-actions", 
+          name: "Marketing Actions", 
+          icon: <Activity className="h-4 w-4" />,
+          permission: "canManageMarketing" as const,
+          availableTo: "admin"
+        }
+      ]
+    },
+    {
+      id: "sales",
+      name: "Sales",
+      icon: <BadgePercent className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/sales-dashboard", 
+          name: "Sales Dashboard", 
+          icon: <BarChart className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "sales"
+        }
+      ]
+    },
+    {
+      id: "compliance",
+      name: "Compliance",
+      icon: <Scale className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/legal-dashboard", 
+          name: "Legal Dashboard", 
+          icon: <Scale className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "legal"
+        },
+        { 
+          path: "/compliance", 
+          name: "Compliance Management", 
+          icon: <ShieldCheck className="h-4 w-4" />,
+          availableTo: "lead",
+          department: "legal"
+        }
+      ]
+    },
+    {
+      id: "support",
+      name: "Support",
+      icon: <Headphones className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/support-dashboard", 
+          name: "Support Dashboard", 
+          icon: <PhoneCall className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "customer_support"
+        },
+        { 
+          path: "/tickets", 
+          name: "Support Tickets", 
+          icon: <ClipboardList className="h-4 w-4" />,
+          availableTo: "restricted",
+          department: "customer_support"
+        },
+        { 
+          path: "/product-dashboard", 
+          name: "Product Dashboard", 
+          icon: <Package className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "product"
+        }
+      ]
+    },
+    {
+      id: "system",
+      name: "System Settings",
+      icon: <Server className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/users", 
+          name: "User Management", 
+          icon: <ShieldCheck className="h-4 w-4" />,
+          permission: "canManageUsers" as const,
+          availableTo: "power"
+        },
+        { 
+          path: "/it-dashboard", 
+          name: "IT Dashboard", 
+          icon: <MonitorSmartphone className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "it"
+        },
+        { 
+          path: "/system-settings", 
+          name: "System Configuration", 
+          icon: <Settings className="h-4 w-4" />,
+          availableTo: "power",
+          department: "it"
+        },
+        { 
+          path: "/system-logs", 
+          name: "System Logs", 
+          icon: <Database className="h-4 w-4" />,
+          availableTo: "lead",
+          department: "it"
+        },
+        { 
+          path: "/notifications", 
+          name: "Notifications", 
+          icon: <Bell className="h-4 w-4" />,
+          availableTo: "super"
+        },
+        { 
+          path: "/settings", 
+          name: "Global Settings", 
+          icon: <Settings className="h-4 w-4" />,
+          permission: "canEditSettings" as const,
+          availableTo: "super"
+        },
+        { 
+          path: "/facilities-dashboard", 
+          name: "Facilities", 
+          icon: <Building className="h-4 w-4" />,
+          availableTo: "admin",
+          department: "facilities"
+        },
+        { 
+          path: "/maintenance", 
+          name: "Maintenance", 
+          icon: <Hammer className="h-4 w-4" />,
+          availableTo: "restricted",
+          department: "facilities"
+        }
+      ]
+    }
+  ];
 
-  // Get available departments for the user
-  const availableDepartments = Object.keys(departmentNavItems) as Department[];
-  
-  // Filter department based on user's own department (unless superuser)
-  const userVisibleDepartments = isSuperUser || isPowerManager 
-    ? availableDepartments 
-    : [userDepartment].filter(Boolean) as Department[];
+  // Filter categories to only show those with visible items
+  const visibleCategories = navigationCategories
+    .map(category => ({
+      ...category,
+      items: category.items.filter(shouldShowMenuItem)
+    }))
+    .filter(category => category.items.length > 0);
+
+  // Function to render menu items
+  const renderMenuItem = (item: any) => {
+    const isActive = location.pathname === item.path;
+    
+    return (
+      <Link key={item.path} to={item.path}>
+        <Button
+          variant={isActive ? "secondary" : "ghost"}
+          className="w-full justify-start pl-6 h-8 text-sm"
+        >
+          {item.icon}
+          <span className="ml-2">{item.name}</span>
+        </Button>
+      </Link>
+    );
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -457,137 +513,38 @@ const AuthenticatedLayout = () => {
         </div>
       </header>
 
-      <div className="grid flex-1 md:grid-cols-[220px_1fr]">
+      <div className="grid flex-1 md:grid-cols-[280px_1fr]">
         {/* Sidebar Navigation */}
         <aside className="hidden border-r bg-muted/40 md:block">
           <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
-            <nav className="grid gap-2 px-2 py-4">
-              {/* Common navigation items */}
-              {renderMenuItems(commonNavItems)}
-
-              {/* Core functionality items */}
-              {coreNavItems.length > 0 && (
-                <>
-                  <div className="relative my-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t"></span>
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
-                        Core Functions
-                      </span>
-                    </div>
-                  </div>
-                  {renderMenuItems(coreNavItems)}
-                </>
-              )}
-
-              {/* Department-specific navigation */}
-              {userVisibleDepartments.length > 0 && (
-                <>
-                  <div className="relative my-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t"></span>
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
-                        {isSuperUser || isPowerManager ? "Department Tools" : "Your Department"}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {(isSuperUser || isPowerManager) && userVisibleDepartments.length > 1 && (
-                    <Tabs 
-                      value={selectedDepartment} 
-                      onValueChange={(value) => setSelectedDepartment(value as Department | "all")}
-                      className="mb-2"
+            <nav className="grid gap-1 px-2 py-4">
+              {visibleCategories.map((category) => (
+                <Collapsible 
+                  key={category.id}
+                  open={openCategories.includes(category.id)}
+                  onOpenChange={() => toggleCategory(category.id)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between h-9 px-2 font-medium text-sm"
                     >
-                      <TabsList className="w-full">
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        {userVisibleDepartments.map((dept) => (
-                          <TabsTrigger key={dept} value={dept} className="flex items-center">
-                            {getDepartmentIcon(dept)}
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                    </Tabs>
-                  )}
-                  
-                  {selectedDepartment === "all" ? (
-                    // Show items from all departments
-                    userVisibleDepartments.map(dept => {
-                      const deptItems = departmentNavItems[dept] || [];
-                      if (deptItems.filter(shouldShowMenuItem).length === 0) return null;
-                      
-                      return (
-                        <div key={dept} className="mb-3">
-                          <div className="flex items-center mb-1 px-2">
-                            {getDepartmentIcon(dept)}
-                            <span className="ml-2 text-sm font-medium capitalize">
-                              {dept === "it" ? "IT" : dept === "hr" ? "HR" : dept.replace(/_/g, ' ')}
-                            </span>
-                          </div>
-                          {renderMenuItems(deptItems)}
-                        </div>
-                      );
-                    })
-                  ) : (
-                    // Show items from selected department
-                    renderMenuItems(departmentNavItems[selectedDepartment as Department] || [])
-                  )}
-                </>
-              )}
-
-              {/* Management tools */}
-              {isManager && (
-                <>
-                  <div className="relative my-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t"></span>
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
-                        Management Tools
-                      </span>
-                    </div>
-                  </div>
-                  {renderMenuItems(managementNavItems)}
-                </>
-              )}
-
-              {/* Administrative tools */}
-              {isPowerManager && (
-                <>
-                  <div className="relative my-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t"></span>
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
-                        Administration
-                      </span>
-                    </div>
-                  </div>
-                  {renderMenuItems(adminNavItems)}
-                </>
-              )}
-
-              {/* System configuration */}
-              {isSuperUser && (
-                <>
-                  <div className="relative my-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t"></span>
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-muted/40 px-2 text-xs text-muted-foreground">
-                        System Configuration
-                      </span>
-                    </div>
-                  </div>
-                  {renderMenuItems(superUserItems)}
-                </>
-              )}
+                      <div className="flex items-center">
+                        {category.icon}
+                        <span className="ml-2">{category.name}</span>
+                      </div>
+                      {openCategories.includes(category.id) ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-1">
+                    {category.items.map(renderMenuItem)}
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
             </nav>
           </div>
         </aside>
