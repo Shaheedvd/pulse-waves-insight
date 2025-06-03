@@ -25,6 +25,7 @@ import { ArrowUpRight, Download, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { downloadAsPdf, generateDashboardPdf } from "@/lib/pdf-utils";
+import ViewDetailsModal from "@/components/shared/ViewDetailsModal";
 
 // Updated data for Pulse Point CX
 const monthlyScoreData = [
@@ -88,6 +89,8 @@ const Dashboard = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const [timeFrame, setTimeFrame] = useState("month");
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
 
   const handleDownload = () => {
     // Create a comprehensive data object with all dashboard information
@@ -129,6 +132,23 @@ const Dashboard = () => {
       title: "Report Downloaded",
       description: "Dashboard report has been downloaded successfully",
     });
+  };
+
+  const handleViewEvaluationDetails = (evaluation: any) => {
+    const evaluationDetails = {
+      id: evaluation.id,
+      client: evaluation.client,
+      location: evaluation.location,
+      scheduledDate: evaluation.date,
+      scheduledTime: "10:00 AM", // Mock time
+      evaluationScope: "Comprehensive Store Evaluation",
+      evaluator: "To be assigned",
+      status: "Scheduled",
+      score: 0
+    };
+    
+    setSelectedEvaluation(evaluationDetails);
+    setIsDetailsModalOpen(true);
   };
 
   return (
@@ -322,7 +342,12 @@ const Dashboard = () => {
                   <div className="text-sm text-muted-foreground">
                     {evaluation.date}
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewEvaluationDetails(evaluation)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
                     View Details
                   </Button>
                 </div>
@@ -331,6 +356,13 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ViewDetailsModal
+        open={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        type="evaluation"
+        data={selectedEvaluation}
+      />
     </div>
   );
 };
