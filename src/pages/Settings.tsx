@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -38,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import DataExportImport from "@/components/shared/DataExportImport";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -89,10 +89,11 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="account">
-        <TabsList className="grid w-full grid-cols-4 md:w-[500px]">
+        <TabsList className="grid w-full grid-cols-5 md:w-[600px]">
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="dataExport">Data Export</TabsTrigger>
           {isSuperuserOrManager && <TabsTrigger value="userPasswords">User Passwords</TabsTrigger>}
         </TabsList>
 
@@ -326,6 +327,10 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="dataExport" className="space-y-4 mt-4">
+          <DataExportImport />
         </TabsContent>
 
         {isSuperuserOrManager && (

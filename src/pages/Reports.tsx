@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -44,6 +43,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { downloadAsPdf } from "@/lib/pdf-utils";
+import DataExportImport from "@/components/shared/DataExportImport";
 
 // Sample report data
 const recentReports = [
@@ -147,7 +147,7 @@ const locations = [
 ];
 
 const Reports = () => {
-  const [activeTab, setActiveTab] = useState("recent");
+  const [activeTab, setActiveTab] = useState("standard");
   const [isGenerateReportOpen, setIsGenerateReportOpen] = useState(false);
   const [reportParams, setReportParams] = useState({
     template: "",
@@ -312,21 +312,20 @@ const Reports = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-        <div className="flex space-x-2">
-          <Button onClick={() => setIsGenerateReportOpen(true)}>
-            Generate Report
-          </Button>
-        </div>
+        <Button>
+          <FileText className="mr-2 h-4 w-4" /> Generate Report
+        </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="recent">Recent Reports</TabsTrigger>
-          <TabsTrigger value="templates">Report Templates</TabsTrigger>
-          <TabsTrigger value="library">Reports Library</TabsTrigger>
+      <Tabs defaultValue="standard">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="standard">Standard Reports</TabsTrigger>
+          <TabsTrigger value="custom">Custom Reports</TabsTrigger>
+          <TabsTrigger value="scheduled">Scheduled Reports</TabsTrigger>
+          <TabsTrigger value="dataExport">Data Export/Import</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="recent" className="space-y-4 pt-4">
+        <TabsContent value="standard" className="space-y-4 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentReports.map((report) => (
               <Card key={report.id}>
@@ -369,7 +368,7 @@ const Reports = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="templates" className="space-y-4 pt-4">
+        <TabsContent value="custom" className="space-y-4 pt-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {reportTemplates.map((template) => (
               <Card key={template.id}>
@@ -419,119 +418,125 @@ const Reports = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="library" className="pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports Library</CardTitle>
-              <CardDescription>
-                Browse and access all previously generated reports
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <div className="relative flex-1">
-                    <Input
-                      placeholder="Search reports..."
-                      className="pl-8"
-                    />
-                    <FileText className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <TabsContent value="scheduled" className="space-y-4 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Scheduled Reports</CardTitle>
+                <CardDescription>
+                  View and manage scheduled reports
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="relative flex-1">
+                      <Input
+                        placeholder="Search reports..."
+                        className="pl-8"
+                      />
+                      <FileText className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-[180px]">
+                        <Filter className="mr-2 h-4 w-4" />
+                        <SelectValue placeholder="Report Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="audit">Audit</SelectItem>
+                        <SelectItem value="performance">Performance</SelectItem>
+                        <SelectItem value="compliance">Compliance</SelectItem>
+                        <SelectItem value="analysis">Analysis</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select defaultValue="recent">
+                      <SelectTrigger className="w-[180px]">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        <SelectValue placeholder="Time Period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="recent">Recent</SelectItem>
+                        <SelectItem value="last-week">Last Week</SelectItem>
+                        <SelectItem value="last-month">Last Month</SelectItem>
+                        <SelectItem value="last-quarter">Last Quarter</SelectItem>
+                        <SelectItem value="last-year">Last Year</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Select defaultValue="all">
-                    <SelectTrigger className="w-[180px]">
-                      <Filter className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Report Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="audit">Audit</SelectItem>
-                      <SelectItem value="performance">Performance</SelectItem>
-                      <SelectItem value="compliance">Compliance</SelectItem>
-                      <SelectItem value="analysis">Analysis</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select defaultValue="recent">
-                    <SelectTrigger className="w-[180px]">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Time Period" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Recent</SelectItem>
-                      <SelectItem value="last-week">Last Week</SelectItem>
-                      <SelectItem value="last-month">Last Month</SelectItem>
-                      <SelectItem value="last-quarter">Last Quarter</SelectItem>
-                      <SelectItem value="last-year">Last Year</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                <div className="relative overflow-x-auto rounded-md border">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs uppercase bg-muted">
-                      <tr>
-                        <th scope="col" className="px-6 py-3">
-                          Report Name
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Type
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Generated Date
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Status
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-right">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentReports.concat(recentReports).map((report, idx) => (
-                        <tr
-                          key={`${report.id}-${idx}`}
-                          className="bg-card border-b last:border-0"
-                        >
-                          <td className="px-6 py-4 font-medium">
-                            {report.name}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center">
-                              {getReportTypeIcon(report.type)}
-                              {report.type}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            {new Date(report.date).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4">
-                            <Badge
-                              variant={
-                                report.status === "complete"
-                                  ? "outline"
-                                  : "secondary"
-                              }
-                            >
-                              {report.status}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleReportDownload(report.id)}
-                            >
-                              <Download className="h-4 w-4 mr-1" /> Download
-                            </Button>
-                          </td>
+                  <div className="relative overflow-x-auto rounded-md border">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-xs uppercase bg-muted">
+                        <tr>
+                          <th scope="col" className="px-6 py-3">
+                            Report Name
+                          </th>
+                          <th scope="col" className="px-6 py-3">
+                            Type
+                          </th>
+                          <th scope="col" className="px-6 py-3">
+                            Generated Date
+                          </th>
+                          <th scope="col" className="px-6 py-3">
+                            Status
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-right">
+                            Action
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {recentReports.concat(recentReports).map((report, idx) => (
+                          <tr
+                            key={`${report.id}-${idx}`}
+                            className="bg-card border-b last:border-0"
+                          >
+                            <td className="px-6 py-4 font-medium">
+                              {report.name}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center">
+                                {getReportTypeIcon(report.type)}
+                                {report.type}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              {new Date(report.date).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4">
+                              <Badge
+                                variant={
+                                  report.status === "complete"
+                                    ? "outline"
+                                    : "secondary"
+                                }
+                              >
+                                {report.status}
+                              </Badge>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleReportDownload(report.id)}
+                              >
+                                <Download className="h-4 w-4 mr-1" /> Download
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="dataExport" className="space-y-4 mt-4">
+          <DataExportImport />
         </TabsContent>
       </Tabs>
 

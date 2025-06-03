@@ -150,6 +150,13 @@ const AuthenticatedLayout = () => {
           availableTo: "restricted"
         },
         { 
+          path: "/cx-evaluation-builder", 
+          name: "CX Evaluation Builder", 
+          icon: <FileDown className="h-4 w-4" />,
+          permission: "canCreateAuditSheets" as const,
+          availableTo: "manager"
+        },
+        { 
           path: "/audit-sheet-designer", 
           name: "Design Audit Sheets", 
           icon: <FileDown className="h-4 w-4" />,

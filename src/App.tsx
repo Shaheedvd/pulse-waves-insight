@@ -30,6 +30,7 @@ import ClientPortalSettings from "./pages/ClientPortalSettings";
 import AuditScheduling from "./pages/AuditScheduling";
 import Notifications from "./pages/Notifications";
 import SystemLogs from "./pages/SystemLogs";
+import CXEvaluationBuilder from "./components/evaluations/CXEvaluationBuilder";
 
 // Import new department dashboards
 import OperationsDashboard from "./pages/OperationsDashboard";
