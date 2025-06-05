@@ -7,6 +7,7 @@ import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import Dashboard from '@/pages/Dashboard';
+import KpiDashboard from '@/pages/KpiDashboard';
 import Evaluations from '@/pages/Evaluations';
 import Clients from '@/pages/Clients';
 import Reports from '@/pages/Reports';
@@ -47,6 +48,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route element={<AuthenticatedLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/kpi-dashboard" element={<KpiDashboard />} />
                   <Route path="/evaluations" element={<Evaluations />} />
                   <Route path="/clients" element={<Clients />} />
                   <Route path="/reports" element={<Reports />} />
