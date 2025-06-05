@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Dialog,
@@ -45,7 +44,7 @@ interface EvaluationDetailsProps extends BaseModalProps {
     evaluator?: string;
     status: string;
     score?: number;
-  };
+  } | null;
 }
 
 interface ClientDetailsProps extends BaseModalProps {
@@ -60,7 +59,7 @@ interface ClientDetailsProps extends BaseModalProps {
     phone: string;
     status: string;
     lastEvaluation?: string;
-  };
+  } | null;
 }
 
 interface FinancialDetailsProps extends BaseModalProps {
@@ -74,7 +73,7 @@ interface FinancialDetailsProps extends BaseModalProps {
     status: string;
     client?: string;
     category?: string;
-  };
+  } | null;
 }
 
 interface TaskDetailsProps extends BaseModalProps {
@@ -88,13 +87,32 @@ interface TaskDetailsProps extends BaseModalProps {
     status: string;
     dueDate: string;
     project?: string;
-  };
+  } | null;
 }
 
 type ViewDetailsModalProps = EvaluationDetailsProps | ClientDetailsProps | FinancialDetailsProps | TaskDetailsProps;
 
 const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({ open, onClose, onEdit, onPrint, type, data }) => {
-  const renderEvaluationDetails = (evalData: EvaluationDetailsProps['data']) => (
+  // Early return if data is null
+  if (!data) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[700px] max-h-[600px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>No Data Available</DialogTitle>
+            <DialogDescription>The requested data could not be loaded.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  const renderEvaluationDetails = (evalData: NonNullable<EvaluationDetailsProps['data']>) => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
@@ -163,7 +181,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({ open, onClose, onEd
     </div>
   );
 
-  const renderClientDetails = (clientData: ClientDetailsProps['data']) => (
+  const renderClientDetails = (clientData: NonNullable<ClientDetailsProps['data']>) => (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
@@ -226,7 +244,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({ open, onClose, onEd
     </div>
   );
 
-  const renderFinancialDetails = (finData: FinancialDetailsProps['data']) => (
+  const renderFinancialDetails = (finData: NonNullable<FinancialDetailsProps['data']>) => (
     <div className="space-y-4">
       <Card>
         <CardContent className="pt-4">
@@ -282,7 +300,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({ open, onClose, onEd
     </div>
   );
 
-  const renderTaskDetails = (taskData: TaskDetailsProps['data']) => (
+  const renderTaskDetails = (taskData: NonNullable<TaskDetailsProps['data']>) => (
     <div className="space-y-4">
       <Card>
         <CardContent className="pt-4">
@@ -364,13 +382,13 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({ open, onClose, onEd
   const renderContent = () => {
     switch (type) {
       case "evaluation":
-        return renderEvaluationDetails(data as EvaluationDetailsProps['data']);
+        return renderEvaluationDetails(data as NonNullable<EvaluationDetailsProps['data']>);
       case "client":
-        return renderClientDetails(data as ClientDetailsProps['data']);
+        return renderClientDetails(data as NonNullable<ClientDetailsProps['data']>);
       case "financial":
-        return renderFinancialDetails(data as FinancialDetailsProps['data']);
+        return renderFinancialDetails(data as NonNullable<FinancialDetailsProps['data']>);
       case "task":
-        return renderTaskDetails(data as TaskDetailsProps['data']);
+        return renderTaskDetails(data as NonNullable<TaskDetailsProps['data']>);
       default:
         return null;
     }
