@@ -30,50 +30,53 @@ import QualityControlPage from '@/pages/QualityControl';
 import Tickets from '@/pages/Tickets';
 import CRM from '@/pages/CRM';
 import { AuthProvider } from './contexts/AuthContext';
+import { TaskProvider } from './contexts/TaskContext';
 import Recruitment from '@/pages/Recruitment';
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AuthenticatedLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/evaluations" element={<Evaluations />} />
-              <Route path="/clients" element={<Clients />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/financial" element={<Financial />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/audit-sheet-designer" element={<AuditSheetDesigner />} />
-              <Route path="/audit-scheduling" element={<AuditScheduling />} />
-              <Route path="/user-activity-report" element={<UserActivityReport />} />
-              <Route path="/operations-dashboard" element={<OperationsDashboard />} />
-              <Route path="/project-management" element={<ProjectManagement />} />
-              <Route path="/hr-dashboard" element={<HRDashboard />} />
-              <Route path="/training-resources" element={<TrainingResources />} />
-              <Route path="/manager-training" element={<ManagerTraining />} />
-              <Route path="/system-logs" element={<SystemLogs />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
-              
-              {/* New routes for stub interfaces */}
-              <Route path="/recruitment" element={<Recruitment />} />
-              <Route path="/crm" element={<CRM />} />
-              <Route path="/quality-control" element={<QualityControlPage />} />
-              <Route path="/system-settings" element={<SystemSettingsPage />} />
-              <Route path="/tickets" element={<Tickets />} />
-              <Route path="/compliance" element={<Compliance />} />
-              <Route path="/maintenance" element={<Maintenance />} />
+      <TaskProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AuthenticatedLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/evaluations" element={<Evaluations />} />
+                <Route path="/clients" element={<Clients />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/financial" element={<Financial />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/audit-sheet-designer" element={<AuditSheetDesigner />} />
+                <Route path="/audit-scheduling" element={<AuditScheduling />} />
+                <Route path="/user-activity-report" element={<UserActivityReport />} />
+                <Route path="/operations-dashboard" element={<OperationsDashboard />} />
+                <Route path="/project-management" element={<ProjectManagement />} />
+                <Route path="/hr-dashboard" element={<HRDashboard />} />
+                <Route path="/training-resources" element={<TrainingResources />} />
+                <Route path="/manager-training" element={<ManagerTraining />} />
+                <Route path="/system-logs" element={<SystemLogs />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
+                
+                {/* New routes for stub interfaces */}
+                <Route path="/recruitment" element={<Recruitment />} />
+                <Route path="/crm" element={<CRM />} />
+                <Route path="/quality-control" element={<QualityControlPage />} />
+                <Route path="/system-settings" element={<SystemSettingsPage />} />
+                <Route path="/tickets" element={<Tickets />} />
+                <Route path="/compliance" element={<Compliance />} />
+                <Route path="/maintenance" element={<Maintenance />} />
+              </Route>
             </Route>
-          </Route>
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TaskProvider>
     </AuthProvider>
   );
 }
