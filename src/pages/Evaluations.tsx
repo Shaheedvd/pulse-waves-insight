@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,12 +32,16 @@ import {
   Plus,
   Search,
   FileText,
+  Settings,
+  Calendar,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import EvaluationForm from "@/components/evaluations/EvaluationForm";
 import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
+import CXEvaluationBuilder from "@/components/evaluations/CXEvaluationBuilder";
 import { useToast } from "@/components/ui/use-toast";
 import { downloadAsPdf } from "@/lib/pdf-utils";
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 // Sample evaluation data
 const initialEvaluationsData = [
@@ -153,8 +158,11 @@ const Evaluations = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedEvaluation, setSelectedEvaluation] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("evaluations");
   const [evaluationsData, setEvaluationsData] = useState(initialEvaluationsData);
   const { toast } = useToast();
+  const { logActivity } = useGlobalContext();
   const itemsPerPage = 8;
 
   // Check for globally updated evaluations data
@@ -216,6 +224,11 @@ const Evaluations = () => {
   const handleViewEvaluation = (evaluation: any) => {
     setSelectedEvaluation(evaluation);
     setIsSheetOpen(true);
+    logActivity({
+      action: "VIEW_EVALUATION",
+      details: `Viewed evaluation ${evaluation.id}`,
+      module: "EVALUATIONS"
+    });
   };
 
   const handleDownload = () => {
@@ -253,6 +266,12 @@ const Evaluations = () => {
     
     downloadAsPdf(content, "evaluations-report.pdf");
     
+    logActivity({
+      action: "EXPORT_EVALUATIONS",
+      details: `Exported ${filteredEvaluations.length} evaluations`,
+      module: "EVALUATIONS"
+    });
+    
     toast({
       title: "Downloading evaluations",
       description: "Your file has been downloaded successfully",
@@ -262,174 +281,247 @@ const Evaluations = () => {
   // After a successful form submission, this function will be called to add the new evaluation
   const addNewEvaluation = (newEvaluation: any) => {
     setEvaluationsData(prevData => [...prevData, newEvaluation]);
-    // Also update the global data
     if (typeof window !== 'undefined') {
       (window as any).evaluationsData = [...evaluationsData, newEvaluation];
     }
+    logActivity({
+      action: "CREATE_EVALUATION",
+      details: `Created evaluation ${newEvaluation.id}`,
+      module: "EVALUATIONS"
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Evaluations</h1>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> New Evaluation
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsBuilderOpen(true)}>
+            <Settings className="mr-2 h-4 w-4" /> Form Builder
+          </Button>
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> New Evaluation
+          </Button>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>Evaluation Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 md:space-x-4">
-            <div className="flex flex-1 items-center space-x-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search evaluations..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Select
-                value={statusFilter}
-                onValueChange={(value) => setStatusFilter(value)}
-              >
-                <SelectTrigger className="w-[160px]">
-                  <div className="flex items-center">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Status" />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="evaluations">Evaluations</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="evaluations">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Evaluation Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 md:space-x-4">
+                <div className="flex flex-1 items-center space-x-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search evaluations..."
+                      className="pl-8"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Scheduled">Scheduled</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button variant="outline" size="icon" onClick={handleDownload}>
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value) => setStatusFilter(value)}
+                  >
+                    <SelectTrigger className="w-[160px]">
+                      <div className="flex items-center">
+                        <Filter className="mr-2 h-4 w-4" />
+                        <SelectValue placeholder="Status" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Scheduled">Scheduled</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" size="icon" onClick={handleDownload}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
 
-          <div className="mt-4 rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Evaluator</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentEvaluations.length > 0 ? (
-                  currentEvaluations.map((evaluation) => (
-                    <TableRow key={evaluation.id}>
-                      <TableCell className="font-medium">
-                        {evaluation.id}
-                      </TableCell>
-                      <TableCell>{evaluation.client}</TableCell>
-                      <TableCell>{evaluation.location}</TableCell>
-                      <TableCell>{evaluation.date}</TableCell>
-                      <TableCell>{evaluation.evaluator}</TableCell>
-                      <TableCell>
-                        {evaluation.status === "Completed" ? (
-                          <Badge
-                            className={getScoreBadgeColor(
-                              evaluation.score,
-                              evaluation.status
-                            )}
-                          >
-                            {evaluation.score}%
-                          </Badge>
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={getStatusBadgeColor(evaluation.status)}
-                        >
-                          {evaluation.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleViewEvaluation(evaluation)}
-                        >
-                          <FileText className="h-4 w-4 mr-1" /> View
-                        </Button>
-                      </TableCell>
+              <div className="mt-4 rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Evaluator</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={8}
-                      className="h-24 text-center text-muted-foreground"
-                    >
-                      No evaluations found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {currentEvaluations.length > 0 ? (
+                      currentEvaluations.map((evaluation) => (
+                        <TableRow key={evaluation.id}>
+                          <TableCell className="font-medium">
+                            {evaluation.id}
+                          </TableCell>
+                          <TableCell>{evaluation.client}</TableCell>
+                          <TableCell>{evaluation.location}</TableCell>
+                          <TableCell>{evaluation.date}</TableCell>
+                          <TableCell>{evaluation.evaluator}</TableCell>
+                          <TableCell>
+                            {evaluation.status === "Completed" ? (
+                              <Badge
+                                className={getScoreBadgeColor(
+                                  evaluation.score,
+                                  evaluation.status
+                                )}
+                              >
+                                {evaluation.score}%
+                              </Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              className={getStatusBadgeColor(evaluation.status)}
+                            >
+                              {evaluation.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleViewEvaluation(evaluation)}
+                            >
+                              <FileText className="h-4 w-4 mr-1" /> View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={8}
+                          className="h-24 text-center text-muted-foreground"
+                        >
+                          No evaluations found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between space-x-2 py-4">
-              <div className="text-sm text-muted-foreground">
-                Showing {indexOfFirstItem + 1}-
-                {Math.min(indexOfLastItem, filteredEvaluations.length)} of{" "}
-                {filteredEvaluations.length}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between space-x-2 py-4">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {indexOfFirstItem + 1}-
+                    {Math.min(indexOfLastItem, filteredEvaluations.length)} of{" "}
+                    {filteredEvaluations.length}
+                  </div>
+                  <div className="flex items-center space-x-2">
                     <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
+                      variant="outline"
                       size="icon"
-                      onClick={() => setCurrentPage(page)}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
                     >
-                      {page}
+                      <ChevronLeft className="h-4 w-4" />
                     </Button>
-                  )
-                )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="icon"
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      )
+                    )}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="templates">
+          <Card>
+            <CardHeader>
+              <CardTitle>Evaluation Templates</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <ClipboardCheck className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Templates Yet</h3>
+                <p className="text-muted-foreground mb-4">Create reusable evaluation templates using the Form Builder</p>
+                <Button onClick={() => setIsBuilderOpen(true)}>
+                  <Settings className="mr-2 h-4 w-4" /> Open Form Builder
                 </Button>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Evaluation Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">
+                      {evaluationsData.filter(e => e.status === "Completed").length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Completed Evaluations</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">
+                      {evaluationsData.filter(e => e.status === "Scheduled").length}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Scheduled Evaluations</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">
+                      {Math.round(evaluationsData.filter(e => e.status === "Completed").reduce((acc, e) => acc + e.score, 0) / evaluationsData.filter(e => e.status === "Completed").length) || 0}%
+                    </div>
+                    <p className="text-xs text-muted-foreground">Average Score</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Evaluation Form Dialog */}
       <EvaluationForm 
@@ -444,6 +536,12 @@ const Evaluations = () => {
         onClose={() => setIsSheetOpen(false)}
         evaluation={selectedEvaluation}
         evaluatorsList={evaluatorsList}
+      />
+
+      {/* CX Evaluation Builder Dialog */}
+      <CXEvaluationBuilder
+        open={isBuilderOpen}
+        onClose={() => setIsBuilderOpen(false)}
       />
     </div>
   );

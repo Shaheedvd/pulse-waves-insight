@@ -1,6 +1,14 @@
 
 import React, { useState } from "react";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Card,
   CardContent,
   CardHeader,
@@ -17,16 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import {
   Plus,
   Save,
@@ -41,16 +42,24 @@ import {
   Eye,
   Calendar,
   Building,
+  Users,
+  Clock,
+  Target,
+  FileText,
+  Settings,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 interface FormField {
   id: string;
-  type: "rating" | "multiple_choice" | "yes_no" | "comment";
+  type: "rating" | "multiple_choice" | "yes_no" | "comment" | "number" | "date";
   label: string;
   required: boolean;
   options?: string[];
   maxRating?: number;
+  placeholder?: string;
+  weight?: number;
 }
 
 interface FormSection {
@@ -58,328 +67,706 @@ interface FormSection {
   title: string;
   description?: string;
   fields: FormField[];
+  weight?: number;
 }
 
-interface EvaluationForm {
+interface EvaluationTemplate {
   id: string;
   name: string;
   description: string;
+  category: string;
   version: string;
   sections: FormSection[];
   createdAt: string;
   updatedAt: string;
-  isTemplate: boolean;
+  isActive: boolean;
   assignedClients: string[];
+  totalScore: number;
 }
 
-const CXEvaluationBuilder = () => {
+interface CXEvaluationBuilderProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose }) => {
   const { toast } = useToast();
-  const [selectedForm, setSelectedForm] = useState<EvaluationForm | null>(null);
-  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { logActivity } = useGlobalContext();
   const [activeTab, setActiveTab] = useState("builder");
-  const [formName, setFormName] = useState("");
-  const [formDescription, setFormDescription] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<EvaluationTemplate | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isNewTemplateDialogOpen, setIsNewTemplateDialogOpen] = useState(false);
 
-  // Sample forms data
-  const [evaluationForms] = useState<EvaluationForm[]>([
-    {
-      id: "form-001",
-      name: "Standard Customer Experience Audit",
-      description: "Comprehensive evaluation for retail environments",
-      version: "2.1",
-      sections: [
-        {
-          id: "section-1",
-          title: "Customer Service",
-          description: "Evaluate staff interaction and service quality",
-          fields: [
-            {
-              id: "field-1",
-              type: "rating",
-              label: "Overall service quality",
-              required: true,
-              maxRating: 5,
-            },
-            {
-              id: "field-2",
-              type: "yes_no",
-              label: "Staff greeted customers within 30 seconds",
-              required: true,
-            },
-          ],
-        },
-        {
-          id: "section-2",
-          title: "Store Cleanliness",
-          description: "Assess cleanliness and maintenance standards",
-          fields: [
-            {
-              id: "field-3",
-              type: "multiple_choice",
-              label: "Overall cleanliness rating",
-              required: true,
-              options: ["Excellent", "Good", "Average", "Poor"],
-            },
-            {
-              id: "field-4",
-              type: "comment",
-              label: "Additional cleanliness observations",
-              required: false,
-            },
-          ],
-        },
-      ],
-      createdAt: "2023-06-15",
-      updatedAt: "2023-06-20",
-      isTemplate: true,
-      assignedClients: ["client-1", "client-2"],
-    },
-  ]);
-
-  const [newSection, setNewSection] = useState<FormSection>({
+  // Form builder state
+  const [templateName, setTemplateName] = useState("");
+  const [templateDescription, setTemplateDescription] = useState("");
+  const [templateCategory, setTemplateCategory] = useState("");
+  const [currentSection, setCurrentSection] = useState<FormSection>({
     id: "",
     title: "",
     description: "",
     fields: [],
+    weight: 100
+  });
+  const [isAddingSectionField, setIsAddingSectionField] = useState(false);
+  const [newField, setNewField] = useState<FormField>({
+    id: "",
+    type: "rating",
+    label: "",
+    required: true,
+    weight: 10
   });
 
+  // Sample templates data
+  const [evaluationTemplates] = useState<EvaluationTemplate[]>([
+    {
+      id: "template-001",
+      name: "Retail Store CX Audit",
+      description: "Comprehensive customer experience evaluation for retail environments",
+      category: "Retail",
+      version: "2.1",
+      sections: [
+        {
+          id: "section-1",
+          title: "Customer Service Excellence",
+          description: "Evaluate staff interaction and service quality",
+          weight: 40,
+          fields: [
+            {
+              id: "field-1",
+              type: "rating",
+              label: "Greeting quality and enthusiasm",
+              required: true,
+              maxRating: 5,
+              weight: 25
+            },
+            {
+              id: "field-2",
+              type: "yes_no",
+              label: "Staff acknowledged customer within 30 seconds",
+              required: true,
+              weight: 20
+            },
+            {
+              id: "field-3",
+              type: "multiple_choice",
+              label: "Staff product knowledge level",
+              required: true,
+              options: ["Expert", "Good", "Basic", "Poor"],
+              weight: 25
+            },
+            {
+              id: "field-4",
+              type: "comment",
+              label: "Specific service observations",
+              required: false,
+              weight: 30
+            }
+          ]
+        },
+        {
+          id: "section-2",
+          title: "Store Environment & Cleanliness",
+          description: "Assess physical environment and maintenance standards",
+          weight: 35,
+          fields: [
+            {
+              id: "field-5",
+              type: "rating",
+              label: "Overall store cleanliness",
+              required: true,
+              maxRating: 5,
+              weight: 30
+            },
+            {
+              id: "field-6",
+              type: "yes_no",
+              label: "All lighting fixtures working",
+              required: true,
+              weight: 20
+            },
+            {
+              id: "field-7",
+              type: "multiple_choice",
+              label: "Store organization level",
+              required: true,
+              options: ["Excellent", "Good", "Needs Improvement", "Poor"],
+              weight: 25
+            }
+          ]
+        },
+        {
+          id: "section-3",
+          title: "Brand Compliance",
+          description: "Check adherence to brand standards and guidelines",
+          weight: 25,
+          fields: [
+            {
+              id: "field-8",
+              type: "yes_no",
+              label: "All signage matches brand guidelines",
+              required: true,
+              weight: 40
+            },
+            {
+              id: "field-9",
+              type: "rating",
+              label: "Visual merchandising effectiveness",
+              required: true,
+              maxRating: 5,
+              weight: 35
+            }
+          ]
+        }
+      ],
+      createdAt: "2023-06-15",
+      updatedAt: "2023-06-20",
+      isActive: true,
+      assignedClients: ["retail-corp", "quickmart"],
+      totalScore: 100
+    }
+  ]);
+
   const predefinedSections = [
-    { id: "customer_service", title: "Customer Service", icon: <MessageSquare className="h-4 w-4" /> },
-    { id: "staff_appearance", title: "Staff Appearance", icon: <Star className="h-4 w-4" /> },
-    { id: "store_cleanliness", title: "Store Cleanliness", icon: <CheckSquare className="h-4 w-4" /> },
-    { id: "brand_compliance", title: "Brand Compliance", icon: <Building className="h-4 w-4" /> },
-    { id: "product_knowledge", title: "Product Knowledge", icon: <Star className="h-4 w-4" /> },
+    { id: "customer_service", title: "Customer Service Excellence", icon: <Users className="h-4 w-4" />, description: "Staff interaction and service quality" },
+    { id: "store_environment", title: "Store Environment", icon: <Building className="h-4 w-4" />, description: "Cleanliness and physical environment" },
+    { id: "brand_compliance", title: "Brand Compliance", icon: <Target className="h-4 w-4" />, description: "Adherence to brand standards" },
+    { id: "product_knowledge", title: "Product Knowledge", icon: <Star className="h-4 w-4" />, description: "Staff expertise and product awareness" },
+    { id: "speed_efficiency", title: "Speed & Efficiency", icon: <Clock className="h-4 w-4" />, description: "Service speed and operational efficiency" }
   ];
 
-  const handleCreateForm = () => {
-    if (!formName.trim()) {
+  const fieldTypes = [
+    { value: "rating", label: "Star Rating", icon: <Star className="h-4 w-4" />, description: "1-5 star rating scale" },
+    { value: "multiple_choice", label: "Multiple Choice", icon: <CheckSquare className="h-4 w-4" />, description: "Select from predefined options" },
+    { value: "yes_no", label: "Yes/No", icon: <ToggleLeft className="h-4 w-4" />, description: "Binary choice question" },
+    { value: "comment", label: "Comment", icon: <MessageSquare className="h-4 w-4" />, description: "Free text response" },
+    { value: "number", label: "Number", icon: <FileText className="h-4 w-4" />, description: "Numeric input" },
+    { value: "date", label: "Date", icon: <Calendar className="h-4 w-4" />, description: "Date selection" }
+  ];
+
+  const handleCreateTemplate = () => {
+    if (!templateName.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a form name",
+        description: "Please enter a template name",
         variant: "destructive",
       });
       return;
     }
 
-    // Create new form logic here
-    toast({
-      title: "Success",
-      description: "New evaluation form created successfully",
+    logActivity({
+      action: "CREATE_EVALUATION_TEMPLATE",
+      details: `Created template: ${templateName}`,
+      module: "EVALUATIONS"
     });
 
-    setFormName("");
-    setFormDescription("");
-    setIsFormDialogOpen(false);
-  };
-
-  const handleSaveForm = () => {
     toast({
       title: "Success",
-      description: "Evaluation form saved successfully",
+      description: "New evaluation template created successfully",
     });
+
+    setTemplateName("");
+    setTemplateDescription("");
+    setTemplateCategory("");
+    setIsNewTemplateDialogOpen(false);
   };
 
-  const handlePreview = (form: EvaluationForm) => {
-    setSelectedForm(form);
+  const handlePreview = (template: EvaluationTemplate) => {
+    setSelectedTemplate(template);
     setIsPreviewOpen(true);
+    
+    logActivity({
+      action: "PREVIEW_EVALUATION_TEMPLATE",
+      details: `Previewed template: ${template.name}`,
+      module: "EVALUATIONS"
+    });
+  };
+
+  const handleAddField = () => {
+    if (!newField.label.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a field label",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const fieldToAdd: FormField = {
+      ...newField,
+      id: `field-${Date.now()}`,
+    };
+
+    setCurrentSection(prev => ({
+      ...prev,
+      fields: [...prev.fields, fieldToAdd]
+    }));
+
+    setNewField({
+      id: "",
+      type: "rating",
+      label: "",
+      required: true,
+      weight: 10
+    });
+    setIsAddingSectionField(false);
+
+    toast({
+      title: "Field Added",
+      description: "Field added to section successfully",
+    });
   };
 
   const renderFieldIcon = (type: string) => {
-    switch (type) {
+    const fieldType = fieldTypes.find(ft => ft.value === type);
+    return fieldType?.icon || <Star className="h-4 w-4" />;
+  };
+
+  const renderPreviewField = (field: FormField) => {
+    switch (field.type) {
       case "rating":
-        return <Star className="h-4 w-4" />;
+        return (
+          <div className="flex gap-1">
+            {Array.from({ length: field.maxRating || 5 }).map((_, i) => (
+              <Star key={i} className="h-5 w-5 text-gray-300 hover:text-yellow-400 cursor-pointer" />
+            ))}
+          </div>
+        );
       case "multiple_choice":
-        return <CheckSquare className="h-4 w-4" />;
+        return (
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options?.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
       case "yes_no":
-        return <ToggleLeft className="h-4 w-4" />;
+        return (
+          <div className="flex gap-4">
+            <Button variant="outline" size="sm">Yes</Button>
+            <Button variant="outline" size="sm">No</Button>
+          </div>
+        );
       case "comment":
-        return <MessageSquare className="h-4 w-4" />;
+        return <Textarea placeholder={field.placeholder || "Enter your comments here..."} />;
+      case "number":
+        return <Input type="number" placeholder={field.placeholder || "Enter number"} />;
+      case "date":
+        return <Input type="date" />;
       default:
-        return <Star className="h-4 w-4" />;
+        return <Input placeholder="Field preview" />;
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">CX Evaluation Builder</h1>
-        <Button onClick={() => setIsFormDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create New Form
-        </Button>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="builder">Form Builder</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="assignments">Client Assignments</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="builder" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Evaluation Forms</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4">
-                {evaluationForms.map((form) => (
-                  <Card key={form.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{form.name}</h3>
-                          <Badge variant="outline">v{form.version}</Badge>
-                          {form.isTemplate && <Badge>Template</Badge>}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{form.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Updated: {form.updatedAt}</span>
-                          <span>{form.sections.length} sections</span>
-                          <span>{form.assignedClients.length} clients assigned</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handlePreview(form)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Calendar className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="templates" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Predefined Section Templates</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {predefinedSections.map((section) => (
-                  <Card key={section.id} className="p-4 cursor-pointer hover:bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      {section.icon}
-                      <h3 className="font-medium">{section.title}</h3>
-                    </div>
-                    <Button className="w-full mt-3" variant="outline" size="sm">
-                      Add to Form
-                    </Button>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="assignments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Client Assignments & Scheduling</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Form" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {evaluationForms.map((form) => (
-                        <SelectItem key={form.id} value={form.id}>
-                          {form.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Client" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="client-1">Retail Corp SA</SelectItem>
-                      <SelectItem value="client-2">QuickMart</SelectItem>
-                      <SelectItem value="client-3">EcoFuel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button>
-                    <Calendar className="mr-2 h-4 w-4" /> Schedule Evaluation
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Create Form Dialog */}
-      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[90vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Evaluation Form</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              CX Evaluation Builder
+            </DialogTitle>
             <DialogDescription>
-              Design a new customer experience evaluation form
+              Create and manage custom evaluation forms and templates
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="form-name">Form Name</Label>
-              <Input
-                id="form-name"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="e.g., Retail Store Evaluation"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="form-description">Description</Label>
-              <Textarea
-                id="form-description"
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Brief description of the evaluation purpose"
-              />
-            </div>
-          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="builder">Form Builder</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="sections">Section Library</TabsTrigger>
+              <TabsTrigger value="assignments">Assignments</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="builder" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Design Your Evaluation Form</h3>
+                <Button onClick={() => setIsNewTemplateDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> New Template
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Form Structure</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Section Title</Label>
+                      <Input
+                        value={currentSection.title}
+                        onChange={(e) => setCurrentSection(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="e.g., Customer Service"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Section Description</Label>
+                      <Textarea
+                        value={currentSection.description}
+                        onChange={(e) => setCurrentSection(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Brief description of what this section evaluates"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Section Weight (%)</Label>
+                      <Input
+                        type="number"
+                        value={currentSection.weight}
+                        onChange={(e) => setCurrentSection(prev => ({ ...prev, weight: parseInt(e.target.value) || 0 }))}
+                        placeholder="100"
+                      />
+                    </div>
+                    <Separator />
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label>Section Fields</Label>
+                        <Button size="sm" onClick={() => setIsAddingSectionField(true)}>
+                          <Plus className="h-4 w-4 mr-1" /> Add Field
+                        </Button>
+                      </div>
+                      {currentSection.fields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-2 p-2 border rounded">
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
+                          {renderFieldIcon(field.type)}
+                          <span className="flex-1">{field.label}</span>
+                          <Badge variant={field.required ? "default" : "secondary"}>
+                            {field.required ? "Required" : "Optional"}
+                          </Badge>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Live Preview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {currentSection.title ? (
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold">{currentSection.title}</h4>
+                          {currentSection.description && (
+                            <p className="text-sm text-muted-foreground">{currentSection.description}</p>
+                          )}
+                        </div>
+                        <div className="space-y-3">
+                          {currentSection.fields.map((field) => (
+                            <div key={field.id} className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                {renderFieldIcon(field.type)}
+                                <Label>{field.label}</Label>
+                                {field.required && <span className="text-red-500">*</span>}
+                              </div>
+                              {renderPreviewField(field)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <FileText className="mx-auto h-12 w-12 mb-2" />
+                        <p>Start building your section to see the preview</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="templates" className="space-y-4">
+              <div className="grid gap-4">
+                {evaluationTemplates.map((template) => (
+                  <Card key={template.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{template.name}</h3>
+                            <Badge variant="outline">v{template.version}</Badge>
+                            <Badge variant={template.isActive ? "default" : "secondary"}>
+                              {template.isActive ? "Active" : "Draft"}
+                            </Badge>
+                            <Badge>{template.category}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{template.description}</p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>Updated: {template.updatedAt}</span>
+                            <span>{template.sections.length} sections</span>
+                            <span>{template.assignedClients.length} clients</span>
+                            <span>Score: {template.totalScore}pts</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handlePreview(template)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Calendar className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="sections" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Predefined Section Templates</CardTitle>
+                  <DialogDescription>
+                    Quick-start your evaluation with pre-built sections
+                  </DialogDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {predefinedSections.map((section) => (
+                      <Card key={section.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            {section.icon}
+                            <div className="flex-1">
+                              <h3 className="font-medium">{section.title}</h3>
+                              <p className="text-sm text-muted-foreground">{section.description}</p>
+                            </div>
+                          </div>
+                          <Button className="w-full mt-3" variant="outline" size="sm">
+                            Add to Form
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="assignments" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Template Assignments & Scheduling</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {evaluationTemplates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="retail-corp">Retail Corp SA</SelectItem>
+                          <SelectItem value="quickmart">QuickMart</SelectItem>
+                          <SelectItem value="ecofuel">EcoFuel</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="quarterly">Quarterly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button>
+                        <Calendar className="mr-2 h-4 w-4" /> Schedule
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFormDialogOpen(false)}>
-              Cancel
+            <Button variant="outline" onClick={onClose}>
+              Close
             </Button>
-            <Button onClick={handleCreateForm}>Create Form</Button>
+            <Button>
+              <Save className="mr-2 h-4 w-4" /> Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Preview Dialog */}
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="sm:max-w-[800px] max-h-[600px] overflow-y-auto">
+      {/* Add Field Dialog */}
+      {isAddingSectionField && (
+        <Dialog open={isAddingSectionField} onOpenChange={setIsAddingSectionField}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Field</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label>Field Type</Label>
+                <Select value={newField.type} onValueChange={(value: any) => setNewField(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fieldTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div className="flex items-center gap-2">
+                          {type.icon}
+                          <span>{type.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Field Label</Label>
+                <Input
+                  value={newField.label}
+                  onChange={(e) => setNewField(prev => ({ ...prev, label: e.target.value }))}
+                  placeholder="e.g., Overall service quality"
+                />
+              </div>
+              {newField.type === "multiple_choice" && (
+                <div className="space-y-2">
+                  <Label>Options (comma separated)</Label>
+                  <Input
+                    onChange={(e) => setNewField(prev => ({ ...prev, options: e.target.value.split(',').map(opt => opt.trim()) }))}
+                    placeholder="Excellent, Good, Average, Poor"
+                  />
+                </div>
+              )}
+              {newField.type === "rating" && (
+                <div className="space-y-2">
+                  <Label>Maximum Rating</Label>
+                  <Select value={newField.maxRating?.toString()} onValueChange={(value) => setNewField(prev => ({ ...prev, maxRating: parseInt(value) }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="5" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 Stars</SelectItem>
+                      <SelectItem value="5">5 Stars</SelectItem>
+                      <SelectItem value="10">10 Point Scale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddingSectionField(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddField}>Add Field</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* New Template Dialog */}
+      <Dialog open={isNewTemplateDialogOpen} onOpenChange={setIsNewTemplateDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Form Preview: {selectedForm?.name}</DialogTitle>
+            <DialogTitle>Create New Template</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Template Name</Label>
+              <Input
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="e.g., Restaurant Service Evaluation"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                value={templateDescription}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                placeholder="Brief description of the evaluation purpose"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={templateCategory} onValueChange={setTemplateCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="retail">Retail</SelectItem>
+                  <SelectItem value="restaurant">Restaurant</SelectItem>
+                  <SelectItem value="hospitality">Hospitality</SelectItem>
+                  <SelectItem value="healthcare">Healthcare</SelectItem>
+                  <SelectItem value="automotive">Automotive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNewTemplateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateTemplate}>Create Template</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Template Preview: {selectedTemplate?.name}</DialogTitle>
             <DialogDescription>
-              {selectedForm?.description}
+              {selectedTemplate?.description}
             </DialogDescription>
           </DialogHeader>
-          {selectedForm && (
+          {selectedTemplate && (
             <div className="space-y-6">
-              {selectedForm.sections.map((section) => (
+              {selectedTemplate.sections.map((section) => (
                 <Card key={section.id}>
                   <CardHeader>
-                    <CardTitle className="text-lg">{section.title}</CardTitle>
-                    {section.description && (
-                      <p className="text-sm text-muted-foreground">{section.description}</p>
-                    )}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{section.title}</CardTitle>
+                        {section.description && (
+                          <p className="text-sm text-muted-foreground">{section.description}</p>
+                        )}
+                      </div>
+                      <Badge variant="outline">Weight: {section.weight}%</Badge>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {section.fields.map((field) => (
@@ -388,37 +775,13 @@ const CXEvaluationBuilder = () => {
                           {renderFieldIcon(field.type)}
                           <Label>{field.label}</Label>
                           {field.required && <span className="text-red-500">*</span>}
+                          {field.weight && (
+                            <Badge variant="secondary" className="ml-auto">
+                              {field.weight}pts
+                            </Badge>
+                          )}
                         </div>
-                        {field.type === "rating" && (
-                          <div className="flex gap-1">
-                            {Array.from({ length: field.maxRating || 5 }).map((_, i) => (
-                              <Star key={i} className="h-5 w-5 text-gray-300" />
-                            ))}
-                          </div>
-                        )}
-                        {field.type === "multiple_choice" && (
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select an option" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {field.options?.map((option) => (
-                                <SelectItem key={option} value={option}>
-                                  {option}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                        {field.type === "yes_no" && (
-                          <div className="flex gap-4">
-                            <Button variant="outline" size="sm">Yes</Button>
-                            <Button variant="outline" size="sm">No</Button>
-                          </div>
-                        )}
-                        {field.type === "comment" && (
-                          <Textarea placeholder="Enter your comments here..." />
-                        )}
+                        {renderPreviewField(field)}
                       </div>
                     ))}
                   </CardContent>
@@ -430,13 +793,10 @@ const CXEvaluationBuilder = () => {
             <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
               Close
             </Button>
-            <Button onClick={handleSaveForm}>
-              <Save className="mr-2 h-4 w-4" /> Save Form
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
