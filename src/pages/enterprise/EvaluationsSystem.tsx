@@ -15,10 +15,10 @@ const EvaluationsSystem = () => {
   const [activeTab, setActiveTab] = useState("view");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredEvaluations = evaluations.filter(eval => 
-    eval.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    eval.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    eval.auditorName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvaluations = evaluations.filter(evaluation => 
+    evaluation.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    evaluation.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    evaluation.auditorName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
