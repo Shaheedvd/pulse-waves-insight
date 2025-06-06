@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -33,6 +34,20 @@ import Recruitment from '@/pages/Recruitment';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
+import EvaluationsSystem from '@/pages/enterprise/EvaluationsSystem';
+import CXEvaluationBuilder from '@/pages/enterprise/CXEvaluationBuilder';
+import FinancialReportsSystem from '@/pages/enterprise/FinancialReportsSystem';
+import FinanceAnalytics from '@/pages/enterprise/FinanceAnalytics';
+import PayrollManagement from '@/pages/enterprise/PayrollManagement';
+import MarketingDashboardPage from '@/pages/enterprise/MarketingDashboard';
+import MarketingActionsPage from '@/pages/enterprise/MarketingActions';
+import SalesDashboardPage from '@/pages/enterprise/SalesDashboard';
+import LegalDashboardPage from '@/pages/enterprise/LegalDashboard';
+import SupportDashboardPage from '@/pages/enterprise/SupportDashboard';
+import ProductDashboardPage from '@/pages/enterprise/ProductDashboard';
+import UserManagementPage from '@/pages/enterprise/UserManagement';
+import ITDashboardPage from '@/pages/enterprise/ITDashboard';
+import FacilitiesDashboardPage from '@/pages/enterprise/FacilitiesDashboard';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { TaskProvider } from './contexts/TaskContext';
@@ -82,6 +97,21 @@ function App() {
                     
                     {/* Enterprise modules */}
                     <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
+                    <Route path="/admin-kpi" element={<AdminKpiDashboard />} />
+                    <Route path="/evaluations-system" element={<EvaluationsSystem />} />
+                    <Route path="/cx-evaluation-builder" element={<CXEvaluationBuilder />} />
+                    <Route path="/financial-reports" element={<FinancialReportsSystem />} />
+                    <Route path="/finance-analytics" element={<FinanceAnalytics />} />
+                    <Route path="/payroll-management" element={<PayrollManagement />} />
+                    <Route path="/marketing-dashboard" element={<MarketingDashboardPage />} />
+                    <Route path="/marketing-actions" element={<MarketingActionsPage />} />
+                    <Route path="/sales-dashboard" element={<SalesDashboardPage />} />
+                    <Route path="/legal-dashboard" element={<LegalDashboardPage />} />
+                    <Route path="/support-dashboard" element={<SupportDashboardPage />} />
+                    <Route path="/product-dashboard" element={<ProductDashboardPage />} />
+                    <Route path="/user-management" element={<UserManagementPage />} />
+                    <Route path="/it-dashboard" element={<ITDashboardPage />} />
+                    <Route path="/facilities-dashboard" element={<FacilitiesDashboardPage />} />
                   </Route>
                 </Route>
                 
