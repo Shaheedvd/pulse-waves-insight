@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,13 +24,22 @@ const AdminKpiDashboard = () => {
   const [editingKPI, setEditingKPI] = useState<KPITarget | null>(null);
   const [filterDepartment, setFilterDepartment] = useState("all");
 
-  const form = useForm({
+  const form = useForm<{
+    name: string;
+    description: string;
+    department: string;
+    owner: string;
+    period: "monthly" | "quarterly" | "yearly";
+    targetValue: number;
+    actualValue: number;
+    unit: string;
+  }>({
     defaultValues: {
       name: "",
       description: "",
       department: "",
       owner: "",
-      period: "monthly" as const,
+      period: "monthly",
       targetValue: 0,
       actualValue: 0,
       unit: ""
