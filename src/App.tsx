@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -30,56 +29,66 @@ import Compliance from '@/pages/Compliance';
 import QualityControlPage from '@/pages/QualityControl';
 import Tickets from '@/pages/Tickets';
 import CRM from '@/pages/CRM';
+import Recruitment from '@/pages/Recruitment';
+
+// Enterprise modules
+import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
+
 import { AuthProvider } from './contexts/AuthContext';
 import { TaskProvider } from './contexts/TaskContext';
 import { GlobalProvider } from './contexts/GlobalContext';
-import Recruitment from '@/pages/Recruitment';
+import { EnterpriseProvider } from './contexts/EnterpriseContext';
 
 function App() {
   return (
     <AuthProvider>
       <TaskProvider>
         <GlobalProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              
-              <Route element={<ProtectedRoute />}>
-                <Route element={<AuthenticatedLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/kpi-dashboard" element={<KpiDashboard />} />
-                  <Route path="/evaluations" element={<Evaluations />} />
-                  <Route path="/clients" element={<Clients />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/financial" element={<Financial />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/audit-sheet-designer" element={<AuditSheetDesigner />} />
-                  <Route path="/audit-scheduling" element={<AuditScheduling />} />
-                  <Route path="/user-activity-report" element={<UserActivityReport />} />
-                  <Route path="/operations-dashboard" element={<OperationsDashboard />} />
-                  <Route path="/project-management" element={<ProjectManagement />} />
-                  <Route path="/hr-dashboard" element={<HRDashboard />} />
-                  <Route path="/training-resources" element={<TrainingResources />} />
-                  <Route path="/manager-training" element={<ManagerTraining />} />
-                  <Route path="/system-logs" element={<SystemLogs />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
-                  
-                  {/* New routes for stub interfaces */}
-                  <Route path="/recruitment" element={<Recruitment />} />
-                  <Route path="/crm" element={<CRM />} />
-                  <Route path="/quality-control" element={<QualityControlPage />} />
-                  <Route path="/system-settings" element={<SystemSettingsPage />} />
-                  <Route path="/tickets" element={<Tickets />} />
-                  <Route path="/compliance" element={<Compliance />} />
-                  <Route path="/maintenance" element={<Maintenance />} />
+          <EnterpriseProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AuthenticatedLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/kpi-dashboard" element={<KpiDashboard />} />
+                    <Route path="/evaluations" element={<Evaluations />} />
+                    <Route path="/clients" element={<Clients />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/financial" element={<Financial />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/audit-sheet-designer" element={<AuditSheetDesigner />} />
+                    <Route path="/audit-scheduling" element={<AuditScheduling />} />
+                    <Route path="/user-activity-report" element={<UserActivityReport />} />
+                    <Route path="/operations-dashboard" element={<OperationsDashboard />} />
+                    <Route path="/project-management" element={<ProjectManagement />} />
+                    <Route path="/hr-dashboard" element={<HRDashboard />} />
+                    <Route path="/training-resources" element={<TrainingResources />} />
+                    <Route path="/manager-training" element={<ManagerTraining />} />
+                    <Route path="/system-logs" element={<SystemLogs />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
+                    
+                    {/* Existing stub interfaces */}
+                    <Route path="/recruitment" element={<Recruitment />} />
+                    <Route path="/crm" element={<CRM />} />
+                    <Route path="/quality-control" element={<QualityControlPage />} />
+                    <Route path="/system-settings" element={<SystemSettingsPage />} />
+                    <Route path="/tickets" element={<Tickets />} />
+                    <Route path="/compliance" element={<Compliance />} />
+                    <Route path="/maintenance" element={<Maintenance />} />
+                    
+                    {/* Enterprise modules */}
+                    <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
+                  </Route>
                 </Route>
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </EnterpriseProvider>
         </GlobalProvider>
       </TaskProvider>
     </AuthProvider>
