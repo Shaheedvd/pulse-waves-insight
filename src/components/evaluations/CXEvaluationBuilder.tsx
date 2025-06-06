@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -49,7 +48,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useGlobalContext } from "@/contexts/GlobalContext";
+import { useGlobal } from "@/contexts/GlobalContext";
 
 interface FormField {
   id: string;
@@ -91,7 +90,7 @@ interface CXEvaluationBuilderProps {
 
 const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose }) => {
   const { toast } = useToast();
-  const { logActivity } = useGlobalContext();
+  const { logAction } = useGlobal();
   const [activeTab, setActiveTab] = useState("builder");
   const [selectedTemplate, setSelectedTemplate] = useState<EvaluationTemplate | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -254,11 +253,14 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
       return;
     }
 
-    logActivity({
-      action: "CREATE_EVALUATION_TEMPLATE",
-      details: `Created template: ${templateName}`,
-      module: "EVALUATIONS"
-    });
+    logAction(
+      "CREATE_EVALUATION_TEMPLATE",
+      "evaluations",
+      undefined,
+      "template",
+      undefined,
+      { name: templateName }
+    );
 
     toast({
       title: "Success",
@@ -275,11 +277,14 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
     setSelectedTemplate(template);
     setIsPreviewOpen(true);
     
-    logActivity({
-      action: "PREVIEW_EVALUATION_TEMPLATE",
-      details: `Previewed template: ${template.name}`,
-      module: "EVALUATIONS"
-    });
+    logAction(
+      "PREVIEW_EVALUATION_TEMPLATE",
+      "evaluations",
+      template.id,
+      "template",
+      undefined,
+      { name: template.name }
+    );
   };
 
   const handleAddField = () => {

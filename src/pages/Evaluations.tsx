@@ -41,7 +41,7 @@ import EvaluationSheet from "@/components/evaluations/EvaluationSheet";
 import CXEvaluationBuilder from "@/components/evaluations/CXEvaluationBuilder";
 import { useToast } from "@/components/ui/use-toast";
 import { downloadAsPdf } from "@/lib/pdf-utils";
-import { useGlobalContext } from "@/contexts/GlobalContext";
+import { useGlobal } from "@/contexts/GlobalContext";
 
 // Sample evaluation data
 const initialEvaluationsData = [
@@ -162,7 +162,7 @@ const Evaluations = () => {
   const [activeTab, setActiveTab] = useState("evaluations");
   const [evaluationsData, setEvaluationsData] = useState(initialEvaluationsData);
   const { toast } = useToast();
-  const { logActivity } = useGlobalContext();
+  const { logAction } = useGlobal();
   const itemsPerPage = 8;
 
   // Check for globally updated evaluations data
@@ -224,11 +224,14 @@ const Evaluations = () => {
   const handleViewEvaluation = (evaluation: any) => {
     setSelectedEvaluation(evaluation);
     setIsSheetOpen(true);
-    logActivity({
-      action: "VIEW_EVALUATION",
-      details: `Viewed evaluation ${evaluation.id}`,
-      module: "EVALUATIONS"
-    });
+    logAction(
+      "VIEW_EVALUATION",
+      "evaluations",
+      evaluation.id,
+      "evaluation",
+      undefined,
+      { id: evaluation.id }
+    );
   };
 
   const handleDownload = () => {
@@ -266,11 +269,14 @@ const Evaluations = () => {
     
     downloadAsPdf(content, "evaluations-report.pdf");
     
-    logActivity({
-      action: "EXPORT_EVALUATIONS",
-      details: `Exported ${filteredEvaluations.length} evaluations`,
-      module: "EVALUATIONS"
-    });
+    logAction(
+      "EXPORT_EVALUATIONS",
+      "evaluations",
+      undefined,
+      "report",
+      undefined,
+      { count: filteredEvaluations.length }
+    );
     
     toast({
       title: "Downloading evaluations",
@@ -284,11 +290,14 @@ const Evaluations = () => {
     if (typeof window !== 'undefined') {
       (window as any).evaluationsData = [...evaluationsData, newEvaluation];
     }
-    logActivity({
-      action: "CREATE_EVALUATION",
-      details: `Created evaluation ${newEvaluation.id}`,
-      module: "EVALUATIONS"
-    });
+    logAction(
+      "CREATE_EVALUATION",
+      "evaluations",
+      newEvaluation.id,
+      "evaluation",
+      undefined,
+      newEvaluation
+    );
   };
 
   return (
