@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -37,7 +36,8 @@ import {
   Target,
   TrendingUp,
   Database,
-  Headphones
+  Headphones,
+  MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -139,6 +139,25 @@ const AuthenticatedLayout = () => {
           name: "Admin KPI", 
           icon: <Target className="h-4 w-4" />,
           availableTo: "power"
+        }
+      ]
+    },
+    {
+      id: "communication",
+      name: "Communication",
+      icon: <MessageSquare className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/messages", 
+          name: "Internal Messages", 
+          icon: <MessageSquare className="h-4 w-4" />,
+          availableTo: "restricted"
+        },
+        { 
+          path: "/notifications", 
+          name: "Notifications", 
+          icon: <Bell className="h-4 w-4" />,
+          availableTo: "super"
         }
       ]
     },
