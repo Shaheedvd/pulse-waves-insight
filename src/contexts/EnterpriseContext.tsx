@@ -42,12 +42,19 @@ interface EnterpriseContextType {
   deleteEmployee: (id: string) => void;
   addPayslip: (payslip: Omit<Types.Payslip, keyof Types.BaseEntity>) => void;
   
-  // Marketing
+  // Marketing - Fixed property names
+  marketingCampaigns: Types.MarketingCampaign[];
   campaigns: Types.MarketingCampaign[];
   marketingActions: Types.MarketingAction[];
+  addMarketingCampaign: (campaign: Omit<Types.MarketingCampaign, keyof Types.BaseEntity>) => void;
+  updateMarketingCampaign: (id: string, updates: Partial<Types.MarketingCampaign>) => void;
+  deleteMarketingCampaign: (id: string) => void;
   addCampaign: (campaign: Omit<Types.MarketingCampaign, keyof Types.BaseEntity>) => void;
   updateCampaign: (id: string, updates: Partial<Types.MarketingCampaign>) => void;
   deleteCampaign: (id: string) => void;
+  addMarketingAction: (action: Omit<Types.MarketingAction, keyof Types.BaseEntity>) => void;
+  updateMarketingAction: (id: string, updates: Partial<Types.MarketingAction>) => void;
+  deleteMarketingAction: (id: string) => void;
   
   // Sales
   deals: Types.Deal[];
@@ -61,11 +68,15 @@ interface EnterpriseContextType {
   updateContract: (id: string, updates: Partial<Types.Contract>) => void;
   deleteContract: (id: string) => void;
   
-  // Support
+  // Support - Fixed property names
   tickets: Types.SupportTicket[];
+  supportTickets: Types.SupportTicket[];
   addTicket: (ticket: Omit<Types.SupportTicket, keyof Types.BaseEntity>) => void;
   updateTicket: (id: string, updates: Partial<Types.SupportTicket>) => void;
   deleteTicket: (id: string) => void;
+  addSupportTicket: (ticket: Omit<Types.SupportTicket, keyof Types.BaseEntity>) => void;
+  updateSupportTicket: (id: string, updates: Partial<Types.SupportTicket>) => void;
+  deleteSupportTicket: (id: string) => void;
   
   // Product
   products: Types.Product[];
@@ -768,6 +779,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const budgetCRUD = createCRUDFunctions(budgets, setBudgets, "budget", "finance");
   const employeeCRUD = createCRUDFunctions(employees, setEmployees, "employee", "hr");
   const campaignCRUD = createCRUDFunctions(campaigns, setCampaigns, "campaign", "marketing");
+  const marketingActionCRUD = createCRUDFunctions(marketingActions, setMarketingActions, "action", "marketing");
   const dealCRUD = createCRUDFunctions(deals, setDeals, "deal", "sales");
   const contractCRUD = createCRUDFunctions(contracts, setContracts, "contract", "legal");
   const ticketCRUD = createCRUDFunctions(tickets, setTickets, "ticket", "support");
@@ -869,12 +881,19 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     deleteEmployee: employeeCRUD.delete,
     addPayslip,
     
-    // Marketing
+    // Marketing - Both property names for compatibility
     campaigns,
+    marketingCampaigns: campaigns,
     marketingActions,
     addCampaign: campaignCRUD.add,
     updateCampaign: campaignCRUD.update,
     deleteCampaign: campaignCRUD.delete,
+    addMarketingCampaign: campaignCRUD.add,
+    updateMarketingCampaign: campaignCRUD.update,
+    deleteMarketingCampaign: campaignCRUD.delete,
+    addMarketingAction: marketingActionCRUD.add,
+    updateMarketingAction: marketingActionCRUD.update,
+    deleteMarketingAction: marketingActionCRUD.delete,
     
     // Sales
     deals,
@@ -888,11 +907,15 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     updateContract: contractCRUD.update,
     deleteContract: contractCRUD.delete,
     
-    // Support
+    // Support - Both property names for compatibility
     tickets,
+    supportTickets: tickets,
     addTicket: ticketCRUD.add,
     updateTicket: ticketCRUD.update,
     deleteTicket: ticketCRUD.delete,
+    addSupportTicket: ticketCRUD.add,
+    updateSupportTicket: ticketCRUD.update,
+    deleteSupportTicket: ticketCRUD.delete,
     
     // Product
     products,
