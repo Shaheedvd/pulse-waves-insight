@@ -114,7 +114,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const { logAction, addNotification } = useGlobal();
   const { currentUser } = useAuth();
   
-  // State for all modules
+  // State for all modules - Initialize with empty arrays to prevent undefined errors
   const [kpiTargets, setKpiTargets] = useState<Types.KPITarget[]>([]);
   const [evaluations, setEvaluations] = useState<Types.Evaluation[]>([]);
   const [templates, setTemplates] = useState<Types.EvaluationTemplate[]>([]);
@@ -132,6 +132,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [itSystems, setItSystems] = useState<Types.ITSystem[]>([]);
   const [itIncidents, setItIncidents] = useState<Types.ITIncident[]>([]);
   const [facilities, setFacilities] = useState<Types.Facility[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Helper function to create base entity fields
   const createBaseEntity = (): Types.BaseEntity => ({
@@ -835,12 +836,13 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     logAction("REFRESH_DATA", "system", undefined, "data_refresh");
   };
 
-  // Initialize with mock data
+  // Initialize with mock data only once
   useEffect(() => {
-    if (kpiTargets.length === 0) {
+    if (!isInitialized) {
       initializeMockData();
+      setIsInitialized(true);
     }
-  }, []);
+  }, [isInitialized]);
 
   const value: EnterpriseContextType = {
     // KPI System

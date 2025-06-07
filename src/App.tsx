@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -95,7 +94,7 @@ function App() {
                     <Route path="/compliance" element={<Compliance />} />
                     <Route path="/maintenance" element={<Maintenance />} />
                     
-                    {/* Enterprise modules */}
+                    {/* Enterprise modules - all routes properly defined */}
                     <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
                     <Route path="/admin-kpi" element={<AdminKpiDashboard />} />
                     <Route path="/evaluations-system" element={<EvaluationsSystem />} />
