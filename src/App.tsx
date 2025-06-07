@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -100,15 +101,26 @@ function App() {
                     <Route path="/evaluations-system" element={<EvaluationsSystem />} />
                     <Route path="/cx-evaluation-builder" element={<CXEvaluationBuilder />} />
                     <Route path="/financial-reports" element={<FinancialReportsSystem />} />
+                    
+                    {/* Finance Analytics routes - multiple aliases */}
                     <Route path="/finance-analytics" element={<FinanceAnalytics />} />
+                    <Route path="/financial-dashboard" element={<FinanceAnalytics />} />
+                    
+                    {/* Payroll Management routes - multiple aliases */}
                     <Route path="/payroll-management" element={<PayrollManagement />} />
+                    <Route path="/payroll" element={<PayrollManagement />} />
+                    
                     <Route path="/marketing-dashboard" element={<MarketingDashboardPage />} />
                     <Route path="/marketing-actions" element={<MarketingActionsPage />} />
                     <Route path="/sales-dashboard" element={<SalesDashboardPage />} />
                     <Route path="/legal-dashboard" element={<LegalDashboardPage />} />
                     <Route path="/support-dashboard" element={<SupportDashboardPage />} />
                     <Route path="/product-dashboard" element={<ProductDashboardPage />} />
+                    
+                    {/* User Management routes - multiple aliases */}
                     <Route path="/user-management" element={<UserManagementPage />} />
+                    <Route path="/users" element={<UserManagementPage />} />
+                    
                     <Route path="/it-dashboard" element={<ITDashboardPage />} />
                     <Route path="/facilities-dashboard" element={<FacilitiesDashboardPage />} />
                   </Route>
