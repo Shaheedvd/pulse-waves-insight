@@ -83,15 +83,20 @@ const AuthenticatedLayout = () => {
 
   // Helper function to check if menu item should be visible
   const shouldShowMenuItem = (item: any) => {
-    // Check permission-based visibility
+    // Super users have access to everything - return true immediately
+    if (isSuperUser) {
+      return true;
+    }
+    
+    // Check permission-based visibility for non-super users
     if (item.permission && !hasPermission(item.permission)) {
       return false;
     }
     
-    // Check role-based visibility
+    // Check role-based visibility for non-super users
     if (item.availableTo) {
       switch(item.availableTo) {
-        case "super": return isSuperUser;
+        case "super": return false; // Only super users can access
         case "power": return isPowerManager;
         case "manager": return isManager;
         case "lead": return isLeadAdmin;
@@ -102,8 +107,8 @@ const AuthenticatedLayout = () => {
       }
     }
     
-    // Check department-based visibility
-    if (item.department && item.department !== userDepartment && !isSuperUser) {
+    // Check department-based visibility for non-super users
+    if (item.department && item.department !== userDepartment) {
       return false;
     }
     
