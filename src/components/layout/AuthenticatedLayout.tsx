@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -38,7 +39,10 @@ import {
   TrendingUp,
   Database,
   Headphones,
-  MessageSquare
+  MessageSquare,
+  Brain,
+  Trophy,
+  Repeat
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

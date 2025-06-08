@@ -35,6 +35,12 @@ import DatabaseManagement from '@/pages/DatabaseManagement';
 import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
 import AuditTrails from '@/pages/AuditTrails';
 
+// Phase 2 & 3 imports
+import AIInsights from '@/pages/AIInsights';
+import SmartScheduler from '@/pages/SmartScheduler';
+import Gamification from '@/pages/Gamification';
+import TaskAutomation from '@/pages/TaskAutomation';
+
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
 import EvaluationsSystem from '@/pages/enterprise/EvaluationsSystem';
@@ -94,6 +100,12 @@ function App() {
                       <Route path="/messages" element={<Messages />} />
                       <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
                       <Route path="/database-management" element={<DatabaseManagement />} />
+                      
+                      {/* Phase 2 & 3 Routes */}
+                      <Route path="/ai-insights" element={<AIInsights />} />
+                      <Route path="/smart-scheduler" element={<SmartScheduler />} />
+                      <Route path="/gamification" element={<Gamification />} />
+                      <Route path="/task-automation" element={<TaskAutomation />} />
                       
                       {/* Existing stub interfaces */}
                       <Route path="/recruitment" element={<Recruitment />} />
