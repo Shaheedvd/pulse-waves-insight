@@ -129,6 +129,12 @@ const AuthenticatedLayout = () => {
           availableTo: "all"
         },
         { 
+          path: "/executive-dashboard", 
+          name: "Executive Dashboard", 
+          icon: <Target className="h-4 w-4" />,
+          availableTo: "power"
+        },
+        { 
           path: "/kpi-dashboard", 
           name: "KPI Dashboard", 
           icon: <TrendingUp className="h-4 w-4" />,
@@ -438,6 +444,12 @@ const AuthenticatedLayout = () => {
           icon: <ShieldCheck className="h-4 w-4" />,
           permission: "canManageUsers" as const,
           availableTo: "power"
+        },
+        { 
+          path: "/audit-trails", 
+          name: "Audit Trails", 
+          icon: <Shield className="h-4 w-4" />,
+          availableTo: "lead"
         },
         { 
           path: "/it-dashboard", 

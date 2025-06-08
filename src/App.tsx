@@ -32,6 +32,8 @@ import Tickets from '@/pages/Tickets';
 import CRM from '@/pages/CRM';
 import Recruitment from '@/pages/Recruitment';
 import DatabaseManagement from '@/pages/DatabaseManagement';
+import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
+import AuditTrails from '@/pages/AuditTrails';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
@@ -72,6 +74,7 @@ function App() {
                     <Route element={<AuthenticatedLayout />}>
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/kpi-dashboard" element={<KpiDashboard />} />
+                      <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
                       <Route path="/evaluations" element={<Evaluations />} />
                       <Route path="/clients" element={<Clients />} />
                       <Route path="/reports" element={<Reports />} />
@@ -86,6 +89,7 @@ function App() {
                       <Route path="/training-resources" element={<TrainingResources />} />
                       <Route path="/manager-training" element={<ManagerTraining />} />
                       <Route path="/system-logs" element={<SystemLogs />} />
+                      <Route path="/audit-trails" element={<AuditTrails />} />
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/messages" element={<Messages />} />
                       <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
