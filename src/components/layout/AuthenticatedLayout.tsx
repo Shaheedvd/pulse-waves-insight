@@ -427,6 +427,12 @@ const AuthenticatedLayout = () => {
       icon: <Server className="h-4 w-4" />,
       items: [
         { 
+          path: "/database-management", 
+          name: "Database Management", 
+          icon: <Database className="h-4 w-4" />,
+          availableTo: "power"
+        },
+        { 
           path: "/users", 
           name: "User Management", 
           icon: <ShieldCheck className="h-4 w-4" />,

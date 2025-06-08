@@ -31,6 +31,7 @@ import QualityControlPage from '@/pages/QualityControl';
 import Tickets from '@/pages/Tickets';
 import CRM from '@/pages/CRM';
 import Recruitment from '@/pages/Recruitment';
+import DatabaseManagement from '@/pages/DatabaseManagement';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
@@ -88,6 +89,7 @@ function App() {
                       <Route path="/notifications" element={<Notifications />} />
                       <Route path="/messages" element={<Messages />} />
                       <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
+                      <Route path="/database-management" element={<DatabaseManagement />} />
                       
                       {/* Existing stub interfaces */}
                       <Route path="/recruitment" element={<Recruitment />} />
