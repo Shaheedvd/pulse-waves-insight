@@ -34,6 +34,9 @@ import Recruitment from '@/pages/Recruitment';
 import DatabaseManagement from '@/pages/DatabaseManagement';
 import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
 import AuditTrails from '@/pages/AuditTrails';
+import AdvancedAnalytics from '@/pages/AdvancedAnalytics';
+import MultiTenantManagement from '@/pages/MultiTenantManagement';
+import WorkflowAutomation from '@/pages/WorkflowAutomation';
 
 // Phase 2 & 3 imports
 import AIInsights from '@/pages/AIInsights';
@@ -144,6 +147,11 @@ function App() {
                       
                       <Route path="/it-dashboard" element={<ITDashboardPage />} />
                       <Route path="/facilities-dashboard" element={<FacilitiesDashboardPage />} />
+                      
+                      {/* Phase 4 - Advanced Enterprise Features */}
+                      <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
+                      <Route path="/multi-tenant-management" element={<MultiTenantManagement />} />
+                      <Route path="/workflow-automation" element={<WorkflowAutomation />} />
                     </Route>
                   </Route>
                   

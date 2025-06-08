@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { 
@@ -42,7 +41,10 @@ import {
   MessageSquare,
   Brain,
   Trophy,
-  Repeat
+  Repeat,
+  Workflow,
+  TrendingUp as TrendingUpIcon,
+  Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -149,6 +151,49 @@ const AuthenticatedLayout = () => {
           path: "/admin-kpi", 
           name: "Admin KPI", 
           icon: <Target className="h-4 w-4" />,
+          availableTo: "power"
+        }
+      ]
+    },
+    {
+      id: "ai-automation",
+      name: "AI & Automation",
+      icon: <Brain className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/ai-insights", 
+          name: "AI Business Insights", 
+          icon: <Brain className="h-4 w-4" />,
+          availableTo: "manager"
+        },
+        { 
+          path: "/smart-scheduler", 
+          name: "Smart Scheduler", 
+          icon: <Calendar className="h-4 w-4" />,
+          availableTo: "admin"
+        },
+        { 
+          path: "/gamification", 
+          name: "Gamification", 
+          icon: <Trophy className="h-4 w-4" />,
+          availableTo: "admin"
+        },
+        { 
+          path: "/task-automation", 
+          name: "Task Automation", 
+          icon: <Repeat className="h-4 w-4" />,
+          availableTo: "manager"
+        },
+        { 
+          path: "/advanced-analytics", 
+          name: "Advanced Analytics", 
+          icon: <TrendingUpIcon className="h-4 w-4" />,
+          availableTo: "power"
+        },
+        { 
+          path: "/workflow-automation", 
+          name: "Workflow Automation", 
+          icon: <Workflow className="h-4 w-4" />,
           availableTo: "power"
         }
       ]
@@ -429,6 +474,19 @@ const AuthenticatedLayout = () => {
           icon: <Package className="h-4 w-4" />,
           availableTo: "admin",
           department: "product"
+        }
+      ]
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise Management",
+      icon: <Building2 className="h-4 w-4" />,
+      items: [
+        { 
+          path: "/multi-tenant-management", 
+          name: "Multi-Tenant Management", 
+          icon: <Building2 className="h-4 w-4" />,
+          availableTo: "super"
         }
       ]
     },
