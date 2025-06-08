@@ -8,6 +8,7 @@ import {
   LogOut,
   User,
   ShieldCheck,
+  Shield,
   FileText,
   FileDown,
   Calculator,
