@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useGlobal } from "@/contexts/GlobalContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
 
@@ -18,8 +19,13 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
   fallback
 }) => {
   const { hasPermission } = useGlobal();
+  const { currentUser } = useAuth();
 
-  if (!hasPermission(module, action)) {
+  // Superusers have access to everything
+  const isSuperUser = currentUser?.role === "superuser";
+  const hasAccess = isSuperUser || hasPermission(module, action);
+
+  if (!hasAccess) {
     if (fallback) {
       return <>{fallback}</>;
     }

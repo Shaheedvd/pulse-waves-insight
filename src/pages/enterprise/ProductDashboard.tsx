@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useEnterprise } from "@/contexts/EnterpriseContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,12 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Package, Lightbulb, Bug, Users, Plus } from "lucide-react";
-import { PermissionGate } from "@/components/shared/PermissionGate";
 
 const ProductDashboardPage = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useEnterprise();
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState("products");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const isSuperUser = currentUser?.role === "superuser";
+  const canCreate = isSuperUser || currentUser?.role === "admin";
+  const canUpdate = isSuperUser || currentUser?.role === "admin";
 
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,12 +112,12 @@ const ProductDashboardPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-64"
             />
-            <PermissionGate module="product" action="create">
+            {canCreate && (
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 New Product
               </Button>
-            </PermissionGate>
+            )}
           </div>
 
           <Card>
@@ -160,9 +165,9 @@ const ProductDashboardPage = () => {
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">View</Button>
-                          <PermissionGate module="product" action="update">
+                          {canUpdate && (
                             <Button variant="outline" size="sm">Edit</Button>
-                          </PermissionGate>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useEnterprise } from "@/contexts/EnterpriseContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,12 @@ import { PermissionGate } from "@/components/shared/PermissionGate";
 
 const MarketingActionsPage = () => {
   const { marketingActions, addMarketingAction, updateMarketingAction, deleteMarketingAction } = useEnterprise();
+  const { currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+
+  const isSuperUser = currentUser?.role === "superuser";
+  const canCreate = isSuperUser || currentUser?.role === "admin";
+  const canUpdate = isSuperUser || currentUser?.role === "admin";
 
   const filteredActions = marketingActions.filter(action => 
     action.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -99,12 +105,12 @@ const MarketingActionsPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-64"
         />
-        <PermissionGate module="marketing" action="create">
+        {canCreate && (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             New Action
           </Button>
-        </PermissionGate>
+        )}
       </div>
 
       <Card>
@@ -149,9 +155,9 @@ const MarketingActionsPage = () => {
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button variant="outline" size="sm">View</Button>
-                      <PermissionGate module="marketing" action="update">
+                      {canUpdate && (
                         <Button variant="outline" size="sm">Edit</Button>
-                      </PermissionGate>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

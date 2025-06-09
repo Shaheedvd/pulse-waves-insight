@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useEnterprise } from "@/contexts/EnterpriseContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,12 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileDown, Plus, Edit, Copy, Trash2 } from "lucide-react";
-import { PermissionGate } from "@/components/shared/PermissionGate";
 
 const CXEvaluationBuilder = () => {
   const { templates, addTemplate, updateTemplate, deleteTemplate } = useEnterprise();
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState("templates");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const isSuperUser = currentUser?.role === "superuser";
+  const canCreate = isSuperUser || currentUser?.role === "admin";
+  const canUpdate = isSuperUser || currentUser?.role === "admin";
+  const canDelete = isSuperUser;
 
   const filteredTemplates = templates.filter(template => 
     template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,12 +52,12 @@ const CXEvaluationBuilder = () => {
                 className="w-64"
               />
             </div>
-            <PermissionGate module="evaluations" action="create">
+            {canCreate && (
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 New Template
               </Button>
-            </PermissionGate>
+            )}
           </div>
 
           <Card>
@@ -94,17 +100,19 @@ const CXEvaluationBuilder = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          {canUpdate && (
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button variant="outline" size="sm">
                             <Copy className="h-4 w-4" />
                           </Button>
-                          <PermissionGate module="evaluations" action="delete">
+                          {canDelete && (
                             <Button variant="outline" size="sm">
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                          </PermissionGate>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
