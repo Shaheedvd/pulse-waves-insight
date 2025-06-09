@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash, ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
+import { Edit, Trash, ArrowUp, ArrowDown, ArrowRight, Eye, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AdminKpi } from "@/types/marketing";
 import AdminKpiForm from "./AdminKpiForm";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Sample KPI data
 const sampleKpis: { [key: string]: AdminKpi[] } = {
@@ -134,9 +135,13 @@ const AdminKpiTable: React.FC<AdminKpiTableProps> = ({
   canEdit
 }) => {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [kpis, setKpis] = useState<AdminKpi[]>(sampleKpis[category] || []);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [currentKpi, setCurrentKpi] = useState<AdminKpi | null>(null);
+
+  const isSuperUser = currentUser?.role === "superuser";
 
   const getTrendIcon = (trend: AdminKpi["trend"]) => {
     switch (trend) {
@@ -159,12 +164,26 @@ const AdminKpiTable: React.FC<AdminKpiTableProps> = ({
     }
   };
 
+  const handleView = (kpi: AdminKpi) => {
+    setCurrentKpi(kpi);
+    setIsViewModalOpen(true);
+  };
+
   const handleEdit = (kpi: AdminKpi) => {
     setCurrentKpi(kpi);
     setIsEditModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
+    if (!isSuperUser && !canEdit) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to delete KPIs",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setKpis(kpis.filter(kpi => kpi.id !== id));
     toast({
       title: "KPI Deleted",
@@ -181,8 +200,55 @@ const AdminKpiTable: React.FC<AdminKpiTableProps> = ({
     });
   };
 
+  const handleExport = () => {
+    try {
+      const csvContent = [
+        ["KPI Name", "Category", "Description", "Target", "Current Value", "Progress", "Trend", "Last Updated"],
+        ...kpis.map(kpi => [
+          kpi.name,
+          kpi.category,
+          kpi.description,
+          kpi.target,
+          `${kpi.current}${kpi.unit}`,
+          `${kpi.progress}%`,
+          kpi.trend,
+          new Date(kpi.lastUpdated).toLocaleDateString()
+        ])
+      ].map(row => row.join(",")).join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `admin-kpis-${category}-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Export Successful",
+        description: `KPI data exported for ${category} category`
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting the data",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">KPIs for {category}</h3>
+        <Button onClick={handleExport} variant="outline" size="sm">
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </Button>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -193,7 +259,7 @@ const AdminKpiTable: React.FC<AdminKpiTableProps> = ({
             <TableHead>Progress</TableHead>
             <TableHead className="hidden md:table-cell">Last Updated</TableHead>
             <TableHead>Trend</TableHead>
-            {canEdit && <TableHead className="text-right">Actions</TableHead>}
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -215,35 +281,105 @@ const AdminKpiTable: React.FC<AdminKpiTableProps> = ({
                   {new Date(kpi.lastUpdated).toLocaleDateString()}
                 </TableCell>
                 <TableCell>{getTrendIcon(kpi.trend)}</TableCell>
-                {canEdit && (
-                  <TableCell className="text-right">
+                <TableCell className="text-right">
+                  <div className="flex gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleEdit(kpi)}
+                      onClick={() => handleView(kpi)}
+                      title="View Details"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(kpi.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                )}
+                    {(isSuperUser || canEdit) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(kpi)}
+                        title="Edit KPI"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {(isSuperUser || canEdit) && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(kpi.id)}
+                        title="Delete KPI"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={canEdit ? 8 : 7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 No KPIs found for this category
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+
+      {/* View KPI Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>KPI Details</DialogTitle>
+          </DialogHeader>
+          {currentKpi && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-lg">{currentKpi.name}</h4>
+                <p className="text-muted-foreground">{currentKpi.category}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <p className="text-sm">{currentKpi.description}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Target</label>
+                  <p className="text-sm">{currentKpi.target}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Current Value</label>
+                  <p className="text-lg font-semibold">
+                    {currentKpi.current !== null ? `${currentKpi.current}${currentKpi.unit}` : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Progress</label>
+                  <div className="flex items-center gap-2">
+                    {getProgressBadge(currentKpi.progress)}
+                    <span className="text-sm">({currentKpi.progress}%)</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Trend</label>
+                  <div className="flex items-center gap-2">
+                    {getTrendIcon(currentKpi.trend)}
+                    <span className="text-sm capitalize">{currentKpi.trend}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Last Updated</label>
+                <p className="text-sm">{new Date(currentKpi.lastUpdated).toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Edit KPI Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

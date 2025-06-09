@@ -9,20 +9,26 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
-import { Plus, Target, TrendingUp, TrendingDown, AlertTriangle, Download } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Plus, Target, TrendingUp, TrendingDown, AlertTriangle, Download, Eye } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useEnterprise } from "@/contexts/EnterpriseContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionGate } from "@/components/shared/PermissionGate";
 import { KPITarget } from "@/types/enterprise";
 
 const AdminKpiDashboard = () => {
   const { kpiTargets, addKPITarget, updateKPITarget, deleteKPITarget } = useEnterprise();
+  const { currentUser } = useAuth();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingKPI, setEditingKPI] = useState<KPITarget | null>(null);
+  const [viewingKPI, setViewingKPI] = useState<KPITarget | null>(null);
   const [filterDepartment, setFilterDepartment] = useState("all");
+
+  const isSuperUser = currentUser?.role === "superuser";
 
   const form = useForm<{
     name: string;
@@ -87,6 +93,11 @@ const AdminKpiDashboard = () => {
     form.reset();
   };
 
+  const handleView = (kpi: KPITarget) => {
+    setViewingKPI(kpi);
+    setIsViewDialogOpen(true);
+  };
+
   const handleEdit = (kpi: KPITarget) => {
     setEditingKPI(kpi);
     form.reset({
@@ -100,6 +111,58 @@ const AdminKpiDashboard = () => {
       unit: kpi.unit
     });
     setIsDialogOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (!isSuperUser) {
+      toast({
+        title: "Access Denied",
+        description: "Only superusers can delete KPIs",
+        variant: "destructive"
+      });
+      return;
+    }
+    deleteKPITarget(id);
+    toast({ title: "KPI Deleted", description: "KPI has been deleted successfully" });
+  };
+
+  const handleExportReport = () => {
+    try {
+      const csvContent = [
+        ["KPI Name", "Department", "Owner", "Period", "Target", "Actual", "Progress", "Status"],
+        ...filteredKPIs.map(kpi => [
+          kpi.name,
+          kpi.department,
+          kpi.owner,
+          kpi.period,
+          `${kpi.targetValue}${kpi.unit}`,
+          `${kpi.actualValue}${kpi.unit}`,
+          `${Math.round(kpi.progress)}%`,
+          kpi.status.replace("-", " ")
+        ])
+      ].map(row => row.join(",")).join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `kpi-report-${filterDepartment}-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Export Successful",
+        description: "KPI report has been exported successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting the data",
+        variant: "destructive"
+      });
+    }
   };
 
   // Calculate department performance data
@@ -127,7 +190,7 @@ const AdminKpiDashboard = () => {
             <p className="text-muted-foreground">Track and manage department KPIs across the organization</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportReport}>
               <Download className="mr-2 h-4 w-4" />
               Export Report
             </Button>
@@ -450,12 +513,17 @@ const AdminKpiDashboard = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleView(kpi)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleEdit(kpi)}>
                           Edit
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => deleteKPITarget(kpi.id)}>
-                          Delete
-                        </Button>
+                        {isSuperUser && (
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(kpi.id)}>
+                            Delete
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -464,6 +532,59 @@ const AdminKpiDashboard = () => {
             </Table>
           </CardContent>
         </Card>
+
+        {/* View KPI Details Modal */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>KPI Details</DialogTitle>
+            </DialogHeader>
+            {viewingKPI && (
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-lg">{viewingKPI.name}</h4>
+                  <p className="text-muted-foreground">{viewingKPI.department} Department</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Description</label>
+                    <p className="text-sm">{viewingKPI.description}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Owner</label>
+                    <p className="text-sm">{viewingKPI.owner}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Target Value</label>
+                    <p className="text-lg font-semibold">{viewingKPI.targetValue}{viewingKPI.unit}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Actual Value</label>
+                    <p className="text-lg font-semibold">{viewingKPI.actualValue}{viewingKPI.unit}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Progress</label>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(viewingKPI.status)}>
+                        {viewingKPI.status.replace("-", " ")}
+                      </Badge>
+                      <span className="text-sm">({Math.round(viewingKPI.progress)}%)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Period</label>
+                  <p className="text-sm capitalize">{viewingKPI.period}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </PermissionGate>
   );
