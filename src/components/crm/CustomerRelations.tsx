@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,6 +71,26 @@ interface Opportunity {
   products: string[];
   source: string;
 }
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "active": return "bg-green-100 text-green-800";
+    case "prospect": return "bg-blue-100 text-blue-800";
+    case "inactive": return "bg-yellow-100 text-yellow-800";
+    case "churned": return "bg-red-100 text-red-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getStageColor = (stage: string) => {
+  switch (stage) {
+    case "closed-won": return "bg-green-100 text-green-800";
+    case "closed-lost": return "bg-red-100 text-red-800";
+    case "negotiation": return "bg-orange-100 text-orange-800";
+    case "proposal": return "bg-blue-100 text-blue-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+};
 
 const CustomerRelations = () => {
   const { currentUser } = useAuth();
@@ -179,26 +198,6 @@ const CustomerRelations = () => {
       source: "existing-client"
     }
   ]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active": return "bg-green-100 text-green-800";
-      case "prospect": return "bg-blue-100 text-blue-800";
-      case "inactive": return "bg-yellow-100 text-yellow-800";
-      case "churned": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case "closed-won": return "bg-green-100 text-green-800";
-      case "closed-lost": return "bg-red-100 text-red-800";
-      case "negotiation": return "bg-orange-100 text-orange-800";
-      case "proposal": return "bg-blue-100 text-blue-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
 
   const filteredClients = clients.filter(client => 
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
