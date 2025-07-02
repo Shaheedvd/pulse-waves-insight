@@ -3,254 +3,152 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Hammer, Plus, Wrench, Calendar, CheckCircle, Clock, AlertTriangle, User } from "lucide-react";
+import { 
+  Hammer, 
+  Plus, 
+  Wrench, 
+  Calendar, 
+  CheckCircle, 
+  Clock, 
+  AlertTriangle, 
+  User,
+  Package,
+  Settings,
+  FileText,
+  BarChart3,
+  Zap,
+  Shield,
+  TrendingUp,
+  Activity
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MaintenanceDashboard } from "./MaintenanceDashboard";
+import { AssetManagement } from "./AssetManagement";
+import { WorkOrderManagement } from "./WorkOrderManagement";
+import { PreventiveMaintenanceScheduling } from "./PreventiveMaintenanceScheduling";
+import { EmergencyRequestSystem } from "./EmergencyRequestSystem";
+import { TechnicianManagement } from "./TechnicianManagement";
+import { InventoryControl } from "./InventoryControl";
+import { MaintenanceCalendar } from "./MaintenanceCalendar";
+import { MaintenanceReports } from "./MaintenanceReports";
+import { DocumentLibrary } from "./DocumentLibrary";
 
 const MaintenanceManagement = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
-
-  const mockMaintenanceData = [
-    {
-      id: "MAINT-001",
-      task: "Server Room AC Maintenance",
-      type: "Preventive",
-      priority: "High",
-      status: "Scheduled",
-      assignee: "John Tech",
-      scheduled: "2024-01-20",
-      location: "Data Center"
-    },
-    {
-      id: "MAINT-002",
-      task: "Network Switch Replacement",
-      type: "Corrective",
-      priority: "Medium",
-      status: "In Progress",
-      assignee: "Sarah IT",
-      scheduled: "2024-01-18",
-      location: "Office Floor 2"
-    },
-    {
-      id: "MAINT-003",
-      task: "Backup System Check",
-      type: "Routine",
-      priority: "Low",
-      status: "Completed",
-      assignee: "Mike Admin",
-      scheduled: "2024-01-15",
-      location: "Server Room"
-    }
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Completed": return "bg-green-100 text-green-800";
-      case "In Progress": return "bg-blue-100 text-blue-800";
-      case "Scheduled": return "bg-yellow-100 text-yellow-800";
-      case "Overdue": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High": return "bg-red-100 text-red-800";
-      case "Medium": return "bg-yellow-100 text-yellow-800";
-      case "Low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Preventive": return "bg-blue-100 text-blue-800";
-      case "Corrective": return "bg-orange-100 text-orange-800";
-      case "Routine": return "bg-purple-100 text-purple-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Hammer className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-bold">Maintenance Management</h2>
+          <Hammer className="h-6 w-6 text-primary" />
+          <h1 className="text-3xl font-bold">Maintenance Management System</h1>
         </div>
-        <Dialog open={isNewTaskOpen} onOpenChange={setIsNewTaskOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Task
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Maintenance Task</DialogTitle>
-              <DialogDescription>
-                Schedule a new maintenance task for equipment or systems
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Task Title</label>
-                <Input placeholder="Describe the maintenance task" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Type</label>
-                <Input placeholder="Preventive/Corrective/Routine" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Priority</label>
-                <Input placeholder="High/Medium/Low" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Location</label>
-                <Input placeholder="Where is the maintenance needed?" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Scheduled Date</label>
-                <Input type="date" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Textarea placeholder="Detailed description of the maintenance task..." rows={3} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setIsNewTaskOpen(false)}>
-                Create Task
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button variant="outline">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Button>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Quick Actions
+          </Button>
+        </div>
       </div>
 
       <Alert>
-        <AlertTriangle className="h-4 w-4" />
+        <Shield className="h-4 w-4" />
         <AlertDescription>
-          Full maintenance management system coming soon! This preview shows task scheduling, equipment tracking, and maintenance workflows.
+          Enterprise CMMS (Computerized Maintenance Management System) - Role-based access, workflow-driven maintenance operations.
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Scheduled Tasks</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">This week</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Active tasks</p>
-          </CardContent>
-        </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-10">
+          <TabsTrigger value="dashboard" className="flex items-center gap-1">
+            <Activity className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="assets" className="flex items-center gap-1">
+            <Package className="h-4 w-4" />
+            Assets
+          </TabsTrigger>
+          <TabsTrigger value="work-orders" className="flex items-center gap-1">
+            <Wrench className="h-4 w-4" />
+            Work Orders
+          </TabsTrigger>
+          <TabsTrigger value="preventive" className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            Preventive
+          </TabsTrigger>
+          <TabsTrigger value="emergency" className="flex items-center gap-1">
+            <Zap className="h-4 w-4" />
+            Emergency
+          </TabsTrigger>
+          <TabsTrigger value="technicians" className="flex items-center gap-1">
+            <User className="h-4 w-4" />
+            Technicians
+          </TabsTrigger>
+          <TabsTrigger value="inventory" className="flex items-center gap-1">
+            <Package className="h-4 w-4" />
+            Inventory
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-1">
+            <BarChart3 className="h-4 w-4" />
+            Reports
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex items-center gap-1">
+            <FileText className="h-4 w-4" />
+            Documents
+          </TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">This month</p>
-          </CardContent>
-        </Card>
+        <TabsContent value="dashboard" className="mt-6">
+          <MaintenanceDashboard />
+        </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Equipment</CardTitle>
-            <Wrench className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">Under maintenance</p>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="assets" className="mt-6">
+          <AssetManagement />
+        </TabsContent>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Maintenance Tasks</CardTitle>
-          <CardDescription>Track and manage facility and equipment maintenance</CardDescription>
-          <div className="flex items-center space-x-2">
-            <Input
-              placeholder="Search maintenance tasks..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Task ID</TableHead>
-                <TableHead>Task</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Assignee</TableHead>
-                <TableHead>Scheduled</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockMaintenanceData.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell className="font-medium">{task.id}</TableCell>
-                  <TableCell>{task.task}</TableCell>
-                  <TableCell>
-                    <Badge className={getTypeColor(task.type)}>
-                      {task.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getPriorityColor(task.priority)}>
-                      {task.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(task.status)}>
-                      {task.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <User className="mr-1 h-3 w-3" />
-                      {task.assignee}
-                    </div>
-                  </TableCell>
-                  <TableCell>{task.scheduled}</TableCell>
-                  <TableCell>{task.location}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      Manage
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        <TabsContent value="work-orders" className="mt-6">
+          <WorkOrderManagement />
+        </TabsContent>
+
+        <TabsContent value="preventive" className="mt-6">
+          <PreventiveMaintenanceScheduling />
+        </TabsContent>
+
+        <TabsContent value="emergency" className="mt-6">
+          <EmergencyRequestSystem />
+        </TabsContent>
+
+        <TabsContent value="technicians" className="mt-6">
+          <TechnicianManagement />
+        </TabsContent>
+
+        <TabsContent value="inventory" className="mt-6">
+          <InventoryControl />
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-6">
+          <MaintenanceCalendar />
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-6">
+          <MaintenanceReports />
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-6">
+          <DocumentLibrary />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
