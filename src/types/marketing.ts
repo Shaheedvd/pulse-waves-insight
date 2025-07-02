@@ -1,200 +1,201 @@
 
-import { UserRole } from "@/contexts/AuthContext";
+export interface MarketingCampaign {
+  id: string;
+  name: string;
+  objective: "awareness" | "lead-gen" | "launch" | "promo";
+  channels: string[];
+  budget: number;
+  spent: number;
+  startDate: string;
+  endDate: string;
+  targetAudience: string;
+  assignedOwner: string;
+  status: "draft" | "scheduled" | "live" | "completed" | "analyzed";
+  kpis: {
+    reach: number;
+    clicks: number;
+    conversions: number;
+    cpl: number;
+    revenue: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
-export type TrainingResourceCategory = "SEO" | "Social Media" | "Email Marketing" | "Content Creation" | "Analytics" | "Collaboration" | "Gamification";
-
-export interface TrainingResource {
+export interface ContentItem {
   id: string;
   title: string;
-  category: TrainingResourceCategory;
-  description: string;
-  contentType: "document" | "video" | "quiz" | "interactive";
-  url: string;
-  createdBy: string;
+  type: "post" | "blog" | "ad" | "email" | "video" | "webinar";
+  status: "draft" | "in-review" | "scheduled" | "published";
+  scheduledDate?: string;
+  publishedDate?: string;
+  assignedWriter?: string;
+  assignedDesigner?: string;
+  channel: string;
+  campaignId?: string;
+  tags: string[];
+  fileUrls: string[];
+  content: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-export type ProjectStatus = "completed" | "in-progress" | "not-started" | "on-hold";
-export type ProjectPriority = "high" | "medium" | "low";
-
-export interface ProjectTask {
+export interface MarketingAsset {
   id: string;
-  description: string;
-  completed: boolean;
-  assignedTo?: string;
-  dueDate?: string;
+  name: string;
+  type: "image" | "video" | "template" | "brand-element";
+  category: string;
+  fileUrl: string;
+  fileSize: number;
+  usage: "social" | "print" | "web" | "ads" | "all";
+  tags: string[];
+  version: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  downloadCount: number;
 }
 
-export interface Project {
+export interface MarketingLead {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  source: string;
+  campaignId?: string;
+  stage: "new" | "nurturing" | "warm" | "qualified";
+  score: number;
+  interests: string[];
+  assignedSalesRep?: string;
+  notes: string;
+  createdAt: string;
+  lastContact?: string;
+}
+
+export interface AudienceSegment {
   id: string;
   name: string;
   description: string;
-  status: ProjectStatus;
-  priority: ProjectPriority;
-  dueDate: string;
-  assignedTo: string[];
-  completionPercentage: number;
-  tasks: ProjectTask[];
-  createdBy: string;
+  criteria: {
+    industry?: string[];
+    location?: string[];
+    behavior?: string[];
+    demographics?: any;
+    leadScore?: { min: number; max: number };
+    customerType?: "prospect" | "existing" | "all";
+  };
+  size: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EmailCampaign {
+  id: string;
+  name: string;
+  subject: string;
+  content: string;
+  segmentIds: string[];
+  scheduledDate?: string;
+  sentDate?: string;
+  status: "draft" | "scheduled" | "sent" | "completed";
+  stats: {
+    sent: number;
+    delivered: number;
+    opened: number;
+    clicked: number;
+    unsubscribed: number;
+    bounced: number;
+  };
   createdAt: string;
 }
 
-// Updated MarketingTask interface to include subcategory and trackingMethod
+export interface SEOContent {
+  id: string;
+  title: string;
+  url: string;
+  type: "blog" | "landing-page" | "product-page";
+  targetKeywords: string[];
+  stats: {
+    views: number;
+    ctr: number;
+    bounceRate: number;
+    avgTimeOnPage: number;
+    socialShares: number;
+    backlinks: number;
+  };
+  lastUpdated: string;
+}
+
+export interface AdSpend {
+  id: string;
+  channel: string;
+  campaignName: string;
+  budget: number;
+  spent: number;
+  stats: {
+    impressions: number;
+    clicks: number;
+    conversions: number;
+    cpc: number;
+    cpm: number;
+    ctr: number;
+    conversionRate: number;
+  };
+  roi: number;
+  roas: number;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface MarketingRequest {
+  id: string;
+  type: "graphic" | "brochure" | "social-post" | "ad-campaign" | "event-branding" | "other";
+  title: string;
+  description: string;
+  requestor: string;
+  priority: "low" | "medium" | "high" | "urgent";
+  deadline: string;
+  status: "pending" | "in-progress" | "completed" | "cancelled";
+  assignedTo?: string;
+  attachments: string[];
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MarketingTask {
   id: string;
   title: string;
   description: string;
-  assignedTo: string | null;
-  dueDate: string | null;
-  status: "pending" | "in-progress" | "completed" | "on-hold" | "overdue";
-  priority?: "low" | "medium" | "high";
-  category: string;
-  subcategory: string;
-  trackingMethod: string;
-  tags?: string[];
-  completionDate?: string;
-}
-
-export interface TrainingDocument {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  category: string;
-  url: string;
-  accessLevel: UserRole[];
-  createdBy: string;
+  type: "copywriting" | "design" | "editing" | "campaign-setup" | "reporting" | "qa-testing";
+  assignedTo: string;
+  dueDate: string;
+  status: "todo" | "in-progress" | "completed" | "blocked";
+  priority: "low" | "medium" | "high";
+  campaignId?: string;
+  contentId?: string;
+  attachments: string[];
+  comments: Array<{
+    id: string;
+    author: string;
+    content: string;
+    timestamp: string;
+  }>;
   createdAt: string;
-  tags?: string[];
+  updatedAt: string;
 }
 
-// Add AdminKpi interface
-export interface AdminKpi {
+export interface MarketingReport {
   id: string;
   name: string;
-  category: "marketing" | "sales" | "operations" | "training";
-  description: string;
-  target: string;
-  current: number | null;
-  unit: string;
-  progress: number;
-  trend: "up" | "down" | "stable" | "none";
-  lastUpdated: string;
+  type: "campaign-performance" | "lead-source" | "funnel-analysis" | "content-performance" | "budget-roi";
+  data: any;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  generatedAt: string;
+  generatedBy: string;
 }
-
-// Add ISO audit template reference for AuditSheetDesigner
-export const ISO_AUDIT_TEMPLATE = {
-  id: "iso-audit",
-  name: "ISO 9001 Audit Template",
-  description: "Standard audit template for ISO 9001 quality management certification",
-  sections: [
-    {
-      title: "Quality Management System",
-      questions: [
-        {
-          id: "iso-1",
-          text: "Has the organization established a documented quality management system?",
-          type: "checkbox",
-          required: true
-        },
-        {
-          id: "iso-2",
-          text: "Are quality objectives established at relevant functions and levels?",
-          type: "checkbox",
-          required: true
-        }
-      ]
-    },
-    {
-      title: "Management Responsibility",
-      questions: [
-        {
-          id: "iso-3",
-          text: "Is there evidence that top management is committed to the QMS?",
-          type: "checkbox",
-          required: true
-        },
-        {
-          id: "iso-4",
-          text: "Is the quality policy documented and communicated?",
-          type: "checkbox",
-          required: true
-        }
-      ]
-    }
-  ]
-};
-
-// Add marketing strategies constant
-export const MARKETING_STRATEGIES = [
-  {
-    category: "Digital Marketing",
-    subcategories: [
-      {
-        name: "SEO",
-        tasks: [
-          {
-            title: "Keyword Research",
-            description: "Conduct keyword research to identify relevant search terms for our services.",
-            trackingMethod: "Document with keyword list"
-          },
-          {
-            title: "Content Optimization",
-            description: "Optimize existing website pages for target keywords.",
-            trackingMethod: "List of optimized pages"
-          }
-        ]
-      },
-      {
-        name: "PPC",
-        tasks: [
-          {
-            title: "Ad Campaign Setup",
-            description: "Create targeted PPC campaigns for key services.",
-            trackingMethod: "Campaign performance report"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    category: "Content Marketing",
-    subcategories: [
-      {
-        name: "Blog Posts",
-        tasks: [
-          {
-            title: "Content Calendar Creation",
-            description: "Develop a monthly content calendar aligned with marketing goals.",
-            trackingMethod: "Completed calendar document"
-          },
-          {
-            title: "Blog Post Writing",
-            description: "Create engaging blog posts based on the content calendar.",
-            trackingMethod: "Published posts"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    category: "Social Media Marketing",
-    subcategories: [
-      {
-        name: "LinkedIn",
-        tasks: [
-          {
-            title: "Profile Optimization",
-            description: "Update company page with current information and branding.",
-            trackingMethod: "Before/after screenshot"
-          },
-          {
-            title: "Content Engagement",
-            description: "Schedule regular posts and engage with industry content.",
-            trackingMethod: "Engagement metrics report"
-          }
-        ]
-      }
-    ]
-  }
-];
