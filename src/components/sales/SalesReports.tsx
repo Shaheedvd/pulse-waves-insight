@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ export const SalesReports = () => {
     { month: "Oct", revenue: 175000, deals: 11, leads: 38 },
     { month: "Nov", revenue: 225000, deals: 18, leads: 60 },
     { month: "Dec", revenue: 195000, deals: 14, leads: 41 },
-    { month: "Jan", revenue: 243000, deals: 19, deals: 58 }
+    { month: "Jan", revenue: 243000, deals: 19, leads: 58 }
   ];
 
   const conversionData = [

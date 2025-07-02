@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -326,7 +325,7 @@ export const SalesDocuments = () => {
                         <p className="text-xs text-muted-foreground">{doc.size}</p>
                       </div>
                     </div>
-                    <Badge className={getTypeColor(doc.type)} size="sm">
+                    <Badge className={getTypeColor(doc.type)}>
                       {doc.type.replace('-', ' ')}
                     </Badge>
                   </div>
