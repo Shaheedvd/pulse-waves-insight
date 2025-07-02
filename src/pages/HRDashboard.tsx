@@ -10,65 +10,81 @@ import { HRCompensation } from "@/components/hr/HRCompensation";
 import { HRReporting } from "@/components/hr/HRReporting";
 import { HRTeamMeetings } from "@/components/hr/HRTeamMeetings";
 import { HRPayroll } from "@/components/hr/payroll/HRPayroll";
+import HRDashboard from "@/components/hr/HRDashboard";
+import RecruitmentManagement from "@/components/hr/recruitment/RecruitmentManagement";
+import EmployeeRecords from "@/components/hr/employees/EmployeeRecords";
 import { useAuth } from "@/contexts/AuthContext";
 
-const HRDashboard = () => {
+const HRDashboardPage = () => {
   const { hasPermission } = useAuth();
   
   return (
     <div className="space-y-6">
-      <DepartmentDashboard 
-        department="hr"
-        title="HR Department Dashboard"
-        description="Comprehensive human resource management system with employee data, recruitment, performance management, learning & development, and reporting tools."
-      />
-      
-      <Tabs defaultValue="employees" className="w-full mt-6">
-        <TabsList className="grid grid-cols-8 mb-4">
-          <TabsTrigger value="employees">Employee Data</TabsTrigger>
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid grid-cols-10 mb-4">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="recruitment">Recruitment</TabsTrigger>
+          <TabsTrigger value="employees">Employee Records</TabsTrigger>
+          <TabsTrigger value="leave">Leave Management</TabsTrigger>
+          <TabsTrigger value="attendance">Time & Attendance</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="learning">Learning & Dev</TabsTrigger>
-          <TabsTrigger value="compensation">Compensation</TabsTrigger>
+          <TabsTrigger value="training">Training & Dev</TabsTrigger>
+          <TabsTrigger value="disciplinary">Disciplinary</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
-          <TabsTrigger value="reporting">Reporting</TabsTrigger>
-          <TabsTrigger value="meetings">Team Meetings</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="employees">
-          <HREmployeeManagement />
+        <TabsContent value="dashboard">
+          <HRDashboard />
         </TabsContent>
         
         <TabsContent value="recruitment">
-          <HRRecruitment />
+          <RecruitmentManagement />
+        </TabsContent>
+        
+        <TabsContent value="employees">
+          <EmployeeRecords />
+        </TabsContent>
+        
+        <TabsContent value="leave">
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Leave Management System</p>
+            <p className="text-sm">Complete request-to-approval workflow with live balance tracking</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="attendance">
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Time & Attendance System</p>
+            <p className="text-sm">Clock in/out, timesheets, and attendance reports</p>
+          </div>
         </TabsContent>
         
         <TabsContent value="performance">
           <HRPerformance />
         </TabsContent>
         
-        <TabsContent value="learning">
+        <TabsContent value="training">
           <HRLearningDevelopment />
         </TabsContent>
         
-        <TabsContent value="compensation">
-          <HRCompensation />
+        <TabsContent value="disciplinary">
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Disciplinary & Compliance Tracking</p>
+            <p className="text-sm">Incident reporting and formal action logs</p>
+          </div>
         </TabsContent>
         
         <TabsContent value="payroll">
           <HRPayroll />
         </TabsContent>
         
-        <TabsContent value="reporting">
+        <TabsContent value="analytics">
           <HRReporting />
-        </TabsContent>
-        
-        <TabsContent value="meetings">
-          <HRTeamMeetings />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default HRDashboard;
+export default HRDashboardPage;
