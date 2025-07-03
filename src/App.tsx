@@ -11,32 +11,6 @@ import Evaluations from '@/pages/Evaluations';
 import Clients from '@/pages/Clients';
 import Reports from '@/pages/Reports';
 import Financial from '@/pages/Financial';
-import SettingsPage from '@/pages/Settings';
-import AuditSheetDesigner from '@/pages/AuditSheetDesigner';
-import AuditScheduling from '@/pages/AuditScheduling';
-import UserActivityReport from '@/pages/UserActivityReport';
-import OperationsDashboard from '@/pages/OperationsDashboard';
-import ProjectManagement from '@/pages/ProjectManagement';
-import HRDashboard from '@/pages/HRDashboard';
-import TrainingResources from '@/pages/TrainingResources';
-import ManagerTraining from '@/pages/ManagerTraining';
-import SystemLogs from '@/pages/SystemLogs';
-import Notifications from '@/pages/Notifications';
-import Messages from '@/pages/Messages';
-import ClientPortalSettings from '@/pages/ClientPortalSettings';
-import SystemSettingsPage from '@/pages/SystemSettings';
-import Maintenance from '@/pages/Maintenance';
-import Compliance from '@/pages/Compliance';
-import QualityControlPage from '@/pages/QualityControl';
-import Tickets from '@/pages/Tickets';
-import CRM from '@/pages/CRM';
-import Recruitment from '@/pages/Recruitment';
-import DatabaseManagement from '@/pages/DatabaseManagement';
-import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
-import AuditTrails from '@/pages/AuditTrails';
-import AdvancedAnalytics from '@/pages/AdvancedAnalytics';
-import MultiTenantManagement from '@/pages/MultiTenantManagement';
-import WorkflowAutomation from '@/pages/WorkflowAutomation';
 
 // Phase 2 & 3 imports
 import AIInsights from '@/pages/AIInsights';
@@ -66,6 +40,7 @@ import { TaskProvider } from './contexts/TaskContext';
 import { GlobalProvider } from './contexts/GlobalContext';
 import { EnterpriseProvider } from './contexts/EnterpriseContext';
 import { MessagingProvider } from './contexts/MessagingContext';
+import { FinanceProvider } from './contexts/FinanceContext';
 
 function App() {
   return (
@@ -73,92 +48,79 @@ function App() {
       <TaskProvider>
         <GlobalProvider>
           <EnterpriseProvider>
-            <MessagingProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
-                  
-                  <Route element={<ProtectedRoute />}>
-                    <Route element={<AuthenticatedLayout />}>
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/kpi-dashboard" element={<KpiDashboard />} />
-                      <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
-                      <Route path="/evaluations" element={<Evaluations />} />
-                      <Route path="/clients" element={<Clients />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/financial" element={<Financial />} />
-                      <Route path="/settings" element={<SettingsPage />} />
-                      <Route path="/audit-sheet-designer" element={<AuditSheetDesigner />} />
-                      <Route path="/audit-scheduling" element={<AuditScheduling />} />
-                      <Route path="/user-activity-report" element={<UserActivityReport />} />
-                      <Route path="/operations-dashboard" element={<OperationsDashboard />} />
-                      <Route path="/project-management" element={<ProjectManagement />} />
-                      <Route path="/hr-dashboard" element={<HRDashboard />} />
-                      <Route path="/training-resources" element={<TrainingResources />} />
-                      <Route path="/manager-training" element={<ManagerTraining />} />
-                      <Route path="/system-logs" element={<SystemLogs />} />
-                      <Route path="/audit-trails" element={<AuditTrails />} />
-                      <Route path="/notifications" element={<Notifications />} />
-                      <Route path="/messages" element={<Messages />} />
-                      <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
-                      <Route path="/database-management" element={<DatabaseManagement />} />
-                      
-                      {/* Phase 2 & 3 Routes */}
-                      <Route path="/ai-insights" element={<AIInsights />} />
-                      <Route path="/smart-scheduler" element={<SmartScheduler />} />
-                      <Route path="/gamification" element={<Gamification />} />
-                      <Route path="/task-automation" element={<TaskAutomation />} />
-                      
-                      {/* Existing stub interfaces */}
-                      <Route path="/recruitment" element={<Recruitment />} />
-                      <Route path="/crm" element={<CRM />} />
-                      <Route path="/quality-control" element={<QualityControlPage />} />
-                      <Route path="/system-settings" element={<SystemSettingsPage />} />
-                      <Route path="/tickets" element={<Tickets />} />
-                      <Route path="/compliance" element={<Compliance />} />
-                      <Route path="/maintenance" element={<Maintenance />} />
-                      
-                      {/* Enterprise modules - all routes properly defined */}
-                      <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
-                      <Route path="/admin-kpi" element={<AdminKpiDashboard />} />
-                      <Route path="/evaluations-system" element={<EvaluationsSystem />} />
-                      <Route path="/cx-evaluation-builder" element={<CXEvaluationBuilder />} />
-                      <Route path="/financial-reports" element={<FinancialReportsSystem />} />
-                      
-                      {/* Finance Analytics routes - multiple aliases */}
-                      <Route path="/finance-analytics" element={<FinanceAnalytics />} />
-                      <Route path="/financial-dashboard" element={<FinanceAnalytics />} />
-                      
-                      {/* Payroll Management routes - multiple aliases */}
-                      <Route path="/payroll-management" element={<PayrollManagement />} />
-                      <Route path="/payroll" element={<PayrollManagement />} />
-                      
-                      <Route path="/marketing-dashboard" element={<MarketingDashboardPage />} />
-                      <Route path="/marketing-actions" element={<MarketingActionsPage />} />
-                      <Route path="/sales-dashboard" element={<SalesDashboardPage />} />
-                      <Route path="/legal-dashboard" element={<LegalDashboardPage />} />
-                      <Route path="/support-dashboard" element={<SupportDashboardPage />} />
-                      <Route path="/product-dashboard" element={<ProductDashboardPage />} />
-                      
-                      {/* User Management routes - multiple aliases */}
-                      <Route path="/user-management" element={<UserManagementPage />} />
-                      <Route path="/users" element={<UserManagementPage />} />
-                      
-                      <Route path="/it-dashboard" element={<ITDashboardPage />} />
-                      <Route path="/facilities-dashboard" element={<FacilitiesDashboardPage />} />
-                      
-                      {/* Phase 4 - Advanced Enterprise Features */}
-                      <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
-                      <Route path="/multi-tenant-management" element={<MultiTenantManagement />} />
-                      <Route path="/workflow-automation" element={<WorkflowAutomation />} />
+            <FinanceProvider>
+              <MessagingProvider>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/login" element={<Login />} />
+                    
+                    <Route element={<ProtectedRoute />}>
+                      <Route element={<AuthenticatedLayout />}>
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/kpi-dashboard" element={<KpiDashboard />} />
+                        <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
+                        <Route path="/evaluations" element={<Evaluations />} />
+                        <Route path="/clients" element={<Clients />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/financial" element={<Financial />} />
+                        
+                        {/* Phase 2 & 3 Routes */}
+                        <Route path="/ai-insights" element={<AIInsights />} />
+                        <Route path="/smart-scheduler" element={<SmartScheduler />} />
+                        <Route path="/gamification" element={<Gamification />} />
+                        <Route path="/task-automation" element={<TaskAutomation />} />
+                        
+                        {/* Existing stub interfaces */}
+                        <Route path="/recruitment" element={<Recruitment />} />
+                        <Route path="/crm" element={<CRM />} />
+                        <Route path="/quality-control" element={<QualityControlPage />} />
+                        <Route path="/system-settings" element={<SystemSettingsPage />} />
+                        <Route path="/tickets" element={<Tickets />} />
+                        <Route path="/compliance" element={<Compliance />} />
+                        <Route path="/maintenance" element={<Maintenance />} />
+                        
+                        {/* Enterprise modules - all routes properly defined */}
+                        <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
+                        <Route path="/admin-kpi" element={<AdminKpiDashboard />} />
+                        <Route path="/evaluations-system" element={<EvaluationsSystem />} />
+                        <Route path="/cx-evaluation-builder" element={<CXEvaluationBuilder />} />
+                        <Route path="/financial-reports" element={<FinancialReportsSystem />} />
+                        
+                        {/* Finance Analytics routes - multiple aliases */}
+                        <Route path="/finance-analytics" element={<FinanceAnalytics />} />
+                        <Route path="/financial-dashboard" element={<FinanceAnalytics />} />
+                        
+                        {/* Payroll Management routes - multiple aliases */}
+                        <Route path="/payroll-management" element={<PayrollManagement />} />
+                        <Route path="/payroll" element={<PayrollManagement />} />
+                        
+                        <Route path="/marketing-dashboard" element={<MarketingDashboardPage />} />
+                        <Route path="/marketing-actions" element={<MarketingActionsPage />} />
+                        <Route path="/sales-dashboard" element={<SalesDashboardPage />} />
+                        <Route path="/legal-dashboard" element={<LegalDashboardPage />} />
+                        <Route path="/support-dashboard" element={<SupportDashboardPage />} />
+                        <Route path="/product-dashboard" element={<ProductDashboardPage />} />
+                        
+                        {/* User Management routes - multiple aliases */}
+                        <Route path="/user-management" element={<UserManagementPage />} />
+                        <Route path="/users" element={<UserManagementPage />} />
+                        
+                        <Route path="/it-dashboard" element={<ITDashboardPage />} />
+                        <Route path="/facilities-dashboard" element={<FacilitiesDashboardPage />} />
+                        
+                        {/* Phase 4 - Advanced Enterprise Features */}
+                        <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
+                        <Route path="/multi-tenant-management" element={<MultiTenantManagement />} />
+                        <Route path="/workflow-automation" element={<WorkflowAutomation />} />
+                      </Route>
                     </Route>
-                  </Route>
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </MessagingProvider>
+                    
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </MessagingProvider>
+            </FinanceProvider>
           </EnterpriseProvider>
         </GlobalProvider>
       </TaskProvider>
