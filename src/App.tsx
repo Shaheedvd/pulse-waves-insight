@@ -7,6 +7,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import Dashboard from '@/pages/Dashboard';
 import KpiDashboard from '@/pages/KpiDashboard';
+import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
 import Evaluations from '@/pages/Evaluations';
 import Clients from '@/pages/Clients';
 import Reports from '@/pages/Reports';
@@ -17,6 +18,15 @@ import AIInsights from '@/pages/AIInsights';
 import SmartScheduler from '@/pages/SmartScheduler';
 import Gamification from '@/pages/Gamification';
 import TaskAutomation from '@/pages/TaskAutomation';
+
+// Existing stub interfaces
+import Recruitment from '@/pages/Recruitment';
+import CRM from '@/pages/CRM';
+import QualityControlPage from '@/pages/QualityControl';
+import SystemSettingsPage from '@/pages/SystemSettings';
+import Tickets from '@/pages/Tickets';
+import Compliance from '@/pages/Compliance';
+import Maintenance from '@/pages/Maintenance';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
@@ -34,6 +44,11 @@ import ProductDashboardPage from '@/pages/enterprise/ProductDashboard';
 import UserManagementPage from '@/pages/enterprise/UserManagement';
 import ITDashboardPage from '@/pages/enterprise/ITDashboard';
 import FacilitiesDashboardPage from '@/pages/enterprise/FacilitiesDashboard';
+
+// Phase 4 - Advanced Enterprise Features
+import AdvancedAnalytics from '@/pages/AdvancedAnalytics';
+import MultiTenantManagement from '@/pages/MultiTenantManagement';
+import WorkflowAutomation from '@/pages/WorkflowAutomation';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { TaskProvider } from './contexts/TaskContext';
