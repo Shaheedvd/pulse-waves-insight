@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -32,6 +31,7 @@ import Maintenance from '@/pages/Maintenance';
 // HR imports
 import HRDashboardPage from '@/pages/HRDashboard';
 import TrainingResources from '@/pages/TrainingResources';
+import ManagerTraining from '@/pages/ManagerTraining';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
@@ -103,6 +103,7 @@ function App() {
                         {/* HR Routes */}
                         <Route path="/hr-dashboard" element={<HRDashboardPage />} />
                         <Route path="/training-resources" element={<TrainingResources />} />
+                        <Route path="/manager-training" element={<ManagerTraining />} />
                         
                         {/* Enterprise modules - all routes properly defined */}
                         <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
