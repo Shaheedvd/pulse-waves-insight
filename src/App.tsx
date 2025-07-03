@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -27,6 +28,10 @@ import SystemSettingsPage from '@/pages/SystemSettings';
 import Tickets from '@/pages/Tickets';
 import Compliance from '@/pages/Compliance';
 import Maintenance from '@/pages/Maintenance';
+
+// HR imports
+import HRDashboardPage from '@/pages/HRDashboard';
+import TrainingResources from '@/pages/TrainingResources';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
@@ -94,6 +99,10 @@ function App() {
                         <Route path="/tickets" element={<Tickets />} />
                         <Route path="/compliance" element={<Compliance />} />
                         <Route path="/maintenance" element={<Maintenance />} />
+                        
+                        {/* HR Routes */}
+                        <Route path="/hr-dashboard" element={<HRDashboardPage />} />
+                        <Route path="/training-resources" element={<TrainingResources />} />
                         
                         {/* Enterprise modules - all routes properly defined */}
                         <Route path="/enterprise/admin-kpi" element={<AdminKpiDashboard />} />
