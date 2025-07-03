@@ -32,19 +32,23 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
   onClose,
   onSuccess
 }) => {
-  const [formData, setFormData] = useState<MarketingTask>(
-    task || {
-      id: Math.random().toString(36).substr(2, 9),
-      category: "Digital Marketing",
-      subcategory: "SEO",
-      title: "",
-      description: "",
-      trackingMethod: "",
-      assignedTo: null,
-      dueDate: null,
-      status: "pending"
-    }
-  );
+  const [formData, setFormData] = useState<MarketingTask>({
+    id: task?.id || Math.random().toString(36).substr(2, 9),
+    title: task?.title || "",
+    description: task?.description || "",
+    type: task?.type || "copywriting",
+    assignedTo: task?.assignedTo || "",
+    dueDate: task?.dueDate || "",
+    status: task?.status || "pending",
+    priority: task?.priority || "medium",
+    attachments: task?.attachments || [],
+    comments: task?.comments || [],
+    createdAt: task?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    category: task?.category || "Digital Marketing",
+    subcategory: task?.subcategory || "SEO",
+    trackingMethod: task?.trackingMethod || ""
+  });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -64,7 +68,7 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
       setFormData(prev => ({ 
         ...prev, 
         [name]: value,
-        subcategory: subcategories[value][0]
+        subcategory: subcategories[value]?.[0] || ""
       }));
     }
     
@@ -85,7 +89,7 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
       newErrors.description = "Description is required";
     }
     
-    if (!formData.trackingMethod.trim()) {
+    if (formData.trackingMethod && !formData.trackingMethod.trim()) {
       newErrors.trackingMethod = "Tracking method is required";
     }
     
@@ -131,7 +135,7 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
               <SelectValue placeholder="Select subcategory" />
             </SelectTrigger>
             <SelectContent>
-              {subcategories[formData.category]?.map((subcat) => (
+              {subcategories[formData.category || ""]?.map((subcat) => (
                 <SelectItem key={subcat} value={subcat}>{subcat}</SelectItem>
               ))}
             </SelectContent>
@@ -171,7 +175,7 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
         <Input
           id="trackingMethod"
           name="trackingMethod"
-          value={formData.trackingMethod}
+          value={formData.trackingMethod || ""}
           onChange={handleChange}
           placeholder="How will this task be tracked?"
           className={errors.trackingMethod ? "border-red-500" : ""}
@@ -214,9 +218,11 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="todo">To Do</SelectItem>
             <SelectItem value="in-progress">In Progress</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="overdue">Overdue</SelectItem>
+            <SelectItem value="blocked">Blocked</SelectItem>
           </SelectContent>
         </Select>
       </div>

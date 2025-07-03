@@ -1,4 +1,3 @@
-
 export interface MarketingCampaign {
   id: string;
   name: string;
@@ -165,6 +164,57 @@ export interface MarketingRequest {
   updatedAt: string;
 }
 
+export interface AdminKpi {
+  id: string;
+  name: string;
+  category: "marketing" | "sales" | "operations" | "training" | "finance" | "hr";
+  description: string;
+  target: string;
+  current: number | null;
+  unit: string;
+  progress: number;
+  trend: "up" | "down" | "stable" | "none";
+  lastUpdated: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  status: "not-started" | "in-progress" | "on-hold" | "completed";
+  priority: "low" | "medium" | "high";
+  dueDate: string;
+  assignedTo: string[];
+  completionPercentage: number;
+  tasks: Array<{
+    id: string;
+    description: string;
+    completed: boolean;
+  }>;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface TrainingResource {
+  id: string;
+  title: string;
+  category: "SEO" | "Social Media" | "Email Marketing" | "Collaboration" | "Gamification";
+  description: string;
+  contentType: "document" | "video" | "quiz" | "interactive";
+  url: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export const MARKETING_STRATEGIES = [
+  "Digital Marketing",
+  "Content Marketing", 
+  "Social Media Marketing",
+  "Direct Sales & Business Development",
+  "Marketing Tools & Technology"
+];
+
+// Update MarketingTask to match the form usage
 export interface MarketingTask {
   id: string;
   title: string;
@@ -172,7 +222,7 @@ export interface MarketingTask {
   type: "copywriting" | "design" | "editing" | "campaign-setup" | "reporting" | "qa-testing";
   assignedTo: string;
   dueDate: string;
-  status: "todo" | "in-progress" | "completed" | "blocked";
+  status: "todo" | "in-progress" | "completed" | "blocked" | "pending" | "overdue";
   priority: "low" | "medium" | "high";
   campaignId?: string;
   contentId?: string;
@@ -185,6 +235,11 @@ export interface MarketingTask {
   }>;
   createdAt: string;
   updatedAt: string;
+  // Additional fields for marketing-specific tasks
+  category?: string;
+  subcategory?: string;
+  trackingMethod?: string;
+  completionDate?: string;
 }
 
 export interface MarketingReport {

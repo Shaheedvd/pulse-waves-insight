@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Table,
@@ -20,78 +21,114 @@ const sampleTasks: { [key: string]: MarketingTask[] } = {
   "Digital Marketing": [
     {
       id: "1",
-      category: "Digital Marketing",
-      subcategory: "SEO",
       title: "Keyword Research",
       description: "Conduct keyword research to identify relevant search terms for our services. Use tools like SEMrush or Ahrefs. Record the list of primary and secondary keywords.",
-      trackingMethod: "Document with keyword list and search volume data",
-      assignedTo: null,
+      type: "copywriting",
+      assignedTo: "",
       dueDate: "2025-05-15",
-      status: "in-progress"
+      status: "in-progress",
+      priority: "medium",
+      attachments: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      category: "Digital Marketing",
+      subcategory: "SEO",
+      trackingMethod: "Document with keyword list and search volume data"
     },
     {
       id: "2",
-      category: "Digital Marketing",
-      subcategory: "SEO",
       title: "Content Optimization",
       description: "Optimize existing website pages for target keywords. Track changes made and before/after SEO metrics.",
-      trackingMethod: "List of optimized pages, changes made, and any metric changes",
-      assignedTo: null,
+      type: "copywriting",
+      assignedTo: "",
       dueDate: "2025-05-20",
-      status: "pending"
+      status: "pending",
+      priority: "medium",
+      attachments: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      category: "Digital Marketing",
+      subcategory: "SEO",
+      trackingMethod: "List of optimized pages, changes made, and any metric changes"
     }
   ],
   "Content Marketing": [
     {
       id: "3",
-      category: "Content Marketing",
-      subcategory: "Blog Posts",
       title: "Blog Post Creation",
       description: "Write a blog post on customer experience improvements. Follow the content calendar and SEO guidelines.",
-      trackingMethod: "Link to published blog post, date of publication",
-      assignedTo: null,
+      type: "copywriting",
+      assignedTo: "",
       dueDate: "2025-05-10",
       status: "completed",
+      priority: "medium",
+      attachments: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      category: "Content Marketing",
+      subcategory: "Blog Posts",
+      trackingMethod: "Link to published blog post, date of publication",
       completionDate: "2025-05-07"
     }
   ],
   "Social Media Marketing": [
     {
       id: "4",
-      category: "Social Media Marketing",
-      subcategory: "LinkedIn",
       title: "LinkedIn Engagement",
       description: "Share relevant industry articles on LinkedIn and engage in discussions. Track the number of interactions.",
-      trackingMethod: "List of posts shared, engagement metrics",
-      assignedTo: null,
+      type: "copywriting",
+      assignedTo: "",
       dueDate: "2025-05-08",
-      status: "overdue"
+      status: "overdue",
+      priority: "medium",
+      attachments: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      category: "Social Media Marketing",
+      subcategory: "LinkedIn",
+      trackingMethod: "List of posts shared, engagement metrics"
     }
   ],
   "Direct Sales & Business Development": [
     {
       id: "5",
-      category: "Direct Sales & Business Development",
-      subcategory: "Targeted Outreach",
       title: "Prospect List Creation",
       description: "Research and compile a list of potential clients in the retail sector. Include contact information for key decision-makers.",
-      trackingMethod: "Document with prospect list",
-      assignedTo: null,
+      type: "copywriting",
+      assignedTo: "",
       dueDate: "2025-05-25",
-      status: "pending"
+      status: "pending",
+      priority: "medium",
+      attachments: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      category: "Direct Sales & Business Development",
+      subcategory: "Targeted Outreach",
+      trackingMethod: "Document with prospect list"
     }
   ],
   "Marketing Tools & Technology": [
     {
       id: "6",
-      category: "Marketing Tools & Technology",
-      subcategory: "CRM Management",
       title: "CRM Data Entry",
       description: "Update CRM with new leads and client interactions. Ensure data accuracy and completeness.",
-      trackingMethod: "Number of records updated/added",
-      assignedTo: null,
+      type: "copywriting",
+      assignedTo: "",
       dueDate: "2025-05-12",
-      status: "in-progress"
+      status: "in-progress",
+      priority: "medium",
+      attachments: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      category: "Marketing Tools & Technology",
+      subcategory: "CRM Management",
+      trackingMethod: "Number of records updated/added"
     }
   ]
 };
@@ -120,6 +157,10 @@ const MarketingTasksTable: React.FC<MarketingTasksTableProps> = ({
         return <Badge className="bg-gray-100 text-gray-800">Pending</Badge>;
       case "overdue":
         return <Badge className="bg-red-100 text-red-800">Overdue</Badge>;
+      case "todo":
+        return <Badge className="bg-yellow-100 text-yellow-800">To Do</Badge>;
+      case "blocked":
+        return <Badge className="bg-orange-100 text-orange-800">Blocked</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
