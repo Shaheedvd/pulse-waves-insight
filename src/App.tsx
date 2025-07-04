@@ -62,6 +62,7 @@ import { EnterpriseProvider } from './contexts/EnterpriseContext';
 import { MessagingProvider } from './contexts/MessagingContext';
 import { FinanceProvider } from './contexts/FinanceContext';
 import { CommunicationProvider } from './contexts/CommunicationContext';
+import TeamsWhatsAppSetupGuide from '@/components/training/TeamsWhatsAppSetupGuide';
 
 function App() {
   return (
@@ -140,6 +141,9 @@ function App() {
                           <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
                           <Route path="/multi-tenant-management" element={<MultiTenantManagement />} />
                           <Route path="/workflow-automation" element={<WorkflowAutomation />} />
+                          
+                          {/* Training Document Routes */}
+                          <Route path="/training/teams-whatsapp-setup" element={<TeamsWhatsAppSetupGuide />} />
                         </Route>
                       </Route>
                       
