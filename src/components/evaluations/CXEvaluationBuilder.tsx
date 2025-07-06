@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -49,6 +50,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobal } from "@/contexts/GlobalContext";
+import { useEnterprise } from "@/contexts/EnterpriseContext";
 
 interface FormField {
   id: string;
@@ -69,20 +71,6 @@ interface FormSection {
   weight?: number;
 }
 
-interface EvaluationTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  version: string;
-  sections: FormSection[];
-  createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-  assignedClients: string[];
-  totalScore: number;
-}
-
 interface CXEvaluationBuilderProps {
   open: boolean;
   onClose: () => void;
@@ -91,15 +79,19 @@ interface CXEvaluationBuilderProps {
 const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose }) => {
   const { toast } = useToast();
   const { logAction } = useGlobal();
+  const { templates, addTemplate, updateTemplate, deleteTemplate } = useEnterprise();
+  
   const [activeTab, setActiveTab] = useState("builder");
-  const [selectedTemplate, setSelectedTemplate] = useState<EvaluationTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isNewTemplateDialogOpen, setIsNewTemplateDialogOpen] = useState(false);
+  const [isEditingTemplate, setIsEditingTemplate] = useState<string | null>(null);
 
   // Form builder state
   const [templateName, setTemplateName] = useState("");
   const [templateDescription, setTemplateDescription] = useState("");
   const [templateCategory, setTemplateCategory] = useState("");
+  const [sections, setSections] = useState<FormSection[]>([]);
   const [currentSection, setCurrentSection] = useState<FormSection>({
     id: "",
     title: "",
@@ -115,116 +107,6 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
     required: true,
     weight: 10
   });
-
-  // Sample templates data
-  const [evaluationTemplates] = useState<EvaluationTemplate[]>([
-    {
-      id: "template-001",
-      name: "Retail Store CX Audit",
-      description: "Comprehensive customer experience evaluation for retail environments",
-      category: "Retail",
-      version: "2.1",
-      sections: [
-        {
-          id: "section-1",
-          title: "Customer Service Excellence",
-          description: "Evaluate staff interaction and service quality",
-          weight: 40,
-          fields: [
-            {
-              id: "field-1",
-              type: "rating",
-              label: "Greeting quality and enthusiasm",
-              required: true,
-              maxRating: 5,
-              weight: 25
-            },
-            {
-              id: "field-2",
-              type: "yes_no",
-              label: "Staff acknowledged customer within 30 seconds",
-              required: true,
-              weight: 20
-            },
-            {
-              id: "field-3",
-              type: "multiple_choice",
-              label: "Staff product knowledge level",
-              required: true,
-              options: ["Expert", "Good", "Basic", "Poor"],
-              weight: 25
-            },
-            {
-              id: "field-4",
-              type: "comment",
-              label: "Specific service observations",
-              required: false,
-              weight: 30
-            }
-          ]
-        },
-        {
-          id: "section-2",
-          title: "Store Environment & Cleanliness",
-          description: "Assess physical environment and maintenance standards",
-          weight: 35,
-          fields: [
-            {
-              id: "field-5",
-              type: "rating",
-              label: "Overall store cleanliness",
-              required: true,
-              maxRating: 5,
-              weight: 30
-            },
-            {
-              id: "field-6",
-              type: "yes_no",
-              label: "All lighting fixtures working",
-              required: true,
-              weight: 20
-            },
-            {
-              id: "field-7",
-              type: "multiple_choice",
-              label: "Store organization level",
-              required: true,
-              options: ["Excellent", "Good", "Needs Improvement", "Poor"],
-              weight: 25
-            }
-          ]
-        },
-        {
-          id: "section-3",
-          title: "Brand Compliance",
-          description: "Check adherence to brand standards and guidelines",
-          weight: 25,
-          fields: [
-            {
-              id: "field-8",
-              type: "yes_no",
-              label: "All signage matches brand guidelines",
-              required: true,
-              weight: 40
-            },
-            {
-              id: "field-9",
-              type: "rating",
-              label: "Visual merchandising effectiveness",
-              required: true,
-              maxRating: 5,
-              weight: 35
-            }
-          ]
-        }
-      ],
-      createdAt: "2023-06-15",
-      updatedAt: "2023-06-20",
-      isActive: true,
-      assignedClients: ["retail-corp", "quickmart"],
-      totalScore: 100
-    }
-  ]);
 
   const predefinedSections = [
     { id: "customer_service", title: "Customer Service Excellence", icon: <Users className="h-4 w-4" />, description: "Staff interaction and service quality" },
@@ -253,6 +135,38 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
       return;
     }
 
+    if (sections.length === 0) {
+      toast({
+        title: "Error", 
+        description: "Please add at least one section to the template",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    addTemplate({
+      name: templateName,
+      description: templateDescription,
+      version: "1.0",
+      isActive: true,
+      categories: sections.map(section => ({
+        id: section.id,
+        name: section.title,
+        weight: section.weight || 100,
+        questions: section.fields.map(field => ({
+          id: field.id,
+          text: field.label,
+          type: field.type,
+          maxScore: field.type === 'rating' ? (field.maxRating || 5) : 1,
+          weight: field.weight || 1,
+          required: field.required
+        }))
+      })),
+      totalPossibleScore: sections.reduce((total, section) => 
+        total + section.fields.reduce((sectionTotal, field) => 
+          sectionTotal + (field.weight || 1), 0), 0)
+    });
+
     logAction(
       "CREATE_EVALUATION_TEMPLATE",
       "evaluations",
@@ -267,13 +181,82 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
       description: "New evaluation template created successfully",
     });
 
+    // Reset form
     setTemplateName("");
     setTemplateDescription("");
     setTemplateCategory("");
+    setSections([]);
     setIsNewTemplateDialogOpen(false);
   };
 
-  const handlePreview = (template: EvaluationTemplate) => {
+  const handleEditTemplate = (template: any) => {
+    setSelectedTemplate(template);
+    setTemplateName(template.name);
+    setTemplateDescription(template.description);
+    setTemplateCategory(template.category || "");
+    setSections(template.categories || []);
+    setIsEditingTemplate(template.id);
+    setIsNewTemplateDialogOpen(true);
+  };
+
+  const handleUpdateTemplate = () => {
+    if (!selectedTemplate || !isEditingTemplate) return;
+
+    updateTemplate(isEditingTemplate, {
+      name: templateName,
+      description: templateDescription,
+      categories: sections.map(section => ({
+        id: section.id,
+        name: section.title,
+        weight: section.weight || 100,
+        questions: section.fields.map(field => ({
+          id: field.id,
+          text: field.label,
+          type: field.type,
+          maxScore: field.type === 'rating' ? (field.maxRating || 5) : 1,
+          weight: field.weight || 1,
+          required: field.required
+        }))
+      })),
+      totalPossibleScore: sections.reduce((total, section) => 
+        total + section.fields.reduce((sectionTotal, field) => 
+          sectionTotal + (field.weight || 1), 0), 0)
+    });
+
+    toast({
+      title: "Success",
+      description: "Template updated successfully",
+    });
+
+    setIsEditingTemplate(null);
+    setIsNewTemplateDialogOpen(false);
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    deleteTemplate(templateId);
+    toast({
+      title: "Success",
+      description: "Template deleted successfully",
+    });
+  };
+
+  const handleCopyTemplate = (template: any) => {
+    const copiedTemplate = {
+      ...template,
+      name: `${template.name} (Copy)`,
+      version: "1.0"
+    };
+    delete copiedTemplate.id;
+    
+    addTemplate(copiedTemplate);
+    
+    toast({
+      title: "Success",
+      description: "Template copied successfully",
+    });
+  };
+
+  const handlePreview = (template: any) => {
     setSelectedTemplate(template);
     setIsPreviewOpen(true);
     
@@ -285,6 +268,36 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
       undefined,
       { name: template.name }
     );
+  };
+
+  const handleAddSection = () => {
+    if (!currentSection.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a section title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newSection: FormSection = {
+      ...currentSection,
+      id: `section-${Date.now()}`,
+    };
+
+    setSections(prev => [...prev, newSection]);
+    setCurrentSection({
+      id: "",
+      title: "",
+      description: "",
+      fields: [],
+      weight: 100
+    });
+
+    toast({
+      title: "Success",
+      description: "Section added to template",
+    });
   };
 
   const handleAddField = () => {
@@ -319,6 +332,23 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
     toast({
       title: "Field Added",
       description: "Field added to section successfully",
+    });
+  };
+
+  const handleAddPredefinedSection = (sectionTemplate: any) => {
+    const newSection: FormSection = {
+      id: `section-${Date.now()}`,
+      title: sectionTemplate.title,
+      description: sectionTemplate.description,
+      fields: [],
+      weight: 100
+    };
+
+    setSections(prev => [...prev, newSection]);
+    
+    toast({
+      title: "Section Added",
+      description: `${sectionTemplate.title} section added to template`,
     });
   };
 
@@ -439,7 +469,7 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
                           <Plus className="h-4 w-4 mr-1" /> Add Field
                         </Button>
                       </div>
-                      {currentSection.fields.map((field, index) => (
+                      {currentSection.fields.map((field) => (
                         <div key={field.id} className="flex items-center gap-2 p-2 border rounded">
                           <GripVertical className="h-4 w-4 text-muted-foreground" />
                           {renderFieldIcon(field.type)}
@@ -447,48 +477,39 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
                           <Badge variant={field.required ? "default" : "secondary"}>
                             {field.required ? "Required" : "Optional"}
                           </Badge>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
                       ))}
+                      {currentSection.title && (
+                        <Button onClick={handleAddSection} className="w-full">
+                          Add Section to Template
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Live Preview</CardTitle>
+                    <CardTitle>Template Sections ({sections.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {currentSection.title ? (
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-semibold">{currentSection.title}</h4>
-                          {currentSection.description && (
-                            <p className="text-sm text-muted-foreground">{currentSection.description}</p>
-                          )}
-                        </div>
-                        <div className="space-y-3">
-                          {currentSection.fields.map((field) => (
-                            <div key={field.id} className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                {renderFieldIcon(field.type)}
-                                <Label>{field.label}</Label>
-                                {field.required && <span className="text-red-500">*</span>}
-                              </div>
-                              {renderPreviewField(field)}
+                    {sections.length > 0 ? (
+                      <div className="space-y-3">
+                        {sections.map((section, index) => (
+                          <div key={section.id} className="p-3 border rounded">
+                            <h4 className="font-semibold">{section.title}</h4>
+                            <p className="text-sm text-muted-foreground">{section.description}</p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-sm">{section.fields.length} fields</span>
+                              <Badge variant="outline">Weight: {section.weight}%</Badge>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">
                         <FileText className="mx-auto h-12 w-12 mb-2" />
-                        <p>Start building your section to see the preview</p>
+                        <p>No sections added yet</p>
                       </div>
                     )}
                   </CardContent>
@@ -498,7 +519,7 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
 
             <TabsContent value="templates" className="space-y-4">
               <div className="grid gap-4">
-                {evaluationTemplates.map((template) => (
+                {templates.map((template) => (
                   <Card key={template.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -509,28 +530,25 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
                             <Badge variant={template.isActive ? "default" : "secondary"}>
                               {template.isActive ? "Active" : "Draft"}
                             </Badge>
-                            <Badge>{template.category}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">{template.description}</p>
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>Updated: {template.updatedAt}</span>
-                            <span>{template.sections.length} sections</span>
-                            <span>{template.assignedClients.length} clients</span>
-                            <span>Score: {template.totalScore}pts</span>
+                            <span>{template.categories.length} sections</span>
+                            <span>Score: {template.totalPossibleScore}pts</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" onClick={() => handlePreview(template)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleEditTemplate(template)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleCopyTemplate(template)}>
                             <Copy className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
-                            <Calendar className="h-4 w-4" />
+                          <Button variant="outline" size="sm" onClick={() => handleDeleteTemplate(template.id)}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -560,7 +578,12 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
                               <p className="text-sm text-muted-foreground">{section.description}</p>
                             </div>
                           </div>
-                          <Button className="w-full mt-3" variant="outline" size="sm">
+                          <Button 
+                            className="w-full mt-3" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleAddPredefinedSection(section)}
+                          >
                             Add to Form
                           </Button>
                         </CardContent>
@@ -577,44 +600,9 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
                   <CardTitle>Template Assignments & Scheduling</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {evaluationTemplates.map((template) => (
-                            <SelectItem key={template.id} value={template.id}>
-                              {template.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Client" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="retail-corp">Retail Corp SA</SelectItem>
-                          <SelectItem value="quickmart">QuickMart</SelectItem>
-                          <SelectItem value="ecofuel">EcoFuel</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Frequency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="quarterly">Quarterly</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button>
-                        <Calendar className="mr-2 h-4 w-4" /> Schedule
-                      </Button>
-                    </div>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="mx-auto h-12 w-12 mb-2" />
+                    <p>Assignment functionality will be available once templates are created</p>
                   </div>
                 </CardContent>
               </Card>
@@ -624,9 +612,6 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
           <DialogFooter>
             <Button variant="outline" onClick={onClose}>
               Close
-            </Button>
-            <Button>
-              <Save className="mr-2 h-4 w-4" /> Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -690,6 +675,15 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
                   </Select>
                 </div>
               )}
+              <div className="space-y-2">
+                <Label>Field Weight</Label>
+                <Input
+                  type="number"
+                  value={newField.weight}
+                  onChange={(e) => setNewField(prev => ({ ...prev, weight: parseInt(e.target.value) || 1 }))}
+                  placeholder="10"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddingSectionField(false)}>
@@ -701,11 +695,11 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
         </Dialog>
       )}
 
-      {/* New Template Dialog */}
+      {/* New/Edit Template Dialog */}
       <Dialog open={isNewTemplateDialogOpen} onOpenChange={setIsNewTemplateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Template</DialogTitle>
+            <DialogTitle>{isEditingTemplate ? 'Edit Template' : 'Create New Template'}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
@@ -744,7 +738,9 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
             <Button variant="outline" onClick={() => setIsNewTemplateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateTemplate}>Create Template</Button>
+            <Button onClick={isEditingTemplate ? handleUpdateTemplate : handleCreateTemplate}>
+              {isEditingTemplate ? 'Update Template' : 'Create Template'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -760,25 +756,22 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
           </DialogHeader>
           {selectedTemplate && (
             <div className="space-y-6">
-              {selectedTemplate.sections.map((section) => (
+              {selectedTemplate.categories.map((section: any) => (
                 <Card key={section.id}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-lg">{section.title}</CardTitle>
-                        {section.description && (
-                          <p className="text-sm text-muted-foreground">{section.description}</p>
-                        )}
+                        <CardTitle className="text-lg">{section.name}</CardTitle>
                       </div>
                       <Badge variant="outline">Weight: {section.weight}%</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {section.fields.map((field) => (
+                    {section.questions.map((field: any) => (
                       <div key={field.id} className="space-y-2">
                         <div className="flex items-center gap-2">
                           {renderFieldIcon(field.type)}
-                          <Label>{field.label}</Label>
+                          <Label>{field.text}</Label>
                           {field.required && <span className="text-red-500">*</span>}
                           {field.weight && (
                             <Badge variant="secondary" className="ml-auto">

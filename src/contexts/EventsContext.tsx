@@ -1,7 +1,8 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
+import { eventService } from '@/lib/supabase';
 
 export interface Event {
   id: string;
@@ -25,6 +26,8 @@ interface EventsContextType {
   deleteEvent: (id: string) => void;
   getEventsByDate: (date: string) => Event[];
   getEventsThisWeek: () => Event[];
+  filteredEvents: Event[];
+  setFilteredEvents: (events: Event[]) => void;
 }
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined);
@@ -60,36 +63,105 @@ const initialEvents: Event[] = [
 
 export const EventsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [events, setEvents] = useLocalStorage<Event[]>('events', initialEvents);
+  const [filteredEvents, setFilteredEvents] = useLocalStorage<Event[]>('filtered_events', events);
   const { toast } = useToast();
 
-  const addEvent = (eventData: Omit<Event, 'id'>) => {
+  // Load events from Supabase on mount
+  useEffect(() => {
+    const loadEventsFromDB = async () => {
+      try {
+        const dbEvents = await eventService.getAll();
+        if (dbEvents && dbEvents.length > 0) {
+          setEvents(dbEvents);
+          setFilteredEvents(dbEvents);
+        }
+      } catch (error) {
+        console.error('Error loading events from database:', error);
+        // Continue with local storage data
+      }
+    };
+
+    loadEventsFromDB();
+  }, []);
+
+  // Sync filtered events when events change
+  useEffect(() => {
+    setFilteredEvents(events);
+  }, [events, setFilteredEvents]);
+
+  const addEvent = async (eventData: Omit<Event, 'id'>) => {
     const newEvent: Event = {
       ...eventData,
       id: Date.now().toString()
     };
-    setEvents(prev => [...prev, newEvent]);
-    toast({
-      title: "Event Created",
-      description: `${newEvent.title} has been scheduled successfully.`
-    });
+
+    try {
+      // Try to save to Supabase first
+      const savedEvent = await eventService.create(newEvent);
+      setEvents(prev => [...prev, savedEvent]);
+      
+      toast({
+        title: "Event Created",
+        description: `${savedEvent.title} has been scheduled successfully.`
+      });
+    } catch (error) {
+      console.error('Error saving event to database:', error);
+      // Fallback to local storage
+      setEvents(prev => [...prev, newEvent]);
+      
+      toast({
+        title: "Event Created (Local)",
+        description: `${newEvent.title} has been scheduled locally.`
+      });
+    }
   };
 
-  const editEvent = (id: string, eventData: Partial<Event>) => {
-    setEvents(prev => prev.map(event => 
-      event.id === id ? { ...event, ...eventData } : event
-    ));
-    toast({
-      title: "Event Updated",
-      description: "Event has been updated successfully."
-    });
+  const editEvent = async (id: string, eventData: Partial<Event>) => {
+    try {
+      // Try to update in Supabase
+      const updatedEvent = await eventService.update(id, eventData);
+      setEvents(prev => prev.map(event => 
+        event.id === id ? updatedEvent : event
+      ));
+      
+      toast({
+        title: "Event Updated",
+        description: "Event has been updated successfully."
+      });
+    } catch (error) {
+      console.error('Error updating event in database:', error);
+      // Fallback to local storage
+      setEvents(prev => prev.map(event => 
+        event.id === id ? { ...event, ...eventData } : event
+      ));
+      
+      toast({
+        title: "Event Updated (Local)",
+        description: "Event has been updated locally."
+      });
+    }
   };
 
-  const deleteEvent = (id: string) => {
-    setEvents(prev => prev.filter(event => event.id !== id));
-    toast({
-      title: "Event Deleted",
-      description: "Event has been removed from the schedule."
-    });
+  const deleteEvent = async (id: string) => {
+    try {
+      // Try to delete from Supabase
+      await eventService.delete(id);
+      setEvents(prev => prev.filter(event => event.id !== id));
+      
+      toast({
+        title: "Event Deleted",
+        description: "Event has been removed from the schedule."
+      });
+    } catch (error) {
+      console.error('Error deleting event from database:', error);
+      // Fallback to local storage
+      setEvents(prev => prev.filter(event => event.id !== id));
+      
+      toast({
+        title: "Event Deleted (Local)",
+        description: "Event has been removed locally."
+      });
+    }
   };
 
   const getEventsByDate = (date: string) => {
@@ -112,7 +184,9 @@ export const EventsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       editEvent,
       deleteEvent,
       getEventsByDate,
-      getEventsThisWeek
+      getEventsThisWeek,
+      filteredEvents,
+      setFilteredEvents
     }}>
       {children}
     </EventsContext.Provider>

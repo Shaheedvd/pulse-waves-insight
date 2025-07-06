@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useGlobal } from "./GlobalContext";
 import { useAuth } from "./AuthContext";
 import * as Types from "@/types/enterprise";
+import { 
+  evaluationTemplateService, 
+  evaluationService,
+  eventService,
+  operationsService 
+} from "@/lib/supabase";
 
 interface EnterpriseContextType {
   // KPI System
@@ -143,7 +149,104 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     updatedBy: currentUser?.id || "system",
   });
 
-  // Mock data initialization
+  // Load data from Supabase
+  const loadTemplatesFromDB = async () => {
+    try {
+      const templates = await evaluationTemplateService.getAll();
+      setTemplates(templates || []);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      // Fallback to mock data if Supabase is not configured
+      initializeMockData();
+    }
+  };
+
+  const loadEvaluationsFromDB = async () => {
+    try {
+      const evaluations = await evaluationService.getAll();
+      setEvaluations(evaluations || []);
+    } catch (error) {
+      console.error('Error loading evaluations:', error);
+    }
+  };
+
+  // Enhanced template functions with Supabase integration
+  const addTemplate = async (template: Omit<Types.EvaluationTemplate, keyof Types.BaseEntity>) => {
+    const newTemplate = { ...template, ...createBaseEntity() } as Types.EvaluationTemplate;
+    
+    try {
+      const savedTemplate = await evaluationTemplateService.create(newTemplate);
+      setTemplates(prev => [...prev, savedTemplate]);
+      
+      logAction("CREATE_EVALUATION_TEMPLATE", "evaluations", savedTemplate.id, "template", undefined, savedTemplate);
+      addNotification({
+        userId: currentUser?.id || "",
+        title: "Template Created",
+        message: `New evaluation template "${template.name}" has been created successfully`,
+        type: "success",
+        module: "evaluations"
+      });
+      
+      return savedTemplate;
+    } catch (error) {
+      console.error('Error creating template:', error);
+      // Fallback to local storage
+      setTemplates(prev => [...prev, newTemplate]);
+      return newTemplate;
+    }
+  };
+
+  const updateTemplate = async (id: string, updates: Partial<Types.EvaluationTemplate>) => {
+    try {
+      const updatedTemplate = await evaluationTemplateService.update(id, {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+        updatedBy: currentUser?.id || "system"
+      });
+      
+      setTemplates(prev => prev.map(template => 
+        template.id === id ? updatedTemplate : template
+      ));
+      
+      logAction("UPDATE_EVALUATION_TEMPLATE", "evaluations", id, "template", null, updatedTemplate);
+    } catch (error) {
+      console.error('Error updating template:', error);
+      // Fallback to local state update
+      setTemplates(prev => prev.map(template => {
+        if (template.id === id) {
+          return { 
+            ...template, 
+            ...updates, 
+            updatedAt: new Date().toISOString(),
+            updatedBy: currentUser?.id || "system"
+          };
+        }
+        return template;
+      }));
+    }
+  };
+
+  const deleteTemplate = async (id: string) => {
+    try {
+      await evaluationTemplateService.delete(id);
+      setTemplates(prev => prev.filter(template => template.id !== id));
+      
+      logAction("DELETE_EVALUATION_TEMPLATE", "evaluations", id, "template", null, undefined);
+      addNotification({
+        userId: currentUser?.id || "",
+        title: "Template Deleted",
+        message: "Template has been deleted successfully",
+        type: "success",
+        module: "evaluations"
+      });
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      // Fallback to local state update
+      setTemplates(prev => prev.filter(template => template.id !== id));
+    }
+  };
+
+  // Mock data initialization (fallback when Supabase is not available)
   const initializeMockData = () => {
     // 1. Admin KPI System Mock Data
     const mockKPITargets: Types.KPITarget[] = [
@@ -718,7 +821,7 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setItIncidents(mockITIncidents);
     setFacilities(mockFacilities);
 
-    console.log("✅ All enterprise mock data initialized successfully");
+    console.log("✅ Mock data initialized (Supabase fallback)");
   };
 
   // Generic CRUD functions
@@ -775,7 +878,6 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // KPI functions
   const kpiCRUD = createCRUDFunctions(kpiTargets, setKpiTargets, "kpi", "analytics");
   const evaluationCRUD = createCRUDFunctions(evaluations, setEvaluations, "evaluation", "evaluations");
-  const templateCRUD = createCRUDFunctions(templates, setTemplates, "template", "evaluations");
   const reportCRUD = createCRUDFunctions(financialReports, setFinancialReports, "report", "finance");
   const budgetCRUD = createCRUDFunctions(budgets, setBudgets, "budget", "finance");
   const employeeCRUD = createCRUDFunctions(employees, setEmployees, "employee", "hr");
@@ -830,16 +932,18 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   };
 
-  const refreshData = () => {
-    // Simulate real-time data refresh
+  const refreshData = async () => {
     console.log("Refreshing enterprise data...");
+    await loadTemplatesFromDB();
+    await loadEvaluationsFromDB();
     logAction("REFRESH_DATA", "system", undefined, "data_refresh");
   };
 
-  // Initialize with mock data only once
+  // Initialize data on mount
   useEffect(() => {
     if (!isInitialized) {
-      initializeMockData();
+      loadTemplatesFromDB();
+      loadEvaluationsFromDB();
       setIsInitialized(true);
     }
   }, [isInitialized]);
@@ -859,9 +963,9 @@ export const EnterpriseProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     // Templates
     templates,
-    addTemplate: templateCRUD.add,
-    updateTemplate: templateCRUD.update,
-    deleteTemplate: templateCRUD.delete,
+    addTemplate,
+    updateTemplate,
+    deleteTemplate,
     
     // Financial Reports
     financialReports,
