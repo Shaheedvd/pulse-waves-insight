@@ -4,42 +4,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, BarChart3 } from 'lucide-react';
 import { useTask } from '@/contexts/TaskContext';
+import { useOperationsData } from '@/contexts/OperationsDataContext';
 
 const OpsKPISection = () => {
   const { tasks } = useTask();
+  const { opsTasks, projects, requests, incidents } = useOperationsData();
   
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(t => t.status === "completed").length;
+  const totalTasks = [...tasks, ...opsTasks].length;
+  const completedTasks = [...tasks, ...opsTasks].filter(t => t.status === "completed").length;
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  const activeProjects = projects.filter(p => p.status === 'active').length;
+  const totalProjects = projects.length;
+  const projectProgress = totalProjects > 0 ? Math.round((activeProjects / totalProjects) * 100) : 0;
+
+  const openRequests = requests.filter(r => ['submitted', 'reviewing'].includes(r.status)).length;
+  const totalRequests = requests.length;
+  const requestProgress = totalRequests > 0 ? Math.round(((totalRequests - openRequests) / totalRequests) * 100) : 0;
+
+  const openIncidents = incidents.filter(i => ['open', 'investigating'].includes(i.status)).length;
+  const criticalIncidents = incidents.filter(i => i.severity === 'critical' && ['open', 'investigating'].includes(i.status)).length;
 
   const kpiData = [
     {
       title: "Task Completion Rate",
       value: `${completionRate}%`,
       progress: completionRate,
-      trend: "up",
-      target: 85
-    },
-    {
-      title: "SLA Compliance",
-      value: "92%", 
-      progress: 92,
-      trend: "stable",
-      target: 95
+      trend: completionRate >= 85 ? "up" : "down",
+      target: 85,
+      actual: `${completedTasks}/${totalTasks}`
     },
     {
       title: "Active Projects",
-      value: "8",
-      progress: 67,
-      trend: "up",
-      target: 12
+      value: `${activeProjects}`,
+      progress: projectProgress,
+      trend: activeProjects > 0 ? "up" : "stable",
+      target: totalProjects || 1,
+      actual: `${activeProjects} active`
     },
     {
-      title: "Open Maintenance Jobs",
-      value: "12",
-      progress: 75,
-      trend: "down", 
-      target: 16
+      title: "Request Processing",
+      value: `${requestProgress}%`,
+      progress: requestProgress,
+      trend: openRequests < 5 ? "up" : "down",
+      target: 90,
+      actual: `${openRequests} pending`
+    },
+    {
+      title: "Open Incidents",
+      value: `${openIncidents}`,
+      progress: openIncidents > 0 ? 25 : 100,
+      trend: criticalIncidents > 0 ? "down" : openIncidents === 0 ? "up" : "stable",
+      target: 0,
+      actual: `${criticalIncidents} critical`
     }
   ];
 
@@ -71,7 +88,7 @@ const OpsKPISection = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-bold">{kpi.value}</span>
-                  <span className="text-sm text-muted-foreground ml-2">/ {kpi.target}% target</span>
+                  <div className="text-sm text-muted-foreground">{kpi.actual}</div>
                 </div>
               </div>
               <Progress value={kpi.progress} className="h-2" />

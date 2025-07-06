@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,79 +6,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Calendar, Clock, Users, MapPin, AlertCircle, Plus, Filter } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEvents } from "@/contexts/EventsContext";
+import NewEventForm from "@/components/scheduler/NewEventForm";
 
 const SmartScheduler = () => {
   const { currentUser } = useAuth();
+  const { events, getEventsByDate, getEventsThisWeek } = useEvents();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
-
-  const events = [
-    {
-      id: 1,
-      title: "Weekly Finance Review",
-      type: "meeting",
-      start: "09:00",
-      end: "10:30",
-      date: "2025-06-09",
-      attendees: ["Fiona Finance", "Shaheed Van Dawson"],
-      location: "Conference Room A",
-      priority: "high",
-      department: "finance",
-      recurring: "weekly"
-    },
-    {
-      id: 2,
-      title: "HR Policy Training",
-      type: "training",
-      start: "14:00",
-      end: "16:00",
-      date: "2025-06-09",
-      attendees: ["All Staff"],
-      location: "Training Room",
-      priority: "medium",
-      department: "hr",
-      recurring: "monthly"
-    },
-    {
-      id: 3,
-      title: "Client Evaluation - ABC Corp",
-      type: "evaluation",
-      start: "10:00",
-      end: "12:00",
-      date: "2025-06-10",
-      attendees: ["Quality Team"],
-      location: "ABC Corp Site",
-      priority: "high",
-      department: "quality",
-      recurring: null
-    },
-    {
-      id: 4,
-      title: "Marketing Campaign Review",
-      type: "meeting",
-      start: "11:00",
-      end: "12:00",
-      date: "2025-06-10",
-      attendees: ["Marketing Team"],
-      location: "Virtual",
-      priority: "medium",
-      department: "marketing",
-      recurring: "bi-weekly"
-    },
-    {
-      id: 5,
-      title: "System Maintenance Window",
-      type: "maintenance",
-      start: "22:00",
-      end: "02:00",
-      date: "2025-06-11",
-      attendees: ["IT Team"],
-      location: "Data Center",
-      priority: "high",
-      department: "it",
-      recurring: "monthly"
-    }
-  ];
+  const [showNewEventForm, setShowNewEventForm] = useState(false);
+  const [filterDepartment, setFilterDepartment] = useState('');
 
   const upcomingTasks = [
     {
@@ -143,13 +79,12 @@ const SmartScheduler = () => {
     }
   };
 
-  const todayEvents = events.filter(event => event.date === new Date().toISOString().split('T')[0]);
-  const thisWeekEvents = events.filter(event => {
-    const eventDate = new Date(event.date);
-    const today = new Date();
-    const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    return eventDate >= today && eventDate <= weekFromNow;
-  });
+  const todayEvents = getEventsByDate(new Date().toISOString().split('T')[0]);
+  const thisWeekEvents = getEventsThisWeek();
+  
+  const filteredEvents = filterDepartment 
+    ? thisWeekEvents.filter(event => event.department.toLowerCase().includes(filterDepartment.toLowerCase()))
+    : thisWeekEvents;
 
   return (
     <div className="space-y-6">
@@ -161,11 +96,17 @@ const SmartScheduler = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Input
+            placeholder="Filter by department"
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            className="w-48"
+          />
           <Button variant="outline" size="sm">
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShowNewEventForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
             New Event
           </Button>
@@ -218,12 +159,12 @@ const SmartScheduler = () => {
               <CardHeader>
                 <CardTitle>This Week's Schedule</CardTitle>
                 <CardDescription>
-                  {thisWeekEvents.length} events scheduled
+                  {filteredEvents.length} events scheduled {filterDepartment && `(filtered by ${filterDepartment})`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {thisWeekEvents.map((event) => (
+                  {filteredEvents.map((event) => (
                     <div
                       key={event.id}
                       className={`p-3 rounded-lg border-l-4 ${getEventColor(event.type)}`}
@@ -363,7 +304,8 @@ const SmartScheduler = () => {
                     <span className="text-sm">Status:</span>
                     <Badge variant="outline">Not Connected</Badge>
                   </div>
-                  <Button className="w-full">Connect Google Calendar</Button>
+                  <Button className="w-full" disabled>Connect Google Calendar</Button>
+                  <p className="text-xs text-muted-foreground">External integration - not implemented</p>
                 </div>
               </CardContent>
             </Card>
@@ -379,13 +321,19 @@ const SmartScheduler = () => {
                     <span className="text-sm">Status:</span>
                     <Badge variant="outline">Not Connected</Badge>
                   </div>
-                  <Button className="w-full">Connect Outlook</Button>
+                  <Button className="w-full" disabled>Connect Outlook</Button>
+                  <p className="text-xs text-muted-foreground">External integration - not implemented</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
       </Tabs>
+
+      <NewEventForm 
+        open={showNewEventForm} 
+        onOpenChange={setShowNewEventForm} 
+      />
     </div>
   );
 };
