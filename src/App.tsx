@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -58,6 +59,18 @@ import WorkflowAutomation from '@/pages/WorkflowAutomation';
 // Operations Management System
 import OperationsDashboard from '@/pages/OperationsDashboard';
 
+// Missing pages that need to be imported
+import Messages from '@/pages/Messages';
+import AuditScheduling from '@/pages/AuditScheduling';
+import ClientPortalSettings from '@/pages/ClientPortalSettings';
+import UserActivityReport from '@/pages/UserActivityReport';
+import ProjectManagement from '@/pages/ProjectManagement';
+import DatabaseManagement from '@/pages/DatabaseManagement';
+import AuditTrails from '@/pages/AuditTrails';
+import SystemLogs from '@/pages/SystemLogs';
+import Notifications from '@/pages/Notifications';
+import Settings from '@/pages/Settings';
+
 import { AuthProvider } from './contexts/AuthContext';
 import { TaskProvider } from './contexts/TaskContext';
 import { GlobalProvider } from './contexts/GlobalContext';
@@ -110,6 +123,7 @@ function App() {
                             
                             {/* Operations Management System */}
                             <Route path="/operations" element={<OperationsDashboard />} />
+                            <Route path="/operations-dashboard" element={<OperationsDashboard />} />
                             
                             {/* HR Routes */}
                             <Route path="/hr-dashboard" element={<HRDashboardPage />} />
@@ -149,6 +163,21 @@ function App() {
                             <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
                             <Route path="/multi-tenant-management" element={<MultiTenantManagement />} />
                             <Route path="/workflow-automation" element={<WorkflowAutomation />} />
+                            
+                            {/* Previously missing routes - now added */}
+                            <Route path="/messages" element={<Messages />} />
+                            <Route path="/communications" element={<Messages />} />
+                            <Route path="/internal-messages" element={<Messages />} />
+                            <Route path="/audit-scheduling" element={<AuditScheduling />} />
+                            <Route path="/client-portal-settings" element={<ClientPortalSettings />} />
+                            <Route path="/user-activity-report" element={<UserActivityReport />} />
+                            <Route path="/project-management" element={<ProjectManagement />} />
+                            <Route path="/database-management" element={<DatabaseManagement />} />
+                            <Route path="/audit-trails" element={<AuditTrails />} />
+                            <Route path="/system-logs" element={<SystemLogs />} />
+                            <Route path="/notifications" element={<Notifications />} />
+                            <Route path="/settings" element={<Settings />} />
+                            <Route path="/global-settings" element={<Settings />} />
                             
                             {/* Training Document Routes */}
                             <Route path="/training/teams-whatsapp-setup" element={<TeamsWhatsAppSetupGuide />} />
