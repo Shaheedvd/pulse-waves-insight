@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -71,6 +72,9 @@ import SystemLogs from '@/pages/SystemLogs';
 import Notifications from '@/pages/Notifications';
 import Settings from '@/pages/Settings';
 
+// Audit Sheet Designer
+import AuditSheetDesigner from '@/pages/AuditSheetDesigner';
+
 import { AuthProvider } from './contexts/AuthContext';
 import { TaskProvider } from './contexts/TaskContext';
 import { GlobalProvider } from './contexts/GlobalContext';
@@ -135,6 +139,7 @@ function App() {
                             <Route path="/admin-kpi" element={<AdminKpiDashboard />} />
                             <Route path="/evaluations-system" element={<EvaluationsSystem />} />
                             <Route path="/cx-evaluation-builder" element={<CXEvaluationBuilder />} />
+                            <Route path="/audit-sheet-designer" element={<AuditSheetDesigner />} />
                             <Route path="/financial-reports" element={<FinancialReportsSystem />} />
                             
                             {/* Finance Analytics routes - multiple aliases */}
@@ -199,3 +204,4 @@ function App() {
 }
 
 export default App;
+
