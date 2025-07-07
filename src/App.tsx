@@ -374,7 +374,7 @@ const App = () => {
                                     <ProtectedRoute>
                                       <AuthenticatedLayout>
                                         <Notifications />
-                                      AuthenticatedLayout>
+                                      </AuthenticatedLayout>
                                     </ProtectedRoute>
                                   }
                                 />
@@ -434,7 +434,7 @@ const App = () => {
                                     <ProtectedRoute>
                                       <AuthenticatedLayout>
                                         <ReportDesigner />
-                                      AuthenticatedLayout>
+                                      </AuthenticatedLayout>
                                     </ProtectedRoute>
                                   }
                                 />
