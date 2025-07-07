@@ -71,13 +71,15 @@ const ExecutiveDashboard = () => {
   ];
 
   useEffect(() => {
-    addNotification({
-      userId: currentUser?.id || "",
-      title: "Executive Dashboard Accessed",
-      message: "Executive dashboard was accessed for strategic overview",
-      type: "info",
-      module: "executive"
-    });
+    if (currentUser && addNotification) {
+      addNotification({
+        userId: currentUser.id || "",
+        title: "Executive Dashboard Accessed",
+        message: "Executive dashboard was accessed for strategic overview",
+        type: "info",
+        module: "executive"
+      });
+    }
   }, [currentUser, addNotification]);
 
   const getAlertIcon = (type: string) => {
