@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -65,7 +66,7 @@ import FinancialReportsSystem from "./pages/enterprise/FinancialReportsSystem";
 import FinanceAnalytics from "./pages/enterprise/FinanceAnalytics";
 import PayrollManagement from "./pages/enterprise/PayrollManagement";
 import MarketingDashboard from "./pages/enterprise/MarketingDashboard";
-import MarketingActions from "./pages/MarketingActions";
+import MarketingActions from "./pages/enterprise/MarketingActions";
 import SalesDashboard from "./pages/enterprise/SalesDashboard";
 import LegalDashboard from "./pages/enterprise/LegalDashboard";
 import SupportDashboard from "./pages/enterprise/SupportDashboard";
