@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth, Permissions } from "@/contexts/AuthContext";
@@ -19,7 +18,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, hasPermission, currentUser } = useAuth();
   const location = useLocation();
 
+  console.log("ProtectedRoute rendering", { isAuthenticated, currentUser });
+
   if (!isAuthenticated) {
+    console.log("Not authenticated, redirecting to /");
     return <Navigate to="/" replace />;
   }
 
@@ -27,6 +29,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isSuperUser = currentUser?.role === "superuser";
   
   if (isSuperUser) {
+    console.log("Super user detected, allowing access");
     return <>{children}</>;
   }
 
@@ -52,6 +55,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/dashboard" replace />;
   }
 
+  console.log("All checks passed, rendering children");
   return <>{children}</>;
 };
 

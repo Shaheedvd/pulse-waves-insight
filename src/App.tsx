@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -87,6 +86,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  console.log("App component is rendering");
   console.log("AuthenticatedLayout component:", AuthenticatedLayout);
   
   return (
@@ -109,16 +109,6 @@ const App = () => {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/" element={<Index />} />
                                 
-                                {/* Test route to see if AuthenticatedLayout works */}
-                                <Route
-                                  path="/test"
-                                  element={
-                                    <AuthenticatedLayout>
-                                      <div>Test</div>
-                                    </AuthenticatedLayout>
-                                  }
-                                />
-                                
                                 <Route
                                   path="/dashboard"
                                   element={
@@ -129,6 +119,7 @@ const App = () => {
                                     </ProtectedRoute>
                                   }
                                 />
+                                
                                 <Route
                                   path="/executive-dashboard"
                                   element={
