@@ -65,7 +65,7 @@ import FinancialReportsSystem from "./pages/enterprise/FinancialReportsSystem";
 import FinanceAnalytics from "./pages/enterprise/FinanceAnalytics";
 import PayrollManagement from "./pages/enterprise/PayrollManagement";
 import MarketingDashboard from "./pages/enterprise/MarketingDashboard";
-import MarketingActions from "./pages/enterprise/MarketingActions";
+import MarketingActions from "./pages/MarketingActions";
 import SalesDashboard from "./pages/enterprise/SalesDashboard";
 import LegalDashboard from "./pages/enterprise/LegalDashboard";
 import SupportDashboard from "./pages/enterprise/SupportDashboard";
@@ -86,6 +86,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  console.log("AuthenticatedLayout component:", AuthenticatedLayout);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -105,6 +107,17 @@ const App = () => {
                               <Routes>
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/" element={<Index />} />
+                                
+                                {/* Test route to see if AuthenticatedLayout works */}
+                                <Route
+                                  path="/test"
+                                  element={
+                                    <AuthenticatedLayout>
+                                      <div>Test</div>
+                                    </AuthenticatedLayout>
+                                  }
+                                />
+                                
                                 <Route
                                   path="/dashboard"
                                   element={
@@ -361,7 +374,7 @@ const App = () => {
                                     <ProtectedRoute>
                                       <AuthenticatedLayout>
                                         <Notifications />
-                                      </AuthenticatedLayout>
+                                      AuthenticatedLayout>
                                     </ProtectedRoute>
                                   }
                                 />
@@ -421,7 +434,7 @@ const App = () => {
                                     <ProtectedRoute>
                                       <AuthenticatedLayout>
                                         <ReportDesigner />
-                                      </AuthenticatedLayout>
+                                      AuthenticatedLayout>
                                     </ProtectedRoute>
                                   }
                                 />
