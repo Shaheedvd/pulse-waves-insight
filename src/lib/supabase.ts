@@ -112,6 +112,7 @@ export const eventService = {
 
   async update(id: string, updates: any) {
     const { data, error } = await supabase
+      .from('events')
       .update(updates)
       .eq('id', id)
       .select()

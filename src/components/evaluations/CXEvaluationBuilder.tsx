@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -75,6 +74,23 @@ interface CXEvaluationBuilderProps {
   open: boolean;
   onClose: () => void;
 }
+
+// Helper function to map field types to template question types
+const mapFieldTypeToTemplateType = (type: string): "rating" | "yes-no" | "text" | "multiple-choice" => {
+  switch (type) {
+    case "rating":
+      return "rating";
+    case "yes_no":
+      return "yes-no";
+    case "multiple_choice":
+      return "multiple-choice";
+    case "comment":
+    case "number":
+    case "date":
+    default:
+      return "text";
+  }
+};
 
 const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose }) => {
   const { toast } = useToast();
@@ -156,7 +172,7 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
         questions: section.fields.map(field => ({
           id: field.id,
           text: field.label,
-          type: field.type,
+          type: mapFieldTypeToTemplateType(field.type),
           maxScore: field.type === 'rating' ? (field.maxRating || 5) : 1,
           weight: field.weight || 1,
           required: field.required
@@ -212,7 +228,7 @@ const CXEvaluationBuilder: React.FC<CXEvaluationBuilderProps> = ({ open, onClose
         questions: section.fields.map(field => ({
           id: field.id,
           text: field.label,
-          type: field.type,
+          type: mapFieldTypeToTemplateType(field.type),
           maxScore: field.type === 'rating' ? (field.maxRating || 5) : 1,
           weight: field.weight || 1,
           required: field.required
