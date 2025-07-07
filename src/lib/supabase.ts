@@ -4,11 +4,25 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create a mock client if Supabase is not configured
+const createSupabaseClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase not configured - using mock client');
+    return null;
+  }
+  return createClient(supabaseUrl, supabaseAnonKey);
+};
+
+export const supabase = createSupabaseClient();
 
 // Database operations for evaluation templates
 export const evaluationTemplateService = {
   async getAll() {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('evaluation_templates')
       .select('*')
@@ -19,6 +33,11 @@ export const evaluationTemplateService = {
   },
 
   async create(template: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('evaluation_templates')
       .insert([template])
@@ -30,6 +49,11 @@ export const evaluationTemplateService = {
   },
 
   async update(id: string, updates: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('evaluation_templates')
       .update(updates)
@@ -42,6 +66,11 @@ export const evaluationTemplateService = {
   },
 
   async delete(id: string) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return;
+    }
+    
     const { error } = await supabase
       .from('evaluation_templates')
       .delete()
@@ -54,6 +83,11 @@ export const evaluationTemplateService = {
 // Database operations for evaluations
 export const evaluationService = {
   async getAll() {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('evaluations')
       .select('*')
@@ -64,6 +98,11 @@ export const evaluationService = {
   },
 
   async create(evaluation: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('evaluations')
       .insert([evaluation])
@@ -75,6 +114,11 @@ export const evaluationService = {
   },
 
   async update(id: string, updates: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('evaluations')
       .update(updates)
@@ -90,6 +134,11 @@ export const evaluationService = {
 // Database operations for events (Smart Scheduler)
 export const eventService = {
   async getAll() {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('events')
       .select('*')
@@ -100,6 +149,11 @@ export const eventService = {
   },
 
   async create(event: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('events')
       .insert([event])
@@ -111,6 +165,11 @@ export const eventService = {
   },
 
   async update(id: string, updates: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('events')
       .update(updates)
@@ -123,6 +182,11 @@ export const eventService = {
   },
 
   async delete(id: string) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return;
+    }
+    
     const { error } = await supabase
       .from('events')
       .delete()
@@ -135,6 +199,11 @@ export const eventService = {
 // Database operations for operations data
 export const operationsService = {
   async getTasks() {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('operations_tasks')
       .select('*')
@@ -145,6 +214,11 @@ export const operationsService = {
   },
 
   async createTask(task: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('operations_tasks')
       .insert([task])
@@ -156,6 +230,11 @@ export const operationsService = {
   },
 
   async updateTask(id: string, updates: any) {
+    if (!supabase) {
+      console.warn('Supabase not configured');
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('operations_tasks')
       .update(updates)
