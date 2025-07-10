@@ -88,6 +88,7 @@ const queryClient = new QueryClient({
 const App = () => {
   console.log("App component is rendering");
   console.log("AuthenticatedLayout component:", AuthenticatedLayout);
+  console.log("Dashboard component:", Dashboard);
   
   return (
     <QueryClientProvider client={queryClient}>
