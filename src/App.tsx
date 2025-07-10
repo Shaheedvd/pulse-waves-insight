@@ -19,6 +19,7 @@ import { OperationsDataProvider } from '@/contexts/OperationsDataContext';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
+import Dashboard from '@/pages/Dashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +51,7 @@ function App() {
                                     <AuthenticatedLayout>
                                       <Routes>
                                         <Route path="/" element={<Index />} />
+                                        <Route path="/dashboard" element={<Dashboard />} />
                                       </Routes>
                                     </AuthenticatedLayout>
                                   </Suspense>
