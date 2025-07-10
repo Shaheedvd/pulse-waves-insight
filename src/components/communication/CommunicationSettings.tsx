@@ -28,7 +28,7 @@ export const CommunicationSettings = () => {
   const [editingTemplate, setEditingTemplate] = useState<MessageTemplate | null>(null);
   const [templateName, setTemplateName] = useState('');
   const [templateContent, setTemplateContent] = useState('');
-  const [templateCategory, setTemplateCategory] = useState<'reminder' | 'notification' | 'update' | 'greeting'>('notification');
+  const [templateCategory, setTemplateCategory] = useState<'reminder' | 'notification' | 'follow_up' | 'alert'>('notification');
   const [templateEntityType, setTemplateEntityType] = useState('general');
 
   const handleSaveTemplate = () => {
@@ -223,8 +223,8 @@ export const CommunicationSettings = () => {
                         <SelectContent>
                           <SelectItem value="reminder">Reminder</SelectItem>
                           <SelectItem value="notification">Notification</SelectItem>
-                          <SelectItem value="update">Update</SelectItem>
-                          <SelectItem value="greeting">Greeting</SelectItem>
+                          <SelectItem value="follow_up">Follow-up</SelectItem>
+                          <SelectItem value="alert">Alert</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

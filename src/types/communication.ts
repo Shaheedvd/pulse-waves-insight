@@ -5,6 +5,8 @@ export interface CommunicationContact {
   email?: string;
   phone?: string;
   type: 'internal' | 'external';
+  department?: string;
+  role?: string;
 }
 
 export interface TeamsCall {
@@ -12,12 +14,14 @@ export interface TeamsCall {
   contactId: string;
   contactName: string;
   meetingUrl: string;
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  agenda: string;
-  attendees: string[];
   scheduledTime?: string;
   duration?: number;
+  attendees: string[];
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  agenda: string;
   notes?: string;
+  recordingUrl?: string;
+  transcriptUrl?: string;
   entityType: 'lead' | 'client' | 'employee' | 'technician' | 'campaign';
   entityId: string;
   createdBy: string;
@@ -32,18 +36,21 @@ export interface WhatsAppMessage {
   contactPhone: string;
   message: string;
   templateId?: string;
+  templateData?: Record<string, string>;
   status: 'sent' | 'delivered' | 'read' | 'failed';
-  direction: 'inbound' | 'outbound';
+  direction: 'outbound' | 'inbound';
   attachments?: string[];
   entityType: 'lead' | 'client' | 'employee' | 'technician' | 'campaign';
   entityId: string;
   createdBy: string;
   createdAt: string;
+  deliveredAt?: string;
+  readAt?: string;
 }
 
 export interface CommunicationLog {
   id: string;
-  type: 'teams_call' | 'whatsapp_message' | 'email' | 'phone_call';
+  type: 'teams_call' | 'whatsapp_message';
   contactId: string;
   contactName: string;
   summary: string;
@@ -62,7 +69,7 @@ export interface MessageTemplate {
   name: string;
   content: string;
   variables: string[];
-  category: 'reminder' | 'notification' | 'update' | 'greeting';
+  category: 'reminder' | 'notification' | 'follow_up' | 'alert';
   entityType: string;
 }
 
@@ -72,5 +79,5 @@ export interface CommunicationSettings {
   autoLogCalls: boolean;
   autoSendNotifications: boolean;
   allowedDomains: string[];
-  messageTemplates: string[];
+  messageTemplates: MessageTemplate[];
 }

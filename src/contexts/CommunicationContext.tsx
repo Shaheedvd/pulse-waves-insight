@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { useGlobal } from './GlobalContext';
@@ -45,8 +46,6 @@ interface CommunicationContextType {
 const CommunicationContext = createContext<CommunicationContextType | undefined>(undefined);
 
 export const CommunicationProvider = ({ children }: { children: ReactNode }) => {
-  console.log('CommunicationProvider rendering');
-  
   const { currentUser } = useAuth();
   const { addNotification, logAction } = useGlobal();
 
@@ -89,6 +88,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     messageTemplates: []
   });
 
+  // Teams Integration Functions
   const createTeamsCall = async (
     contact: CommunicationContact, 
     entityType: string, 
@@ -154,6 +154,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       } : call
     ));
 
+    // Auto-create communication log
     const call = teamsCalls.find(c => c.id === callId);
     if (call) {
       addCommunicationLog({
@@ -171,6 +172,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     }
   };
 
+  // WhatsApp Integration Functions
   const sendWhatsAppMessage = async (
     contact: CommunicationContact,
     message: string,
@@ -199,6 +201,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     setWhatsappMessages(prev => [...prev, newMessage]);
     logAction('Send WhatsApp Message', 'communication', messageId, 'whatsapp_message', null, newMessage);
 
+    // Auto-create communication log
     addCommunicationLog({
       type: 'whatsapp_message',
       contactId: contact.id,
@@ -260,6 +263,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     logAction('Send WhatsApp Document', 'communication', messageId, 'whatsapp_document');
   };
 
+  // Communication Log Functions
   const addCommunicationLog = (log: Omit<CommunicationLog, 'id' | 'createdAt'>) => {
     const newLog: CommunicationLog = {
       ...log,
@@ -275,6 +279,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     ));
   };
 
+  // Template Functions
   const addMessageTemplate = (template: Omit<MessageTemplate, 'id'>) => {
     const newTemplate: MessageTemplate = {
       ...template,
@@ -293,9 +298,15 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     setSettings(prev => ({ ...prev, ...updates }));
   };
 
+  // Automation Functions
   const triggerAutomatedMessage = (eventType: string, entityType: string, entityId: string, data: any) => {
     if (!settings.autoSendNotifications) return;
+
+    // Find relevant templates and contacts based on event type
     console.log(`Triggering automated message for ${eventType} on ${entityType}:${entityId}`, data);
+    
+    // Implementation would depend on specific business rules
+    // This is a placeholder for the automation logic
   };
 
   const value: CommunicationContextType = {
@@ -329,7 +340,6 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
 export const useCommunication = () => {
   const context = useContext(CommunicationContext);
   if (!context) {
-    console.error('useCommunication must be used within a CommunicationProvider');
     throw new Error('useCommunication must be used within a CommunicationProvider');
   }
   return context;
