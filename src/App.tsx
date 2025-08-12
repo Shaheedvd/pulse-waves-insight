@@ -98,10 +98,10 @@ const App = () => {
             <GlobalProvider>
               <TaskProvider>
                 <FinanceProvider>
-                  <OperationsProvider>
-                    <OperationsDataProvider>
-                      <MessagingProvider>
-                        <CommunicationProvider>
+                  <CommunicationProvider>
+                    <OperationsProvider>
+                      <OperationsDataProvider>
+                        <MessagingProvider>
                           <EnterpriseProvider>
                             <EventsProvider>
                               <Toaster />
@@ -667,10 +667,10 @@ const App = () => {
                               </Routes>
                             </EventsProvider>
                           </EnterpriseProvider>
-                        </CommunicationProvider>
-                      </MessagingProvider>
-                    </OperationsDataProvider>
-                  </OperationsProvider>
+                        </MessagingProvider>
+                      </OperationsDataProvider>
+                    </OperationsProvider>
+                  </CommunicationProvider>
                 </FinanceProvider>
               </TaskProvider>
             </GlobalProvider>
