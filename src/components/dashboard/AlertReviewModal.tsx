@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { 
   AlertTriangle, 
   Clock, 
@@ -18,10 +19,14 @@ import {
   Calendar,
   TrendingUp,
   TrendingDown,
-  Activity
+  Activity,
+  Send,
+  Download,
+  Users
 } from "lucide-react";
 import { useGlobal } from "@/contexts/GlobalContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export interface AlertData {
   id: number;
@@ -52,9 +57,12 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
 }) => {
   const { addNotification, logAction } = useGlobal();
   const { currentUser } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [editMode, setEditMode] = useState(false);
   const [localAlert, setLocalAlert] = useState<AlertData | null>(null);
+  const [meetingDate, setMeetingDate] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useState("");
 
   useEffect(() => {
     setLocalAlert(alert);
@@ -116,38 +124,200 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
     }
   };
 
-  const handleSave = () => {
-    if (!localAlert) return;
+  const handleScheduleMeeting = () => {
+    if (!meetingDate) {
+      toast({
+        title: "Date Required",
+        description: "Please select a date for the review meeting.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    onUpdateAlert(localAlert.id, localAlert);
-    
     addNotification({
       userId: currentUser?.id || "",
-      title: "Alert Updated",
-      message: `Alert "${localAlert.message}" has been updated`,
+      title: "Meeting Scheduled",
+      message: `Review meeting scheduled for ${new Date(meetingDate).toLocaleDateString()} regarding ${alert?.message}`,
       type: "success",
       module: "executive"
     });
 
-    logAction("update", "executive", localAlert.id.toString(), "alert", alert, localAlert);
+    logAction("schedule_meeting", "executive", alert?.id.toString(), "alert_review", null, { meetingDate, alertId: alert?.id });
     
-    setEditMode(false);
-    onClose();
+    toast({
+      title: "Meeting Scheduled",
+      description: `Review meeting scheduled for ${new Date(meetingDate).toLocaleDateString()}`,
+    });
+  };
+
+  const handleAssignMember = () => {
+    if (!selectedAssignee) {
+      toast({
+        title: "Assignee Required",
+        description: "Please select a team member to assign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (localAlert) {
+      const updatedAlert = { ...localAlert, assignedTo: selectedAssignee };
+      setLocalAlert(updatedAlert);
+      onUpdateAlert(localAlert.id, { assignedTo: selectedAssignee });
+
+      addNotification({
+        userId: currentUser?.id || "",
+        title: "Task Assigned",
+        message: `Alert "${localAlert.message}" assigned to ${selectedAssignee}`,
+        type: "success",
+        module: "executive"
+      });
+
+      logAction("assign", "executive", localAlert.id.toString(), "alert", localAlert, updatedAlert);
+      
+      toast({
+        title: "Task Assigned",
+        description: `Alert assigned to ${selectedAssignee}`,
+      });
+    }
+  };
+
+  const handleGenerateReport = () => {
+    if (!alert) return;
+
+    addNotification({
+      userId: currentUser?.id || "",
+      title: "Report Generated",
+      message: `Executive report generated for ${alert.module} alert: ${alert.message}`,
+      type: "success",
+      module: "executive"
+    });
+
+    logAction("generate_report", "executive", alert.id.toString(), "alert_report", null, { alertId: alert.id, module: alert.module });
+    
+    toast({
+      title: "Report Generated",
+      description: `Executive report for ${alert.module} alert has been generated and saved to your reports section.`,
+    });
+
+    // Simulate report download
+    setTimeout(() => {
+      const reportData = {
+        alertId: alert.id,
+        module: alert.module,
+        message: alert.message,
+        generatedAt: new Date().toISOString(),
+        generatedBy: currentUser?.name
+      };
+      
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `executive-alert-report-${alert.id}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1000);
   };
 
   const handleStatusChange = (status: string) => {
     if (!localAlert) return;
-    setLocalAlert({ ...localAlert, status: status as AlertData["status"] });
+    
+    const updatedAlert = { ...localAlert, status: status as AlertData["status"] };
+    setLocalAlert(updatedAlert);
+    
+    toast({
+      title: "Status Updated",
+      description: `Alert status changed to ${status.replace("_", " ")}`,
+    });
   };
 
   const handlePriorityChange = (priority: string) => {
     if (!localAlert) return;
-    setLocalAlert({ ...localAlert, priority: priority as AlertData["priority"] });
+    
+    const updatedAlert = { ...localAlert, priority: priority as AlertData["priority"] };
+    setLocalAlert(updatedAlert);
+    
+    toast({
+      title: "Priority Updated",
+      description: `Alert priority changed to ${priority}`,
+    });
   };
 
   const handleAssignChange = (assignedTo: string) => {
     if (!localAlert) return;
     setLocalAlert({ ...localAlert, assignedTo });
+  };
+
+  const handleResolveAlert = () => {
+    if (!localAlert) return;
+    
+    const updatedAlert = { ...localAlert, status: "resolved" as AlertData["status"] };
+    setLocalAlert(updatedAlert);
+    onUpdateAlert(localAlert.id, { status: "resolved" });
+
+    addNotification({
+      userId: currentUser?.id || "",
+      title: "Alert Resolved",
+      message: `Alert "${localAlert.message}" has been marked as resolved`,
+      type: "success",
+      module: "executive"
+    });
+
+    logAction("resolve", "executive", localAlert.id.toString(), "alert", localAlert, updatedAlert);
+    
+    toast({
+      title: "Alert Resolved",
+      description: "Alert has been successfully resolved",
+    });
+  };
+
+  const handleSetInProgress = () => {
+    if (!localAlert) return;
+    
+    const updatedAlert = { ...localAlert, status: "in_progress" as AlertData["status"] };
+    setLocalAlert(updatedAlert);
+    onUpdateAlert(localAlert.id, { status: "in_progress" });
+
+    addNotification({
+      userId: currentUser?.id || "",
+      title: "Alert In Progress",
+      message: `Alert "${localAlert.message}" is now in progress`,
+      type: "info",
+      module: "executive"
+    });
+
+    logAction("set_in_progress", "executive", localAlert.id.toString(), "alert", localAlert, updatedAlert);
+    
+    toast({
+      title: "Status Updated",
+      description: "Alert is now in progress",
+    });
+  };
+
+  const handleDismissAlert = () => {
+    if (!localAlert) return;
+    
+    const updatedAlert = { ...localAlert, status: "dismissed" as AlertData["status"] };
+    setLocalAlert(updatedAlert);
+    onUpdateAlert(localAlert.id, { status: "dismissed" });
+
+    addNotification({
+      userId: currentUser?.id || "",
+      title: "Alert Dismissed",
+      message: `Alert "${localAlert.message}" has been dismissed`,
+      type: "info",
+      module: "executive"
+    });
+
+    logAction("dismiss", "executive", localAlert.id.toString(), "alert", localAlert, updatedAlert);
+    
+    toast({
+      title: "Alert Dismissed",
+      description: "Alert has been dismissed",
+    });
   };
 
   const relatedData = getRelatedData();
@@ -358,16 +528,56 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button className="w-full" variant="outline">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Schedule Review Meeting
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <User className="h-4 w-4 mr-2" />
-                      Assign Team Member
-                    </Button>
-                    <Button className="w-full" variant="outline">
-                      <FileText className="h-4 w-4 mr-2" />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Meeting Date</label>
+                      <Input
+                        type="date"
+                        value={meetingDate}
+                        onChange={(e) => setMeetingDate(e.target.value)}
+                        className="w-full"
+                      />
+                      <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={handleScheduleMeeting}
+                        disabled={!meetingDate}
+                      >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Schedule Review Meeting
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Assign To</label>
+                      <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select team member" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sarah.johnson@company.com">Sarah Johnson - Project Manager</SelectItem>
+                          <SelectItem value="mike.chen@company.com">Mike Chen - Finance Director</SelectItem>
+                          <SelectItem value="emily.davis@company.com">Emily Davis - Compliance Officer</SelectItem>
+                          <SelectItem value="alex.smith@company.com">Alex Smith - Operations Manager</SelectItem>
+                          <SelectItem value="lisa.wong@company.com">Lisa Wong - HR Manager</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={handleAssignMember}
+                        disabled={!selectedAssignee}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Assign Team Member
+                      </Button>
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={handleGenerateReport}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
                       Generate Report
                     </Button>
                   </CardContent>
@@ -381,7 +591,7 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
                     <Button 
                       className="w-full" 
                       variant="default"
-                      onClick={() => handleStatusChange("resolved")}
+                      onClick={handleResolveAlert}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Mark as Resolved
@@ -389,7 +599,7 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
                     <Button 
                       className="w-full" 
                       variant="secondary"
-                      onClick={() => handleStatusChange("in_progress")}
+                      onClick={handleSetInProgress}
                     >
                       <Activity className="h-4 w-4 mr-2" />
                       Set In Progress
@@ -397,7 +607,7 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
                     <Button 
                       className="w-full" 
                       variant="destructive"
-                      onClick={() => handleStatusChange("dismissed")}
+                      onClick={handleDismissAlert}
                     >
                       <AlertTriangle className="h-4 w-4 mr-2" />
                       Dismiss Alert
@@ -475,12 +685,37 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
             Cancel
           </Button>
           <Button onClick={handleSave}>
+            <Send className="h-4 w-4 mr-2" />
             Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+
+  function handleSave() {
+    if (!localAlert) return;
+
+    onUpdateAlert(localAlert.id, localAlert);
+    
+    addNotification({
+      userId: currentUser?.id || "",
+      title: "Alert Updated",
+      message: `Alert "${localAlert.message}" has been updated`,
+      type: "success",
+      module: "executive"
+    });
+
+    logAction("update", "executive", localAlert.id.toString(), "alert", alert, localAlert);
+    
+    toast({
+      title: "Changes Saved",
+      description: "Alert details have been successfully updated",
+    });
+    
+    setEditMode(false);
+    onClose();
+  }
 };
 
 export default AlertReviewModal;
