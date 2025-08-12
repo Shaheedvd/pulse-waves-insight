@@ -91,8 +91,6 @@ const pulsePointCXData = {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const Dashboard = () => {
-  console.log("Dashboard component rendering");
-  
   const { currentUser } = useAuth();
   const { logAction, addNotification } = useGlobal();
   const { toast } = useToast();

@@ -70,8 +70,7 @@ export type Department =
   | "it" 
   | "customer_support" 
   | "legal" 
-  | "facilities"
-  | "maintenance";
+  | "facilities";
 
 // Define extended user interface
 export interface User {

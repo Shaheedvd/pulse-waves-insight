@@ -92,7 +92,6 @@ const UserManagement = () => {
     customer_support: "Customer Support",
     legal: "Legal",
     facilities: "Facilities",
-    maintenance: "Maintenance",
   };
 
   const getRoleBadgeVariant = (role: UserRole): "default" | "destructive" | "orange" | "purple" | "blue" | "outline" | "secondary" => {
@@ -251,7 +250,6 @@ const UserManagement = () => {
                     <SelectItem value="customer_support">Customer Support</SelectItem>
                     <SelectItem value="legal">Legal</SelectItem>
                     <SelectItem value="facilities">Facilities</SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -400,7 +398,6 @@ const UserManagement = () => {
                     <SelectItem value="customer_support">Customer Support</SelectItem>
                     <SelectItem value="legal">Legal</SelectItem>
                     <SelectItem value="facilities">Facilities</SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -513,7 +510,6 @@ const UserManagement = () => {
                     <SelectItem value="customer_support">Customer Support</SelectItem>
                     <SelectItem value="legal">Legal</SelectItem>
                     <SelectItem value="facilities">Facilities</SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

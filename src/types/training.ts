@@ -1,3 +1,4 @@
+
 import { UserRole } from "@/contexts/AuthContext";
 
 export type TrainingDocumentType = "guide" | "tutorial" | "reference" | "video" | "faq";
@@ -11,9 +12,8 @@ export interface TrainingDocument {
   type: TrainingDocumentType;
   category: string;
   url: string;
-  tags?: string[];
-  accessLevels: string[];
+  accessLevels: TrainingAccessLevel[];
   createdBy: string;
   createdAt: string;
-  isBuiltIn?: boolean;
+  tags?: string[];
 }
