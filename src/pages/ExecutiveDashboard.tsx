@@ -22,11 +22,66 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobal } from "@/contexts/GlobalContext";
+import AlertReviewModal, { AlertData } from "@/components/dashboard/AlertReviewModal";
 
 const ExecutiveDashboard = () => {
   const { currentUser } = useAuth();
   const { addNotification } = useGlobal();
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedAlert, setSelectedAlert] = useState<AlertData | null>(null);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [alerts, setAlerts] = useState<AlertData[]>([
+    { 
+      id: 1, 
+      type: "critical", 
+      message: "2 projects are overdue", 
+      module: "Projects",
+      status: "pending",
+      priority: "high",
+      assignedTo: "sarah.johnson@company.com",
+      dueDate: "2024-01-20",
+      description: "Two critical projects have exceeded their deadlines and require immediate attention. Budget impact and resource reallocation may be necessary.",
+      actionItems: [
+        "Contact project managers for status update",
+        "Assess budget impact and resource requirements",
+        "Develop recovery plan with revised timelines",
+        "Communicate status to stakeholders"
+      ]
+    },
+    { 
+      id: 2, 
+      type: "warning", 
+      message: "Q4 budget review pending", 
+      module: "Finance",
+      status: "pending",
+      priority: "medium",
+      dueDate: "2024-01-25",
+      description: "Quarterly budget review is approaching deadline. Several departments have pending expenditure approvals that need executive review.",
+      actionItems: [
+        "Schedule budget review meeting",
+        "Collect departmental reports",
+        "Review pending expenditure requests",
+        "Approve or reject budget allocations"
+      ]
+    },
+    { 
+      id: 3, 
+      type: "info", 
+      message: "New compliance audit scheduled", 
+      module: "Compliance",
+      status: "pending",
+      priority: "medium",
+      assignedTo: "emily.davis@company.com",
+      dueDate: "2024-02-15",
+      description: "External compliance audit has been scheduled for ISO 27001 surveillance. Preparation activities need to be coordinated across departments.",
+      actionItems: [
+        "Prepare documentation for audit review",
+        "Schedule staff training sessions",
+        "Set up audit workspace and system access",
+        "Coordinate with external auditors"
+      ]
+    }
+  ]);
 
   // Mock executive-level data - in real app, this would come from APIs
   const executiveMetrics = {
@@ -64,11 +119,6 @@ const ExecutiveDashboard = () => {
     ]
   };
 
-  const alerts = [
-    { id: 1, type: "critical", message: "2 projects are overdue", module: "Projects" },
-    { id: 2, type: "warning", message: "Q4 budget review pending", module: "Finance" },
-    { id: 3, type: "info", message: "New compliance audit scheduled", module: "Compliance" }
-  ];
 
   useEffect(() => {
     addNotification({
@@ -79,6 +129,19 @@ const ExecutiveDashboard = () => {
       module: "executive"
     });
   }, [currentUser, addNotification]);
+
+  const handleAlertReview = (alert: AlertData) => {
+    setSelectedAlert(alert);
+    setIsAlertModalOpen(true);
+  };
+
+  const handleUpdateAlert = (alertId: number, updates: Partial<AlertData>) => {
+    setAlerts(prevAlerts => 
+      prevAlerts.map(alert => 
+        alert.id === alertId ? { ...alert, ...updates } : alert
+      )
+    );
+  };
 
   const getAlertIcon = (type: string) => {
     switch (type) {
@@ -184,7 +247,11 @@ const ExecutiveDashboard = () => {
                     <p className="text-sm text-muted-foreground">{alert.module}</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleAlertReview(alert)}
+                >
                   Review
                 </Button>
               </div>
@@ -328,6 +395,13 @@ const ExecutiveDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AlertReviewModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        alert={selectedAlert}
+        onUpdateAlert={handleUpdateAlert}
+      />
     </div>
   );
 };
