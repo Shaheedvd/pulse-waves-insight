@@ -157,12 +157,23 @@ const AuditTrailsViewer = () => {
       ].join(","))
     ].join("\n");
     
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `audit-log-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
+    // Generate PDF instead of CSV
+    const reportData = {
+      title: "Audit Trail Report",
+      period: new Date().toISOString().split('T')[0],
+      results: filteredLogs.map(log => ({
+        timestamp: log.timestamp,
+        user: log.userName,
+        action: log.action,
+        module: log.module,
+        details: log.entityId || '-'
+      })),
+      columns: ["Timestamp", "User", "Action", "Module", "Details"]
+    };
+    
+    import('../../lib/pdf-utils').then(({ generateCustomReportPdf }) => {
+      generateCustomReportPdf(reportData);
+    });
   };
 
   const moduleStats = useMemo(() => {

@@ -197,28 +197,26 @@ const AlertReviewModal: React.FC<AlertReviewModalProps> = ({
     
     toast({
       title: "Report Generated",
-      description: `Executive report for ${alert.module} alert has been generated and saved to your reports section.`,
+      description: `Executive report for ${alert.module} alert has been generated and downloaded as PDF.`,
     });
 
-    // Simulate report download
+    // Generate PDF report
     setTimeout(() => {
       const reportData = {
+        title: `Executive Alert Report - ${alert.module}`,
         alertId: alert.id,
         module: alert.module,
         message: alert.message,
+        priority: alert.priority,
         generatedAt: new Date().toISOString(),
-        generatedBy: currentUser?.name
+        generatedBy: currentUser?.name,
+        details: `Alert in ${alert.module} module requires attention: ${alert.message}`
       };
       
-      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `executive-alert-report-${alert.id}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Use existing PDF utility to generate custom report
+      import('../../lib/pdf-utils').then(({ generateCustomReportPdf }) => {
+        generateCustomReportPdf(reportData);
+      });
     }, 1000);
   };
 

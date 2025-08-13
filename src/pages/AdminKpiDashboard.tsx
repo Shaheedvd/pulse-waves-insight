@@ -51,15 +51,25 @@ const AdminKpiDashboard = () => {
         ["Sample", "Sample KPI", "Sample Description", "≥ 100%", "95%", "95%", "up", new Date().toLocaleDateString()]
       ].map(row => row.join(",")).join("\n");
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `all-admin-kpis-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Generate PDF instead of CSV
+      const reportData = {
+        title: "Complete Admin KPI Report",
+        period: new Date().toISOString().split('T')[0],
+        results: [
+          {
+            category: "Sample",
+            name: "Sample KPI",
+            current: "95%",
+            target: "≥ 100%",
+            status: "At Risk"
+          }
+        ],
+        columns: ["Category", "KPI Name", "Current Value", "Target", "Status"]
+      };
+      
+      import('../lib/pdf-utils').then(({ generateCustomReportPdf }) => {
+        generateCustomReportPdf(reportData);
+      });
 
       toast({
         title: "Export Successful",
