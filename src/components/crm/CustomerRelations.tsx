@@ -9,8 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Mail, Phone, Calendar, MessageSquare, TrendingUp, AlertCircle, Plus, Edit, Eye, FileText, DollarSign } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Users, Mail, Phone, Calendar, MessageSquare, TrendingUp, AlertCircle, Plus, Edit, Eye, FileText, DollarSign, Clock, VideoIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
 
 interface Client {
   id: string;
@@ -47,7 +50,7 @@ interface Interaction {
   id: string;
   clientId: string;
   contactId: string;
-  type: "call" | "email" | "meeting" | "note";
+  type: "call" | "email" | "meeting" | "note" | "chat" | "video-call";
   subject: string;
   description: string;
   date: string;
@@ -55,6 +58,9 @@ interface Interaction {
   outcome: string;
   followUpDate?: string;
   createdBy: string;
+  isVisibleToCustomer: boolean;
+  priority: "low" | "medium" | "high";
+  tags: string[];
 }
 
 interface Opportunity {
@@ -94,6 +100,7 @@ const getStageColor = (stage: string) => {
 
 const CustomerRelations = () => {
   const { currentUser } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("clients");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -101,6 +108,8 @@ const CustomerRelations = () => {
   const [isAddContactOpen, setIsAddContactOpen] = useState(false);
   const [isAddInteractionOpen, setIsAddInteractionOpen] = useState(false);
   const [isAddOpportunityOpen, setIsAddOpportunityOpen] = useState(false);
+  const [isInteractionLogOpen, setIsInteractionLogOpen] = useState(false);
+  const [selectedContactForInteraction, setSelectedContactForInteraction] = useState<Contact | null>(null);
 
   // Mock data
   const [clients, setClients] = useState<Client[]>([
@@ -179,7 +188,25 @@ const CustomerRelations = () => {
       duration: 60,
       outcome: "Positive - interested in upgrade",
       followUpDate: "2024-01-25",
-      createdBy: "user-1"
+      createdBy: "user-1",
+      isVisibleToCustomer: true,
+      priority: "high",
+      tags: ["quarterly-review", "upgrade"]
+    },
+    {
+      id: "INT-002",
+      clientId: "CL-001",
+      contactId: "CT-001",
+      type: "email",
+      subject: "Follow-up on System Review",
+      description: "Sent detailed proposal for system upgrade with pricing breakdown",
+      date: "2024-01-16T09:30:00Z",
+      outcome: "Proposal sent - awaiting response",
+      followUpDate: "2024-01-23",
+      createdBy: "user-1",
+      isVisibleToCustomer: true,
+      priority: "medium",
+      tags: ["proposal", "follow-up"]
     }
   ]);
 
@@ -232,6 +259,55 @@ const CustomerRelations = () => {
     };
     setInteractions([...interactions, newInteraction]);
     setIsAddInteractionOpen(false);
+    setIsInteractionLogOpen(false);
+    toast({
+      title: "Interaction logged",
+      description: `${interactionData.type} interaction has been recorded successfully.`,
+    });
+  };
+
+  const handleCommunication = (type: 'email' | 'call' | 'chat' | 'video-call', contact: Contact) => {
+    const client = clients.find(c => c.id === contact.clientId);
+    if (!client) return;
+
+    switch (type) {
+      case 'email':
+        window.open(`mailto:${contact.email}?subject=Re: ${client.name}`);
+        break;
+      case 'call':
+        window.open(`tel:${contact.phone}`);
+        break;
+      case 'chat':
+        // In a real app, this would open your chat system
+        toast({
+          title: "Opening Chat",
+          description: `Starting chat session with ${contact.name}`,
+        });
+        break;
+      case 'video-call':
+        // In a real app, this would open your video call system
+        toast({
+          title: "Starting Video Call",
+          description: `Initiating video call with ${contact.name}`,
+        });
+        break;
+    }
+
+    // Log the communication attempt
+    const communicationInteraction: Omit<Interaction, 'id' | 'createdBy'> = {
+      clientId: contact.clientId,
+      contactId: contact.id,
+      type: type === 'video-call' ? 'meeting' : type,
+      subject: `${type.charAt(0).toUpperCase() + type.slice(1)} with ${contact.name}`,
+      description: `Initiated ${type} communication with ${contact.name}`,
+      date: new Date().toISOString(),
+      outcome: "Communication initiated",
+      isVisibleToCustomer: false,
+      priority: "medium",
+      tags: [type, "communication"]
+    };
+
+    addInteraction(communicationInteraction);
   };
 
   const addOpportunity = (opportunityData: Omit<Opportunity, 'id'>) => {
@@ -305,10 +381,11 @@ const CustomerRelations = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
           <TabsTrigger value="interactions">Interactions</TabsTrigger>
+          <TabsTrigger value="interaction-log">Interaction Log</TabsTrigger>
           <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
         </TabsList>
 
@@ -383,11 +460,38 @@ const CustomerRelations = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              const primaryContact = contacts.find(c => c.clientId === client.id && c.isPrimary);
+                              if (primaryContact) handleCommunication('email', primaryContact);
+                            }}
+                          >
                             <Mail className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              const primaryContact = contacts.find(c => c.clientId === client.id && c.isPrimary);
+                              if (primaryContact) handleCommunication('call', primaryContact);
+                            }}
+                          >
                             <Phone className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              const primaryContact = contacts.find(c => c.clientId === client.id && c.isPrimary);
+                              if (primaryContact) {
+                                setSelectedContactForInteraction(primaryContact);
+                                setIsInteractionLogOpen(true);
+                              }
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -450,8 +554,36 @@ const CustomerRelations = () => {
                             <Button variant="ghost" size="sm">
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleCommunication('email', contact)}
+                            >
                               <Mail className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleCommunication('call', contact)}
+                            >
+                              <Phone className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleCommunication('chat', contact)}
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedContactForInteraction(contact);
+                                setIsInteractionLogOpen(true);
+                              }}
+                            >
+                              <Plus className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -591,6 +723,182 @@ const CustomerRelations = () => {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="interaction-log" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold">Customer Interaction Log</h3>
+              <p className="text-sm text-muted-foreground">Log and track all customer communications</p>
+            </div>
+            <Dialog open={isInteractionLogOpen} onOpenChange={setIsInteractionLogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Interaction
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Log Customer Interaction</DialogTitle>
+                  <DialogDescription>Record a new customer interaction with communication options</DialogDescription>
+                </DialogHeader>
+                <InteractionLogForm 
+                  onSubmit={addInteraction} 
+                  onCancel={() => setIsInteractionLogOpen(false)} 
+                  clients={clients} 
+                  contacts={contacts}
+                  selectedContact={selectedContactForInteraction}
+                  onCommunicate={handleCommunication}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid gap-4">
+            {/* Quick Communication Panel */}
+            {selectedContactForInteraction && (
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Quick Actions - {selectedContactForInteraction.name}
+                  </CardTitle>
+                  <CardDescription>
+                    {clients.find(c => c.id === selectedContactForInteraction.clientId)?.name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleCommunication('email', selectedContactForInteraction)}
+                      className="flex items-center gap-2"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Send Email
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleCommunication('call', selectedContactForInteraction)}
+                      className="flex items-center gap-2"
+                    >
+                      <Phone className="h-4 w-4" />
+                      Call
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleCommunication('chat', selectedContactForInteraction)}
+                      className="flex items-center gap-2"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Chat
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleCommunication('video-call', selectedContactForInteraction)}
+                      className="flex items-center gap-2"
+                    >
+                      <VideoIcon className="h-4 w-4" />
+                      Video Call
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Interactions Timeline */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Interactions</CardTitle>
+                <CardDescription>All customer interactions sorted by most recent</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {interactions
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((interaction) => {
+                      const client = clients.find(c => c.id === interaction.clientId);
+                      const contact = contacts.find(c => c.id === interaction.contactId);
+                      return (
+                        <div key={interaction.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                              {interaction.type === 'email' && <Mail className="h-4 w-4 text-blue-500" />}
+                              {interaction.type === 'call' && <Phone className="h-4 w-4 text-green-500" />}
+                              {interaction.type === 'meeting' && <Calendar className="h-4 w-4 text-purple-500" />}
+                              {interaction.type === 'chat' && <MessageSquare className="h-4 w-4 text-orange-500" />}
+                              {interaction.type === 'note' && <FileText className="h-4 w-4 text-gray-500" />}
+                              <Badge variant="outline" className="capitalize">
+                                {interaction.type}
+                              </Badge>
+                              <Badge variant={interaction.priority === 'high' ? 'destructive' : interaction.priority === 'medium' ? 'default' : 'secondary'}>
+                                {interaction.priority}
+                              </Badge>
+                              {interaction.isVisibleToCustomer && (
+                                <Badge variant="outline" className="bg-green-50 text-green-700">
+                                  Customer Visible
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {new Date(interaction.date).toLocaleString()}
+                            </div>
+                          </div>
+                          
+                          <h4 className="font-medium mb-1">{interaction.subject}</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {client?.name} - {contact?.name} ({contact?.title})
+                          </p>
+                          <p className="text-sm mb-2">{interaction.description}</p>
+                          
+                          {interaction.outcome && (
+                            <div className="bg-gray-50 rounded p-2 mb-2">
+                              <p className="text-sm"><strong>Outcome:</strong> {interaction.outcome}</p>
+                            </div>
+                          )}
+                          
+                          {interaction.tags.length > 0 && (
+                            <div className="flex gap-1 mb-2">
+                              {interaction.tags.map((tag, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {interaction.followUpDate && (
+                            <div className="flex items-center gap-2 text-sm text-orange-600">
+                              <AlertCircle className="h-3 w-3" />
+                              Follow-up: {new Date(interaction.followUpDate).toLocaleDateString()}
+                            </div>
+                          )}
+                          
+                          <div className="flex justify-end gap-2 mt-2">
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                if (contact) {
+                                  setSelectedContactForInteraction(contact);
+                                }
+                              }}
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -757,7 +1065,10 @@ const InteractionForm = ({ onSubmit, onCancel, clients, contacts }: {
     description: "",
     date: new Date().toISOString(),
     outcome: "",
-    followUpDate: ""
+    followUpDate: "",
+    isVisibleToCustomer: true,
+    priority: "medium" as const,
+    tags: [] as string[]
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -862,6 +1173,216 @@ const OpportunityForm = ({ onSubmit, onCancel, clients }: { onSubmit: (data: Omi
         <Button type="submit">Add Opportunity</Button>
       </div>
     </form>
+  );
+};
+
+const InteractionLogForm = ({ 
+  onSubmit, 
+  onCancel, 
+  clients, 
+  contacts, 
+  selectedContact,
+  onCommunicate 
+}: { 
+  onSubmit: (data: Omit<Interaction, 'id' | 'createdBy'>) => void, 
+  onCancel: () => void, 
+  clients: Client[], 
+  contacts: Contact[],
+  selectedContact?: Contact | null,
+  onCommunicate: (type: 'email' | 'call' | 'chat' | 'video-call', contact: Contact) => void
+}) => {
+  const [formData, setFormData] = useState({
+    clientId: selectedContact?.clientId || "",
+    contactId: selectedContact?.id || "",
+    type: "email" as const,
+    subject: "",
+    description: "",
+    date: new Date().toISOString(),
+    outcome: "",
+    followUpDate: "",
+    isVisibleToCustomer: true,
+    priority: "medium" as const,
+    tags: [] as string[]
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  const filteredContacts = contacts.filter(c => c.clientId === formData.clientId);
+
+  return (
+    <div className="space-y-6">
+      {/* Quick Communication Actions */}
+      {selectedContact && (
+        <div className="bg-blue-50 rounded-lg p-4">
+          <h4 className="font-medium mb-3">Quick Actions - {selectedContact.name}</h4>
+          <div className="flex gap-2">
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={() => onCommunicate('email', selectedContact)}
+            >
+              <Mail className="h-4 w-4 mr-1" />
+              Email
+            </Button>
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={() => onCommunicate('call', selectedContact)}
+            >
+              <Phone className="h-4 w-4 mr-1" />
+              Call
+            </Button>
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={() => onCommunicate('chat', selectedContact)}
+            >
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Chat
+            </Button>
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={() => onCommunicate('video-call', selectedContact)}
+            >
+              <VideoIcon className="h-4 w-4 mr-1" />
+              Video
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="clientId">Client</Label>
+            <Select value={formData.clientId} onValueChange={(value) => setFormData({...formData, clientId: value, contactId: ""})}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select client" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map(client => (
+                  <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="contactId">Contact</Label>
+            <Select value={formData.contactId} onValueChange={(value) => setFormData({...formData, contactId: value})}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select contact" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredContacts.map(contact => (
+                  <SelectItem key={contact.id} value={contact.id}>{contact.name} - {contact.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="type">Interaction Type</Label>
+            <Select value={formData.type} onValueChange={(value: any) => setFormData({...formData, type: value})}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="call">Phone Call</SelectItem>
+                <SelectItem value="chat">Chat/Messaging</SelectItem>
+                <SelectItem value="meeting">Meeting</SelectItem>
+                <SelectItem value="video-call">Video Call</SelectItem>
+                <SelectItem value="note">Note/Update</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="priority">Priority</Label>
+            <Select value={formData.priority} onValueChange={(value: any) => setFormData({...formData, priority: value})}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="subject">Subject</Label>
+          <Input 
+            id="subject" 
+            value={formData.subject} 
+            onChange={(e) => setFormData({...formData, subject: e.target.value})} 
+            placeholder="Brief description of the interaction"
+            required 
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="description">Notes</Label>
+          <Textarea 
+            id="description" 
+            value={formData.description} 
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            placeholder="Detailed notes about the interaction..."
+            className="min-h-[100px]"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="outcome">Outcome</Label>
+            <Input 
+              id="outcome" 
+              value={formData.outcome} 
+              onChange={(e) => setFormData({...formData, outcome: e.target.value})}
+              placeholder="Result of the interaction"
+            />
+          </div>
+          <div>
+            <Label htmlFor="followUpDate">Follow-up Date (Optional)</Label>
+            <Input 
+              id="followUpDate" 
+              type="date"
+              value={formData.followUpDate} 
+              onChange={(e) => setFormData({...formData, followUpDate: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="isVisibleToCustomer"
+            checked={formData.isVisibleToCustomer}
+            onChange={(e) => setFormData({...formData, isVisibleToCustomer: e.target.checked})}
+            className="rounded"
+          />
+          <Label htmlFor="isVisibleToCustomer" className="text-sm">
+            Make this interaction visible to customer
+          </Label>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button type="submit">Log Interaction</Button>
+        </div>
+      </form>
+    </div>
   );
 };
 
