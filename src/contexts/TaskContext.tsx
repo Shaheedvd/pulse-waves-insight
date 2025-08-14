@@ -19,6 +19,18 @@ export interface TaskItem {
   updatedAt: string;
   completedAt?: string;
   tags: string[];
+  activityLog?: TaskActivity[];
+}
+
+export interface TaskActivity {
+  id: string;
+  taskId: string;
+  employeeId: string;
+  employeeName: string;
+  activity: string;
+  notes: string;
+  timestamp: string;
+  type: "comment" | "status_change" | "assignment" | "priority_change";
 }
 
 interface TaskContextType {

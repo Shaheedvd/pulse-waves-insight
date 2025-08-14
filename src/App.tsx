@@ -43,6 +43,7 @@ import AIInsights from '@/pages/AIInsights';
 import SmartScheduler from '@/pages/SmartScheduler';
 import Gamification from '@/pages/Gamification';
 import TaskAutomation from '@/pages/TaskAutomation';
+import TaskManagement from '@/pages/TaskManagement';
 
 // Enterprise modules
 import AdminKpiDashboard from '@/pages/enterprise/AdminKpiDashboard';
@@ -108,7 +109,8 @@ function App() {
                       <Route path="/ai-insights" element={<AIInsights />} />
                       <Route path="/smart-scheduler" element={<SmartScheduler />} />
                       <Route path="/gamification" element={<Gamification />} />
-                      <Route path="/task-automation" element={<TaskAutomation />} />
+                       <Route path="/task-automation" element={<TaskAutomation />} />
+                       <Route path="/task-management" element={<TaskManagement />} />
                       
                       {/* Existing stub interfaces */}
                       <Route path="/recruitment" element={<Recruitment />} />
