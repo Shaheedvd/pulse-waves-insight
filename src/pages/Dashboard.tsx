@@ -31,6 +31,8 @@ import { downloadAsPdf, generateDashboardPdf } from "@/lib/pdf-utils";
 import ViewDetailsModal from "@/components/shared/ViewDetailsModal";
 import { PermissionGate } from "@/components/shared/PermissionGate";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { TaskNotifications } from "@/components/performance/TaskNotifications";
+import { ValidatedButton } from "@/components/shared/ButtonValidator";
 
 // Updated data for Pulse Point CX
 const monthlyScoreData = [
@@ -205,9 +207,14 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold tracking-tight">Pulse Point CX Dashboard</h1>
           <div className="flex items-center gap-2">
             <NotificationCenter />
-            <Button variant="outline" onClick={handleDownload}>
+            <ValidatedButton 
+              variant="outline" 
+              onClick={handleDownload}
+              action="Downloading dashboard report..."
+              confirmMessage="Download the current dashboard report?"
+            >
               <Download className="mr-2 h-4 w-4" /> Download Report
-            </Button>
+            </ValidatedButton>
           </div>
         </div>
 
@@ -462,6 +469,9 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Task Notifications */}
+        <TaskNotifications />
 
         {/* Upcoming Evaluations */}
         <Card>

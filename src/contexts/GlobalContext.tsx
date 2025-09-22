@@ -67,10 +67,10 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       userName: currentUser.name,
       action,
       module,
-      entityId,
-      entityType,
-      oldData,
-      newData,
+      entityId: entityId || undefined,
+      entityType: entityType || undefined,
+      oldData: oldData || undefined,
+      newData: newData || undefined,
       timestamp: new Date().toISOString(),
     };
     
