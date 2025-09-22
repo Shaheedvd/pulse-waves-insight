@@ -67,6 +67,7 @@ import { TaskProvider } from './contexts/TaskContext';
 import { GlobalProvider } from './contexts/GlobalContext';
 import { EnterpriseProvider } from './contexts/EnterpriseContext';
 import { MessagingProvider } from './contexts/MessagingContext';
+import { ModernLayout } from './components/layout/ModernLayout';
 
 function App() {
   return (
@@ -81,7 +82,7 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   
                   <Route element={<ProtectedRoute />}>
-                    <Route element={<AuthenticatedLayout />}>
+                    <Route element={<ModernLayout />}>
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/kpi-dashboard" element={<KpiDashboard />} />
                       <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
