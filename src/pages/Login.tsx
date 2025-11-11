@@ -12,11 +12,13 @@ import { useAuth } from "@/contexts/AuthContext";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { login, isAuthenticated } = useAuth();
+  const { login, signup, isAuthenticated } = useAuth();
 
   // If already logged in, redirect to dashboard
   useEffect(() => {
@@ -25,30 +27,41 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const user = await login(email, password);
-      
-      if (user) {
+      if (isSignUp) {
+        if (!name.trim()) {
+          toast({
+            title: "Name required",
+            description: "Please enter your name",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        await signup(email, password, name);
+        toast({
+          title: "Account created!",
+          description: "You can now sign in with your credentials",
+        });
+        setIsSignUp(false);
+        setName("");
+      } else {
+        await login(email, password);
         toast({
           title: "Login successful",
-          description: `Welcome, ${user.name}`,
+          description: "Welcome back!",
         });
         navigate("/dashboard");
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password",
-          variant: "destructive",
-        });
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: "Login error",
-        description: "An unexpected error occurred",
+        title: isSignUp ? "Signup failed" : "Login failed",
+        description: error.message || "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -66,13 +79,30 @@ const Login = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Employee Login</CardTitle>
+            <CardTitle className="text-xl">
+              {isSignUp ? "Create Account" : "Employee Login"}
+            </CardTitle>
             <CardDescription>
-              Sign in to access the customer experience dashboard
+              {isSignUp 
+                ? "Sign up to access the customer experience dashboard" 
+                : "Sign in to access the customer experience dashboard"}
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              {isSignUp && (
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required={isSignUp}
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -94,6 +124,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    minLength={6}
                   />
                   <button
                     type="button"
@@ -104,24 +135,23 @@ const Login = () => {
                   </button>
                 </div>
               </div>
-              <div className="flex justify-end">
-                <Button variant="link" className="p-0 h-auto" type="button">
-                  Forgot password?
-                </Button>
-              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading 
+                  ? (isSignUp ? "Creating account..." : "Signing in...") 
+                  : (isSignUp ? "Create account" : "Sign in")}
               </Button>
-              <div className="text-sm text-center mt-2 hidden">
-                <p className="text-muted-foreground">
-                  Superuser: shaheed@pulsepointcx.com / Shaheed1!
-                </p>
-                <p className="text-muted-foreground">
-                  Admin: admin@pulsepointcx.com / admin123
-                </p>
-              </div>
+              <Button 
+                type="button" 
+                variant="link" 
+                className="w-full" 
+                onClick={() => setIsSignUp(!isSignUp)}
+              >
+                {isSignUp 
+                  ? "Already have an account? Sign in" 
+                  : "Don't have an account? Sign up"}
+              </Button>
             </CardFooter>
           </form>
         </Card>

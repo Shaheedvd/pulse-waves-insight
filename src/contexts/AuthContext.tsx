@@ -1,14 +1,44 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 
-// Define user roles with their permission levels
+// Define user roles
 export type UserRole = 
-  | "superuser" 
-  | "power_manager" 
-  | "manager" 
-  | "lead_admin" 
+  | "superuser"
   | "admin" 
-  | "restricted_admin" 
-  | "viewer";
+  | "manager" 
+  | "power_manager"
+  | "team_lead"
+  | "member" 
+  | "viewer"
+  | "lead_admin"
+  | "restricted_admin";
+
+// Define department types
+export type Department = 
+  | "operations" 
+  | "finance" 
+  | "hr" 
+  | "marketing" 
+  | "sales" 
+  | "product" 
+  | "it" 
+  | "customer_support" 
+  | "legal" 
+  | "facilities";
+
+// Extended user interface for backward compatibility
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  permissions: Permissions;
+  department?: Department;
+  position?: string;
+  hireDate?: string;
+  requiresMFA?: boolean;
+}
 
 // Define permission types
 export interface Permissions {
@@ -36,7 +66,6 @@ export interface Permissions {
   canEditDepartmentalData: boolean;
   canApproveLeaves: boolean;
   canEscalateTickets: boolean;
-  // New granular permissions for department dashboards
   canManageFinancialDashboard: boolean;
   canGenerateFinancialReports: boolean;
   canManagePayroll: boolean;
@@ -59,175 +88,8 @@ export interface Permissions {
   canManageFacilities: boolean;
 }
 
-// Define department types
-export type Department = 
-  | "operations" 
-  | "finance" 
-  | "hr" 
-  | "marketing" 
-  | "sales" 
-  | "product" 
-  | "it" 
-  | "customer_support" 
-  | "legal" 
-  | "facilities";
-
-// Define extended user interface
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  permissions: Permissions;
-  department?: Department;
-  position?: string;
-  hireDate?: string;
-  requiresMFA?: boolean;
-}
-
-// Role-based permission mapping
+// Role-based permission mapping  
 const rolePermissions: Record<UserRole, Permissions> = {
-  superuser: {
-    canViewReports: true,
-    canCreateReports: true,
-    canEditReports: true,
-    canDeleteReports: true,
-    canManageUsers: true,
-    canManageSystem: true,
-    canEditSettings: true,
-    canViewEvaluations: true,
-    canCreateEvaluations: true,
-    canEditEvaluations: true,
-    canDeleteEvaluations: true,
-    canViewClients: true,
-    canEditClients: true,
-    canCreateAuditSheets: true,
-    canManageFinancials: true,
-    canManageMarketing: true,
-    canApproveRequests: true,
-    canViewAnalytics: true,
-    canAccessBackend: true,
-    canManageDepartment: true,
-    canViewDashboards: true,
-    canEditDepartmentalData: true,
-    canApproveLeaves: true,
-    canEscalateTickets: true,
-    // New granular permissions
-    canManageFinancialDashboard: true,
-    canGenerateFinancialReports: true,
-    canManagePayroll: true,
-    canManageHRDashboard: true,
-    canManageRecruitment: true,
-    canManageTraining: true,
-    canManageMarketingDashboard: true,
-    canManageCreativeAssets: true,
-    canManageSalesDashboard: true,
-    canManageSalesEnablement: true,
-    canManageClientOnboarding: true,
-    canManageCustomerService: true,
-    canManageSystems: true,
-    canManageProductDevelopment: true,
-    canManageUXUI: true,
-    canManageITHelpdesk: true,
-    canManageTechnicalSupport: true,
-    canManageLegalContracts: true,
-    canManageCompliance: true,
-    canManageFacilities: true,
-  },
-  power_manager: {
-    canViewReports: true,
-    canCreateReports: true,
-    canEditReports: true,
-    canDeleteReports: false,
-    canManageUsers: true,
-    canManageSystem: false,
-    canEditSettings: true,
-    canViewEvaluations: true,
-    canCreateEvaluations: true,
-    canEditEvaluations: true,
-    canDeleteEvaluations: false,
-    canViewClients: true,
-    canEditClients: true,
-    canCreateAuditSheets: true,
-    canManageFinancials: true,
-    canManageMarketing: true,
-    canApproveRequests: true,
-    canViewAnalytics: true,
-    canAccessBackend: false,
-    canManageDepartment: true,
-    canViewDashboards: true,
-    canEditDepartmentalData: true,
-    canApproveLeaves: true,
-    canEscalateTickets: true,
-    // New granular permissions - power managers can manage their department
-    canManageFinancialDashboard: true,
-    canGenerateFinancialReports: true,
-    canManagePayroll: true,
-    canManageHRDashboard: true,
-    canManageRecruitment: true,
-    canManageTraining: true,
-    canManageMarketingDashboard: true,
-    canManageCreativeAssets: true,
-    canManageSalesDashboard: true,
-    canManageSalesEnablement: true,
-    canManageClientOnboarding: true,
-    canManageCustomerService: true,
-    canManageSystems: true,
-    canManageProductDevelopment: true,
-    canManageUXUI: true,
-    canManageITHelpdesk: true,
-    canManageTechnicalSupport: true,
-    canManageLegalContracts: true,
-    canManageCompliance: true,
-    canManageFacilities: true,
-  },
-  manager: {
-    canViewReports: true,
-    canCreateReports: true,
-    canEditReports: false,
-    canDeleteReports: false,
-    canManageUsers: false,
-    canManageSystem: false,
-    canEditSettings: false,
-    canViewEvaluations: true,
-    canCreateEvaluations: true,
-    canEditEvaluations: true,
-    canDeleteEvaluations: false,
-    canViewClients: true,
-    canEditClients: false,
-    canCreateAuditSheets: true,
-    canManageFinancials: true,
-    canManageMarketing: true,
-    canApproveRequests: true,
-    canViewAnalytics: true,
-    canAccessBackend: false,
-    canManageDepartment: false,
-    canViewDashboards: true,
-    canEditDepartmentalData: true,
-    canApproveLeaves: true,
-    canEscalateTickets: true,
-    // Managers get department-specific permissions based on their department
-    canManageFinancialDashboard: false,
-    canGenerateFinancialReports: false,
-    canManagePayroll: false,
-    canManageHRDashboard: false,
-    canManageRecruitment: false,
-    canManageTraining: false,
-    canManageMarketingDashboard: false,
-    canManageCreativeAssets: false,
-    canManageSalesDashboard: false,
-    canManageSalesEnablement: false,
-    canManageClientOnboarding: false,
-    canManageCustomerService: false,
-    canManageSystems: false,
-    canManageProductDevelopment: false,
-    canManageUXUI: false,
-    canManageITHelpdesk: false,
-    canManageTechnicalSupport: false,
-    canManageLegalContracts: false,
-    canManageCompliance: false,
-    canManageFacilities: false,
-  },
   lead_admin: {
     canViewReports: true,
     canCreateReports: true,
@@ -253,54 +115,6 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: true,
     canApproveLeaves: true,
     canEscalateTickets: true,
-    // Limited department-specific permissions
-    canManageFinancialDashboard: false,
-    canGenerateFinancialReports: false,
-    canManagePayroll: false,
-    canManageHRDashboard: false,
-    canManageRecruitment: false,
-    canManageTraining: false,
-    canManageMarketingDashboard: false,
-    canManageCreativeAssets: false,
-    canManageSalesDashboard: false,
-    canManageSalesEnablement: false,
-    canManageClientOnboarding: false,
-    canManageCustomerService: false,
-    canManageSystems: false,
-    canManageProductDevelopment: false,
-    canManageUXUI: false,
-    canManageITHelpdesk: false,
-    canManageTechnicalSupport: false,
-    canManageLegalContracts: false,
-    canManageCompliance: false,
-    canManageFacilities: false,
-  },
-  admin: {
-    canViewReports: true,
-    canCreateReports: false,
-    canEditReports: false,
-    canDeleteReports: false,
-    canManageUsers: false,
-    canManageSystem: false,
-    canEditSettings: false,
-    canViewEvaluations: true,
-    canCreateEvaluations: false,
-    canEditEvaluations: false,
-    canDeleteEvaluations: false,
-    canViewClients: true,
-    canEditClients: false,
-    canCreateAuditSheets: false,
-    canManageFinancials: false,
-    canManageMarketing: false,
-    canApproveRequests: false,
-    canViewAnalytics: false,
-    canAccessBackend: false,
-    canManageDepartment: false,
-    canViewDashboards: false,
-    canEditDepartmentalData: true,
-    canApproveLeaves: false,
-    canEscalateTickets: false,
-    // Basic view permissions, no management
     canManageFinancialDashboard: false,
     canGenerateFinancialReports: false,
     canManagePayroll: false,
@@ -347,7 +161,282 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: false,
     canApproveLeaves: false,
     canEscalateTickets: false,
-    // No department-specific management permissions
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
+  },
+  superuser: {
+    canViewReports: true,
+    canCreateReports: true,
+    canEditReports: true,
+    canDeleteReports: true,
+    canManageUsers: true,
+    canManageSystem: true,
+    canEditSettings: true,
+    canViewEvaluations: true,
+    canCreateEvaluations: true,
+    canEditEvaluations: true,
+    canDeleteEvaluations: true,
+    canViewClients: true,
+    canEditClients: true,
+    canCreateAuditSheets: true,
+    canManageFinancials: true,
+    canManageMarketing: true,
+    canApproveRequests: true,
+    canViewAnalytics: true,
+    canAccessBackend: true,
+    canManageDepartment: true,
+    canViewDashboards: true,
+    canEditDepartmentalData: true,
+    canApproveLeaves: true,
+    canEscalateTickets: true,
+    canManageFinancialDashboard: true,
+    canGenerateFinancialReports: true,
+    canManagePayroll: true,
+    canManageHRDashboard: true,
+    canManageRecruitment: true,
+    canManageTraining: true,
+    canManageMarketingDashboard: true,
+    canManageCreativeAssets: true,
+    canManageSalesDashboard: true,
+    canManageSalesEnablement: true,
+    canManageClientOnboarding: true,
+    canManageCustomerService: true,
+    canManageSystems: true,
+    canManageProductDevelopment: true,
+    canManageUXUI: true,
+    canManageITHelpdesk: true,
+    canManageTechnicalSupport: true,
+    canManageLegalContracts: true,
+    canManageCompliance: true,
+    canManageFacilities: true,
+  },
+  power_manager: {
+    canViewReports: true,
+    canCreateReports: true,
+    canEditReports: true,
+    canDeleteReports: false,
+    canManageUsers: true,
+    canManageSystem: false,
+    canEditSettings: true,
+    canViewEvaluations: true,
+    canCreateEvaluations: true,
+    canEditEvaluations: true,
+    canDeleteEvaluations: false,
+    canViewClients: true,
+    canEditClients: true,
+    canCreateAuditSheets: true,
+    canManageFinancials: true,
+    canManageMarketing: true,
+    canApproveRequests: true,
+    canViewAnalytics: true,
+    canAccessBackend: false,
+    canManageDepartment: true,
+    canViewDashboards: true,
+    canEditDepartmentalData: true,
+    canApproveLeaves: true,
+    canEscalateTickets: true,
+    canManageFinancialDashboard: true,
+    canGenerateFinancialReports: true,
+    canManagePayroll: true,
+    canManageHRDashboard: true,
+    canManageRecruitment: true,
+    canManageTraining: true,
+    canManageMarketingDashboard: true,
+    canManageCreativeAssets: true,
+    canManageSalesDashboard: true,
+    canManageSalesEnablement: true,
+    canManageClientOnboarding: true,
+    canManageCustomerService: true,
+    canManageSystems: true,
+    canManageProductDevelopment: true,
+    canManageUXUI: true,
+    canManageITHelpdesk: true,
+    canManageTechnicalSupport: true,
+    canManageLegalContracts: true,
+    canManageCompliance: true,
+    canManageFacilities: true,
+  },
+  manager: {
+    canViewReports: true,
+    canCreateReports: true,
+    canEditReports: false,
+    canDeleteReports: false,
+    canManageUsers: false,
+    canManageSystem: false,
+    canEditSettings: false,
+    canViewEvaluations: true,
+    canCreateEvaluations: true,
+    canEditEvaluations: true,
+    canDeleteEvaluations: false,
+    canViewClients: true,
+    canEditClients: false,
+    canCreateAuditSheets: true,
+    canManageFinancials: true,
+    canManageMarketing: true,
+    canApproveRequests: true,
+    canViewAnalytics: true,
+    canAccessBackend: false,
+    canManageDepartment: false,
+    canViewDashboards: true,
+    canEditDepartmentalData: true,
+    canApproveLeaves: true,
+    canEscalateTickets: true,
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
+  },
+  team_lead: {
+    canViewReports: true,
+    canCreateReports: true,
+    canEditReports: false,
+    canDeleteReports: false,
+    canManageUsers: false,
+    canManageSystem: false,
+    canEditSettings: false,
+    canViewEvaluations: true,
+    canCreateEvaluations: true,
+    canEditEvaluations: false,
+    canDeleteEvaluations: false,
+    canViewClients: true,
+    canEditClients: false,
+    canCreateAuditSheets: false,
+    canManageFinancials: false,
+    canManageMarketing: false,
+    canApproveRequests: false,
+    canViewAnalytics: true,
+    canAccessBackend: false,
+    canManageDepartment: false,
+    canViewDashboards: true,
+    canEditDepartmentalData: true,
+    canApproveLeaves: true,
+    canEscalateTickets: true,
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
+  },
+  admin: {
+    canViewReports: true,
+    canCreateReports: false,
+    canEditReports: false,
+    canDeleteReports: false,
+    canManageUsers: false,
+    canManageSystem: false,
+    canEditSettings: false,
+    canViewEvaluations: true,
+    canCreateEvaluations: false,
+    canEditEvaluations: false,
+    canDeleteEvaluations: false,
+    canViewClients: true,
+    canEditClients: false,
+    canCreateAuditSheets: false,
+    canManageFinancials: false,
+    canManageMarketing: false,
+    canApproveRequests: false,
+    canViewAnalytics: false,
+    canAccessBackend: false,
+    canManageDepartment: false,
+    canViewDashboards: false,
+    canEditDepartmentalData: true,
+    canApproveLeaves: false,
+    canEscalateTickets: false,
+    canManageFinancialDashboard: false,
+    canGenerateFinancialReports: false,
+    canManagePayroll: false,
+    canManageHRDashboard: false,
+    canManageRecruitment: false,
+    canManageTraining: false,
+    canManageMarketingDashboard: false,
+    canManageCreativeAssets: false,
+    canManageSalesDashboard: false,
+    canManageSalesEnablement: false,
+    canManageClientOnboarding: false,
+    canManageCustomerService: false,
+    canManageSystems: false,
+    canManageProductDevelopment: false,
+    canManageUXUI: false,
+    canManageITHelpdesk: false,
+    canManageTechnicalSupport: false,
+    canManageLegalContracts: false,
+    canManageCompliance: false,
+    canManageFacilities: false,
+  },
+  member: {
+    canViewReports: true,
+    canCreateReports: false,
+    canEditReports: false,
+    canDeleteReports: false,
+    canManageUsers: false,
+    canManageSystem: false,
+    canEditSettings: false,
+    canViewEvaluations: true,
+    canCreateEvaluations: false,
+    canEditEvaluations: false,
+    canDeleteEvaluations: false,
+    canViewClients: true,
+    canEditClients: false,
+    canCreateAuditSheets: false,
+    canManageFinancials: false,
+    canManageMarketing: false,
+    canApproveRequests: false,
+    canViewAnalytics: false,
+    canAccessBackend: false,
+    canManageDepartment: false,
+    canViewDashboards: false,
+    canEditDepartmentalData: false,
+    canApproveLeaves: false,
+    canEscalateTickets: false,
     canManageFinancialDashboard: false,
     canGenerateFinancialReports: false,
     canManagePayroll: false,
@@ -394,7 +483,6 @@ const rolePermissions: Record<UserRole, Permissions> = {
     canEditDepartmentalData: false,
     canApproveLeaves: false,
     canEscalateTickets: false,
-    // No department-specific management permissions
     canManageFinancialDashboard: false,
     canGenerateFinancialReports: false,
     canManagePayroll: false,
@@ -418,495 +506,206 @@ const rolePermissions: Record<UserRole, Permissions> = {
   },
 };
 
-// Initial users with expanded roles
-const initialUsers: User[] = [
-  {
-    id: "1",
-    email: "shaheed@pulsepointcx.com",
-    name: "Shaheed Van Dawson",
-    role: "superuser",
-    permissions: rolePermissions.superuser,
-    department: "operations",
-    position: "CTO",
-    hireDate: "2020-01-01",
-    requiresMFA: true
-  },
-  {
-    id: "2",
-    email: "admin@pulsepointcx.com",
-    name: "Admin User",
-    role: "admin",
-    permissions: rolePermissions.admin,
-    department: "operations",
-    position: "Admin Staff",
-    hireDate: "2020-02-15"
-  },
-  {
-    id: "3",
-    email: "manager@pulsepointcx.com",
-    name: "Sarah Manager",
-    role: "manager",
-    permissions: rolePermissions.manager,
-    department: "marketing",
-    position: "Marketing Manager",
-    hireDate: "2020-03-10",
-    requiresMFA: true
-  },
-  {
-    id: "4",
-    email: "evaluator@pulsepointcx.com",
-    name: "Eric Evaluator",
-    role: "lead_admin",
-    permissions: rolePermissions.lead_admin,
-    department: "customer_support",
-    position: "Support Analyst",
-    hireDate: "2021-01-05"
-  },
-  {
-    id: "5",
-    email: "viewer@pulsepointcx.com",
-    name: "Victor Viewer",
-    role: "viewer",
-    permissions: rolePermissions.viewer,
-    department: "legal",
-    position: "External Auditor",
-    hireDate: "2022-05-20"
-  },
-  // New employees based on defined roles
-  {
-    id: "6",
-    email: "operations@pulsepointcx.com",
-    name: "Oliver Operations",
-    role: "power_manager",
-    permissions: rolePermissions.power_manager,
-    department: "operations",
-    position: "Operations Manager",
-    hireDate: "2020-06-15",
-    requiresMFA: true
-  },
-  {
-    id: "7",
-    email: "finance@pulsepointcx.com",
-    name: "Fiona Finance",
-    role: "power_manager",
-    permissions: rolePermissions.power_manager,
-    department: "finance",
-    position: "Finance Manager",
-    hireDate: "2020-07-01",
-    requiresMFA: true
-  },
-  {
-    id: "8",
-    email: "accountant@pulsepointcx.com",
-    name: "Andrew Accountant",
-    role: "lead_admin",
-    permissions: rolePermissions.lead_admin,
-    department: "finance",
-    position: "Senior Accountant",
-    hireDate: "2021-03-15"
-  },
-  {
-    id: "9",
-    email: "payroll@pulsepointcx.com",
-    name: "Paula Payroll",
-    role: "admin",
-    permissions: rolePermissions.admin,
-    department: "finance",
-    position: "Payroll Officer",
-    hireDate: "2021-05-10"
-  },
-  {
-    id: "10",
-    email: "hr@pulsepointcx.com",
-    name: "Helen HR",
-    role: "manager",
-    permissions: rolePermissions.manager,
-    department: "hr",
-    position: "HR Manager",
-    hireDate: "2020-09-01",
-    requiresMFA: true
-  },
-  {
-    id: "11",
-    email: "recruit@pulsepointcx.com",
-    name: "Rachel Recruiter",
-    role: "lead_admin",
-    permissions: rolePermissions.lead_admin,
-    department: "hr",
-    position: "Talent Acquisition",
-    hireDate: "2021-02-15"
-  },
-  {
-    id: "12",
-    email: "salesmanager@pulsepointcx.com",
-    name: "Samuel Sales",
-    role: "manager",
-    permissions: rolePermissions.manager,
-    department: "sales",
-    position: "Sales Manager",
-    hireDate: "2020-11-01",
-    requiresMFA: true
-  },
-  {
-    id: "13",
-    email: "salesrep@pulsepointcx.com",
-    name: "Sally SalesRep",
-    role: "admin",
-    permissions: rolePermissions.admin,
-    department: "sales",
-    position: "Sales Executive",
-    hireDate: "2021-07-15"
-  },
-  {
-    id: "14",
-    email: "crm@pulsepointcx.com",
-    name: "Carlos CRM",
-    role: "lead_admin",
-    permissions: rolePermissions.lead_admin,
-    department: "sales",
-    position: "Customer Relationship Manager",
-    hireDate: "2021-04-01"
-  },
-  {
-    id: "15",
-    email: "teamlead@pulsepointcx.com",
-    name: "Teresa TeamLead",
-    role: "manager",
-    permissions: rolePermissions.manager,
-    department: "product",
-    position: "Team Supervisor",
-    hireDate: "2020-10-15",
-    requiresMFA: true
-  },
-  {
-    id: "16",
-    email: "qa@pulsepointcx.com",
-    name: "Quinn QA",
-    role: "restricted_admin",
-    permissions: rolePermissions.restricted_admin,
-    department: "product",
-    position: "Quality Assurance Staff",
-    hireDate: "2021-08-01"
-  },
-  {
-    id: "17",
-    email: "itmanager@pulsepointcx.com",
-    name: "Ian IT",
-    role: "power_manager",
-    permissions: rolePermissions.power_manager,
-    department: "it",
-    position: "IT Manager",
-    hireDate: "2020-05-15",
-    requiresMFA: true
-  },
-  {
-    id: "18",
-    email: "sysadmin@pulsepointcx.com",
-    name: "Samantha SysAdmin",
-    role: "superuser",
-    permissions: rolePermissions.superuser,
-    department: "it",
-    position: "System Administrator",
-    hireDate: "2020-06-01",
-    requiresMFA: true
-  },
-  {
-    id: "19",
-    email: "developer@pulsepointcx.com",
-    name: "David Developer",
-    role: "lead_admin",
-    permissions: rolePermissions.lead_admin,
-    department: "it",
-    position: "Software Engineer",
-    hireDate: "2021-01-15"
-  },
-  {
-    id: "20",
-    email: "support@pulsepointcx.com",
-    name: "Steve Support",
-    role: "restricted_admin",
-    permissions: rolePermissions.restricted_admin,
-    department: "it",
-    position: "Technical Support",
-    hireDate: "2021-09-01"
-  },
-  {
-    id: "21",
-    email: "customerservice@pulsepointcx.com",
-    name: "Catherine CustomerService",
-    role: "manager",
-    permissions: rolePermissions.manager,
-    department: "customer_support",
-    position: "Customer Service Manager",
-    hireDate: "2020-08-15",
-    requiresMFA: true
-  },
-  {
-    id: "22",
-    email: "helpdesk@pulsepointcx.com",
-    name: "Harry Helpdesk",
-    role: "admin",
-    permissions: rolePermissions.admin,
-    department: "customer_support",
-    position: "Helpdesk Agent",
-    hireDate: "2021-10-01"
-  },
-  {
-    id: "23",
-    email: "legal@pulsepointcx.com",
-    name: "Laura Legal",
-    role: "manager",
-    permissions: rolePermissions.manager,
-    department: "legal",
-    position: "Legal Counsel",
-    hireDate: "2020-12-01",
-    requiresMFA: true
-  },
-  {
-    id: "24",
-    email: "compliance@pulsepointcx.com",
-    name: "Colin Compliance",
-    role: "power_manager",
-    permissions: rolePermissions.power_manager,
-    department: "legal",
-    position: "Compliance Officer",
-    hireDate: "2021-01-10",
-    requiresMFA: true
-  },
-  {
-    id: "25",
-    email: "facilities@pulsepointcx.com",
-    name: "Frank Facilities",
-    role: "restricted_admin",
-    permissions: rolePermissions.restricted_admin,
-    department: "facilities",
-    position: "Facilities Staff",
-    hireDate: "2021-11-01"
-  }
-];
-
-// Create a password map (in a real app, these would be hashed)
-const passwordMap: Record<string, string> = {
-  "shaheed@pulsepointcx.com": "Shaheed1!",
-  "admin@pulsepointcx.com": "admin123",
-  "manager@pulsepointcx.com": "manager123",
-  "evaluator@pulsepointcx.com": "evaluator123",
-  "viewer@pulsepointcx.com": "viewer123",
-  // New employee passwords
-  "operations@pulsepointcx.com": "operations123",
-  "finance@pulsepointcx.com": "finance123",
-  "accountant@pulsepointcx.com": "accountant123",
-  "payroll@pulsepointcx.com": "payroll123",
-  "hr@pulsepointcx.com": "hr123",
-  "recruit@pulsepointcx.com": "recruit123",
-  "salesmanager@pulsepointcx.com": "sales123",
-  "salesrep@pulsepointcx.com": "salesrep123",
-  "crm@pulsepointcx.com": "crm123",
-  "teamlead@pulsepointcx.com": "teamlead123",
-  "qa@pulsepointcx.com": "qa123",
-  "itmanager@pulsepointcx.com": "it123",
-  "sysadmin@pulsepointcx.com": "sysadmin123",
-  "developer@pulsepointcx.com": "developer123",
-  "support@pulsepointcx.com": "support123",
-  "customerservice@pulsepointcx.com": "customer123",
-  "helpdesk@pulsepointcx.com": "helpdesk123",
-  "legal@pulsepointcx.com": "legal123",
-  "compliance@pulsepointcx.com": "compliance123",
-  "facilities@pulsepointcx.com": "facilities123"
+type UserProfile = {
+  id: string;
+  email: string;
+  name: string;
+  department?: string;
+  position?: string;
+  avatar_url?: string;
 };
 
-interface AuthContextType {
-  currentUser: User | null;
-  users: User[];
-  login: (email: string, password: string) => Promise<User | null>;
-  logout: () => void;
-  addUser: (user: Omit<User, "id" | "permissions">) => void;
-  updateUser: (id: string, updates: Partial<Omit<User, "id" | "permissions">>) => void;
-  deleteUser: (id: string) => void;
-  hasPermission: (permission: keyof Permissions) => boolean;
+type AuthContextType = {
+  user: UserProfile | null;
+  currentUser: User | null; // Backward compatibility
+  session: Session | null;
+  userRole: UserRole | null;
   isAuthenticated: boolean;
-}
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
+  hasPermission: (permission: keyof Permissions) => boolean;
+  isRole: (role: UserRole | UserRole[]) => boolean;
+  users: User[]; // Backward compatibility
+  addUser: (user: Omit<User, "id">) => Promise<User>; // Backward compatibility
+  updateUser: (id: string, updates: Partial<User>) => Promise<void>; // Backward compatibility
+  deleteUser: (id: string) => Promise<void>; // Backward compatibility
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // Check for existing session on app load
-  useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setCurrentUser(user);
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const login = async (email: string, password: string): Promise<User | null> => {
-    // In a real app, this would be a server request with proper authentication
-    const correctPassword = passwordMap[email];
-    
-    if (correctPassword && correctPassword === password) {
-      const user = users.find((u) => u.email === email);
-      if (user) {
-        // Check if user requires MFA (would be implemented with actual MFA in production)
-        if (user.requiresMFA) {
-          console.log("This user requires MFA authentication");
-          // In a real app, we would trigger MFA here
-          // For now, we'll just log it and proceed
-        }
-        
-        setCurrentUser(user);
-        setIsAuthenticated(true);
-        localStorage.setItem("currentUser", JSON.stringify(user));
-        return user;
-      }
-    }
-    return null;
-  };
-
-  const logout = () => {
-    setCurrentUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem("currentUser");
-  };
-
-  const addUser = (newUser: Omit<User, "id" | "permissions">) => {
-    if (!currentUser?.permissions.canManageUsers) return;
-    
-    const user: User = {
-      ...newUser,
-      id: Date.now().toString(),
-      permissions: rolePermissions[newUser.role],
-    };
-    
-    setUsers((prevUsers) => [...prevUsers, user]);
-    // In a real app, we would also add the user to the passwordMap with a hashed password
-  };
-
-  const updateUser = (id: string, updates: Partial<Omit<User, "id" | "permissions">>) => {
-    if (!currentUser?.permissions.canManageUsers) return;
-    
-    setUsers((prevUsers) =>
-      prevUsers.map((user) => {
-        if (user.id === id) {
-          const updatedUser = {
-            ...user,
-            ...updates,
-          };
-          
-          // Update permissions if role changed
-          if (updates.role && updates.role !== user.role) {
-            updatedUser.permissions = rolePermissions[updates.role];
-          }
-          
-          // Update department-specific permissions based on department and role
-          if ((updates.department && updates.department !== user.department) || 
-              (updates.role && updates.role !== user.role)) {
-            
-            const department = updates.department || user.department;
-            const role = updates.role || user.role;
-            
-            // Only managers and above get department-specific permissions
-            if (role === "manager" || role === "power_manager" || role === "superuser") {
-              const updatedPermissions = { ...updatedUser.permissions };
-              
-              // Reset all department-specific permissions first
-              Object.keys(updatedPermissions).forEach(key => {
-                if (key.startsWith('canManage') && key !== 'canManageUsers' && key !== 'canManageSystem' && 
-                    key !== 'canManageDepartment') {
-                  updatedPermissions[key as keyof Permissions] = false;
-                }
-              });
-              
-              // Grant permissions based on department
-              if (department) {
-                switch (department) {
-                  case "finance":
-                    updatedPermissions.canManageFinancialDashboard = true;
-                    updatedPermissions.canGenerateFinancialReports = true;
-                    updatedPermissions.canManagePayroll = role === "power_manager" || role === "superuser";
-                    break;
-                  case "hr":
-                    updatedPermissions.canManageHRDashboard = true;
-                    updatedPermissions.canManageRecruitment = true;
-                    updatedPermissions.canManageTraining = true;
-                    break;
-                  case "marketing":
-                    updatedPermissions.canManageMarketingDashboard = true;
-                    updatedPermissions.canManageCreativeAssets = true;
-                    break;
-                  case "sales":
-                    updatedPermissions.canManageSalesDashboard = true;
-                    updatedPermissions.canManageSalesEnablement = true;
-                    break;
-                  case "customer_support":
-                    updatedPermissions.canManageCustomerService = true;
-                    updatedPermissions.canManageClientOnboarding = true;
-                    break;
-                  case "it":
-                    updatedPermissions.canManageSystems = true;
-                    updatedPermissions.canManageITHelpdesk = true;
-                    break;
-                  case "product":
-                    updatedPermissions.canManageProductDevelopment = true;
-                    updatedPermissions.canManageUXUI = true;
-                    break;
-                  case "legal":
-                    updatedPermissions.canManageLegalContracts = true;
-                    break;
-                  case "facilities":
-                    updatedPermissions.canManageFacilities = true;
-                    break;
-                }
-              }
-              
-              updatedUser.permissions = updatedPermissions;
-            }
-          }
-          
-          return updatedUser;
-        }
-        return user;
-      })
-    );
-  };
-
-  const deleteUser = (id: string) => {
-    if (!currentUser?.permissions.canManageUsers) return;
-    
-    // Prevent deleting yourself
-    if (currentUser?.id === id) return;
-    
-    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
-  };
-
-  const hasPermission = (permission: keyof Permissions): boolean => {
-    if (!currentUser) return false;
-    return currentUser.permissions[permission];
-  };
-
-  const value = {
-    currentUser,
-    users,
-    login,
-    logout,
-    addUser,
-    updateUser,
-    deleteUser,
-    hasPermission,
-    isAuthenticated,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          // Defer database calls to avoid deadlock
+          setTimeout(() => {
+            // Fetch user profile and role
+            supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', currentSession.user.id)
+              .single()
+              .then(({ data: profile }) => {
+                if (profile) {
+                  setUser(profile);
+                }
+              });
+            
+            // Fetch user role using the security definer function
+            supabase
+              .rpc('get_user_role', { _user_id: currentSession.user.id })
+              .then(({ data: roleData }) => {
+                if (roleData) {
+                  setUserRole(roleData as UserRole);
+                  
+                  // Create backward-compatible currentUser object
+                  supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', currentSession.user.id)
+                    .single()
+                    .then(({ data: profile }) => {
+                      if (profile) {
+                        setCurrentUser({
+                          id: profile.id,
+                          email: profile.email,
+                          name: profile.name,
+                          role: roleData as UserRole,
+                          permissions: rolePermissions[roleData as UserRole],
+                          department: profile.department as Department | undefined,
+                          position: profile.position || undefined,
+                        });
+                      }
+                    });
+                }
+              });
+          }, 0);
+        } else {
+          setUser(null);
+          setUserRole(null);
+          setCurrentUser(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      if (currentSession?.user) {
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentSession.user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile) setUser(profile);
+          });
+        
+        supabase
+          .rpc('get_user_role', { _user_id: currentSession.user.id })
+          .then(({ data: roleData }) => {
+            if (roleData) setUserRole(roleData as UserRole);
+          });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    
+    if (error) throw error;
+  };
+
+  const signup = async (email: string, password: string, name: string): Promise<void> => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+    
+    if (error) throw error;
+  };
+
+  const logout = async (): Promise<void> => {
+    await supabase.auth.signOut();
+  };
+
+  const hasPermission = (permission: keyof Permissions): boolean => {
+    if (!userRole) return false;
+    const permissions = rolePermissions[userRole];
+    return permissions[permission] || false;
+  };
+
+  const isRole = (role: UserRole | UserRole[]): boolean => {
+    if (!userRole) return false;
+    if (Array.isArray(role)) {
+      return role.includes(userRole);
+    }
+    return userRole === role;
+  };
+
+  // Backward compatibility stubs (no-op functions)
+  const addUser = async (userData: Omit<User, "id">): Promise<User> => {
+    console.warn("addUser is deprecated. User management should be done through the backend.");
+    return { ...userData, id: "0" };
+  };
+
+  const updateUser = async (id: string, updates: Partial<User>): Promise<void> => {
+    console.warn("updateUser is deprecated. User management should be done through the backend.");
+  };
+
+  const deleteUser = async (id: string): Promise<void> => {
+    console.warn("deleteUser is deprecated. User management should be done through the backend.");
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        currentUser, // Backward compatibility
+        session,
+        userRole,
+        isAuthenticated: !!session && !!user,
+        login,
+        signup,
+        logout,
+        hasPermission,
+        isRole,
+        users: [], // Backward compatibility - empty array
+        addUser,
+        updateUser,
+        deleteUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

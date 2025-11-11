@@ -75,8 +75,10 @@ const UserManagement = () => {
     superuser: "Super User",
     power_manager: "Power Manager",
     manager: "Manager",
+    team_lead: "Team Lead",
     lead_admin: "Lead Admin",
     admin: "Admin",
+    member: "Member",
     restricted_admin: "Restricted Admin",
     viewer: "Viewer",
   };
@@ -99,8 +101,10 @@ const UserManagement = () => {
       case "superuser": return "destructive";
       case "power_manager": return "orange";
       case "manager": return "purple";
+      case "team_lead": return "blue";
       case "lead_admin": return "blue";
       case "admin": return "default";
+      case "member": return "secondary";
       case "restricted_admin": return "outline";
       case "viewer": return "secondary";
       default: return "secondary";
@@ -117,7 +121,13 @@ const UserManagement = () => {
       return;
     }
 
-    addUser(newUser);
+    // Note: User management should now be done through backend
+    toast({
+      title: "User Management Unavailable",
+      description: "User management must be done through the backend administration panel.",
+      variant: "destructive",
+    });
+    return;
     toast({
       title: "User Added",
       description: `${newUser.name} has been added as a ${roleLabels[newUser.role]} in ${departmentLabels[newUser.department]}`,

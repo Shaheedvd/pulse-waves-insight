@@ -75,7 +75,7 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
     
     setAuditLogs(prev => [logEntry, ...prev].slice(0, 1000)); // Keep last 1000 logs
-    console.log("Audit Log:", logEntry);
+    // Audit log created (removed console.log for security)
   };
 
   const hasPermission = (module: string, action: string): boolean => {
