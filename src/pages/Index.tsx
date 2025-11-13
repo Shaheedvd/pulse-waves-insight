@@ -17,8 +17,12 @@ const Index = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleLoginClick = () => {
+  const handleEmployeeLogin = () => {
     navigate("/login");
+  };
+
+  const handleCustomerLogin = () => {
+    navigate("/login"); // Will add customer portal routing
   };
 
   const features = [
@@ -57,9 +61,14 @@ const Index = () => {
             <Activity size={32} className="text-blue-600" />
             <h1 className="text-2xl font-bold text-gray-900">Pulse Point CX</h1>
           </div>
-          <Button onClick={handleLoginClick} variant="outline">
-            Employee Login
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleCustomerLogin} variant="outline">
+              Customer Portal
+            </Button>
+            <Button onClick={handleEmployeeLogin}>
+              Employee Login
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -76,12 +85,12 @@ const Index = () => {
               Drive exceptional customer experiences with data-driven insights.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" onClick={handleLoginClick} className="text-lg px-8 py-3">
-                Get Started
+              <Button size="lg" onClick={handleCustomerLogin} className="text-lg px-8 py-3">
+                Customer Portal
                 <ArrowRight className="ml-2" size={20} />
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-3">
-                Learn More
+              <Button variant="outline" size="lg" onClick={handleEmployeeLogin} className="text-lg px-8 py-3">
+                Employee Access
               </Button>
             </div>
           </div>
@@ -92,20 +101,44 @@ const Index = () => {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Quick Access</CardTitle>
                 <CardDescription>
-                  Sign in to your Pulse Point CX dashboard
+                  Sign in to your Pulse Point CX account
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <Button 
-                  onClick={handleLoginClick}
+                  onClick={handleCustomerLogin}
+                  className="w-full text-lg py-6"
+                  size="lg"
+                >
+                  <Users className="mr-2" size={20} />
+                  Customer Portal
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  View your evaluations, reports, and insights
+                </p>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or
+                    </span>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleEmployeeLogin}
+                  variant="outline"
                   className="w-full text-lg py-6"
                   size="lg"
                 >
                   <Activity className="mr-2" size={20} />
                   Employee Login
                 </Button>
-                <p className="text-sm text-center text-gray-500">
-                  Access evaluations, reports, and analytics
+                <p className="text-xs text-center text-muted-foreground">
+                  Access internal tools, analytics, and admin
                 </p>
               </CardContent>
             </Card>
@@ -166,14 +199,24 @@ const Index = () => {
                 Join teams across industries who trust Pulse Point CX to deliver 
                 outstanding customer experiences.
               </p>
-              <Button 
-                onClick={handleLoginClick}
-                variant="secondary" 
-                size="lg"
-                className="w-full"
-              >
-                Access Your Dashboard
-              </Button>
+              <div className="space-y-3">
+                <Button 
+                  onClick={handleCustomerLogin}
+                  variant="secondary" 
+                  size="lg"
+                  className="w-full"
+                >
+                  Customer Portal
+                </Button>
+                <Button 
+                  onClick={handleEmployeeLogin}
+                  variant="outline" 
+                  size="lg"
+                  className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30"
+                >
+                  Employee Access
+                </Button>
+              </div>
             </div>
           </div>
         </div>
