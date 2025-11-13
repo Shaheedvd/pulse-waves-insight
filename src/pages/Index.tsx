@@ -22,7 +22,7 @@ const Index = () => {
   };
 
   const handleCustomerLogin = () => {
-    navigate("/login"); // Will add customer portal routing
+    navigate("/customer-login");
   };
 
   const features = [

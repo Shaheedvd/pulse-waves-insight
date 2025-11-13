@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
+import CustomerLogin from '@/pages/CustomerLogin';
+import CustomerDashboard from '@/pages/CustomerDashboard';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
@@ -80,6 +82,11 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/customer-login" element={<CustomerLogin />} />
+                  
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/customer-dashboard" element={<CustomerDashboard />} />
+                  </Route>
                   
                   <Route element={<ProtectedRoute />}>
                     <Route element={<ModernLayout />}>
