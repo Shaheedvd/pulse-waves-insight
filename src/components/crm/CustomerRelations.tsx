@@ -9,11 +9,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Users, Mail, Phone, Calendar, MessageSquare, TrendingUp, AlertCircle, Plus, Edit, Eye, FileText, DollarSign, Clock, VideoIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
+import { useInputValidation } from "@/hooks/useInputValidation";
 
 interface Client {
   id: string;
@@ -920,6 +919,8 @@ const CustomerRelations = () => {
 
 // Helper Components
 const ClientForm = ({ onSubmit, onCancel }: { onSubmit: (data: Omit<Client, 'id' | 'createdAt'>) => void, onCancel: () => void }) => {
+  const { validateField, clientSchema } = useInputValidation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     industry: "",
@@ -936,9 +937,29 @@ const ClientForm = ({ onSubmit, onCancel }: { onSubmit: (data: Omit<Client, 'id'
     tags: [] as string[],
     notes: ""
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const validation = validateField(clientSchema, {
+      name: formData.name,
+      industry: formData.industry,
+      email: formData.email,
+      primaryContact: formData.primaryContact,
+      notes: formData.notes,
+    });
+
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     onSubmit(formData);
   };
 
@@ -1002,6 +1023,8 @@ const ClientForm = ({ onSubmit, onCancel }: { onSubmit: (data: Omit<Client, 'id'
 };
 
 const ContactForm = ({ onSubmit, onCancel, clients }: { onSubmit: (data: Omit<Contact, 'id'>) => void, onCancel: () => void, clients: Client[] }) => {
+  const { validateField, contactSchema } = useInputValidation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     clientId: "",
     name: "",
@@ -1015,6 +1038,24 @@ const ContactForm = ({ onSubmit, onCancel, clients }: { onSubmit: (data: Omit<Co
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const validation = validateField(contactSchema, {
+      clientId: formData.clientId,
+      name: formData.name,
+      email: formData.email,
+      title: formData.title,
+    });
+
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     onSubmit(formData);
   };
 
@@ -1057,6 +1098,8 @@ const InteractionForm = ({ onSubmit, onCancel, clients, contacts }: {
   clients: Client[], 
   contacts: Contact[] 
 }) => {
+  const { validateField, interactionSchema } = useInputValidation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     clientId: "",
     contactId: "",
@@ -1073,6 +1116,25 @@ const InteractionForm = ({ onSubmit, onCancel, clients, contacts }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const validation = validateField(interactionSchema, {
+      clientId: formData.clientId,
+      contactId: formData.contactId,
+      subject: formData.subject,
+      description: formData.description,
+      type: formData.type,
+    });
+
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     onSubmit(formData);
   };
 
@@ -1125,6 +1187,8 @@ const InteractionForm = ({ onSubmit, onCancel, clients, contacts }: {
 };
 
 const OpportunityForm = ({ onSubmit, onCancel, clients }: { onSubmit: (data: Omit<Opportunity, 'id'>) => void, onCancel: () => void, clients: Client[] }) => {
+  const { validateField, opportunitySchema } = useInputValidation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     clientId: "",
     title: "",
@@ -1140,6 +1204,24 @@ const OpportunityForm = ({ onSubmit, onCancel, clients }: { onSubmit: (data: Omi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const validation = validateField(opportunitySchema, {
+      clientId: formData.clientId,
+      title: formData.title,
+      value: formData.value,
+      description: formData.description,
+    });
+
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     onSubmit(formData);
   };
 

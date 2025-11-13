@@ -21,6 +21,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { Image, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useInputValidation } from "@/hooks/useInputValidation";
 
 interface EvaluationFormProps {
   open: boolean;
@@ -68,6 +69,7 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
   evaluatorsList
 }) => {
   const { toast } = useToast();
+  const { validateField, evaluationScheduleSchema, sanitizeHtml } = useInputValidation();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [client, setClient] = useState("");
   const [location, setLocation] = useState("");
@@ -84,10 +86,19 @@ const EvaluationForm: React.FC<EvaluationFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!client || !location || !evaluator || !date) {
+    // Validate using Zod schema
+    const validation = validateField(evaluationScheduleSchema, {
+      client,
+      location,
+      evaluator,
+      date,
+      notes: notes ? sanitizeHtml(notes) : undefined,
+    });
+
+    if (!validation.isValid) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
+        title: "Validation Error",
+        description: validation.error,
         variant: "destructive",
       });
       return;

@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MarketingTask } from "@/types/marketing";
+import { useInputValidation } from "@/hooks/useInputValidation";
+import { useToast } from "@/hooks/use-toast";
 
 interface MarketingTaskFormProps {
   task?: MarketingTask;
@@ -32,6 +34,8 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
   onClose,
   onSuccess
 }) => {
+  const { validateField, marketingTaskSchema } = useInputValidation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<MarketingTask>({
     id: task?.id || Math.random().toString(36).substr(2, 9),
     title: task?.title || "",
@@ -78,31 +82,28 @@ const MarketingTaskForm: React.FC<MarketingTaskFormProps> = ({
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-    
-    if (!formData.title.trim()) {
-      newErrors.title = "Task title is required";
-    }
-    
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-    
-    if (formData.trackingMethod && !formData.trackingMethod.trim()) {
-      newErrors.trackingMethod = "Tracking method is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      onSuccess(formData);
+    // Validate using Zod schema
+    const validation = validateField(marketingTaskSchema, {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      subcategory: formData.subcategory,
+      trackingMethod: formData.trackingMethod,
+    });
+
+    if (!validation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
     }
+
+    onSuccess(formData);
   };
 
   return (
