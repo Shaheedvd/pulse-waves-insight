@@ -70,27 +70,27 @@ const CustomerManagement = () => {
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id')
-        .eq('role', 'customer');
+        .eq('role', 'customer' as any);
 
       if (rolesError) throw rolesError;
 
-      const customerIds = roles.map(r => r.user_id);
+      const customerIds = roles?.map(r => r.user_id) || [];
       const customerProfiles = profiles.filter(p => customerIds.includes(p.id));
 
       const { data: customerData, error: customerError } = await supabase
-        .from('customer_profiles')
+        .from('customer_profiles' as any)
         .select('user_id, company_name, industry, phone, notes');
 
       if (customerError) throw customerError;
 
       const customersWithDetails = customerProfiles.map(profile => {
-        const details = customerData.find(c => c.user_id === profile.id);
+        const details = (customerData as any)?.find((c: any) => c.user_id === profile.id);
         return {
           ...profile,
-          company_name: details?.company_name,
-          industry: details?.industry,
-          phone: details?.phone,
-          notes: details?.notes,
+          company_name: (details as any)?.company_name,
+          industry: (details as any)?.industry,
+          phone: (details as any)?.phone,
+          notes: (details as any)?.notes,
         };
       });
 
