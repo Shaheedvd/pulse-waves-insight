@@ -4,6 +4,7 @@ import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import CustomerLogin from '@/pages/CustomerLogin';
 import CustomerDashboard from '@/pages/CustomerDashboard';
+import CustomerManagement from '@/pages/CustomerManagement';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
@@ -157,6 +158,9 @@ function App() {
                       
                       <Route path="/it-dashboard" element={<ITDashboardPage />} />
                       <Route path="/facilities-dashboard" element={<FacilitiesDashboardPage />} />
+                      
+                      {/* Customer Management */}
+                      <Route path="/customer-management" element={<CustomerManagement />} />
                       
                       {/* Phase 4 - Advanced Enterprise Features */}
                       <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
